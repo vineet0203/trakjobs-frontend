@@ -18,6 +18,7 @@ import { Person, Business } from '@mui/icons-material';
 import SectionHeader from '../../../../components/common/form/SectionHeader';
 import DebouncedTextField from '../../../../components/common/form/DebouncedTextField';
 import DebouncedSelect from '../../../../components/common/form/DebouncedSelect';
+import CustomDatePicker from '../../../../components/common/CustomDatePicker';
 import { QUOTE_STATUS_OPTIONS, CURRENCIES } from '../../constants/quoteConstants';
 
 // Helper function to get client display name based on client type
@@ -101,17 +102,15 @@ const QuoteDetailsSection = ({ formik, clients = [], loadingClients = false }) =
         </Grid>
 
         <Grid item xs={12} md={6}>
-          <DebouncedTextField
+          <CustomDatePicker
             name="quote_due_date"
             label="Quote Due Date"
-            type="date"
+            placeholder="DD/MM/YYYY"
             value={formik.values.quote_due_date || ''}
             onChange={(value) => formik.setFieldValue('quote_due_date', value)}
-            onBlur={formik.handleBlur}
+            onBlur={() => formik.setFieldTouched('quote_due_date', true, true)}
             error={formik.touched.quote_due_date && Boolean(formik.errors.quote_due_date)}
             helperText={formik.touched.quote_due_date && formik.errors.quote_due_date}
-            fullWidth
-            InputLabelProps={{ shrink: true }}
           />
         </Grid>
 

@@ -7,6 +7,7 @@ import { useAuth } from './features/auth/hooks/useAuth';
 // Components
 import ErrorBoundary from './components/feedback/ErrorBoundary';
 import ProtectedRoute from './components/routes/ProtectedRoute';
+import EmployeeProtectedRoute from './components/routes/EmployeeProtectedRoute';
 
 // Pages
 import { Login, Register, ForgotPassword, ResetPassword } from './features/auth';
@@ -37,11 +38,18 @@ import JobList from './features/jobs/pages/JobList';
 import EmployeeList from './features/employees/pages/EmployeeList';
 import ScheduleDashboard from './features/schedule/pages/ScheduleDashboard';
 import TestPage from './pages/TestPage';
+import EmployeeLogin from './features/employee-auth/pages/EmployeeLogin';
+import EmployeeForgotPassword from './features/employee-auth/pages/EmployeeForgotPassword';
+import EmployeeResetPassword from './features/employee-auth/pages/EmployeeResetPassword';
+import EmployeeDashboard from './features/employee-auth/pages/EmployeeDashboard';
 
 // Onboarding Pages
 import FillForm from './features/onboarding/pages/FillForm';
 import OnboardingList from './features/onboarding/pages/OnboardingList';
 import OnboardingAssign from './features/onboarding/pages/OnboardingAssign';
+
+// Time Tracking Approval Pages
+import TimeTrackingApproval from './features/time-tracking/pages/TimeTrackingApproval';
 
 
 const AppContent = () => {
@@ -58,7 +66,19 @@ const AppContent = () => {
       <Route path="/auth/register" element={<Register />} />
       <Route path="/auth/forgot-password" element={<ForgotPassword />} />
       <Route path="/auth/reset-password" element={<ResetPassword />} />
+      <Route path="/employee-login" element={<EmployeeLogin />} />
+      <Route path="/employee/forgot-password" element={<EmployeeForgotPassword />} />
+      <Route path="/employee/reset-password" element={<EmployeeResetPassword />} />
       <Route path="/unauthorized" element={<Unauthorized />} />
+
+      <Route
+        path="/employee/dashboard"
+        element={
+          <EmployeeProtectedRoute>
+            <EmployeeDashboard />
+          </EmployeeProtectedRoute>
+        }
+      />
 
       {/* Public Onboarding Form (no auth - token-based) */}
       <Route path="/fill-form/:token" element={<FillForm />} />
@@ -104,6 +124,9 @@ const AppContent = () => {
         {/* Onboarding Module */}
         <Route path="/onboarding" element={<OnboardingList />} />
         <Route path="/onboarding/assign" element={<OnboardingAssign />} />
+
+        {/* Time Tracking Approval Module */}
+        <Route path="/time-tracking-approval" element={<TimeTrackingApproval />} />
 
       </Route>
 

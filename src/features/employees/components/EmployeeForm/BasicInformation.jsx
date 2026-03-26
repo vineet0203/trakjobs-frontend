@@ -2,6 +2,7 @@
 import React from "react";
 import { Grid, Box, FormLabel, RadioGroup, FormControlLabel, Radio } from "@mui/material";
 import DebouncedTextField from "../../../../components/common/form/DebouncedTextField";
+import CustomDatePicker from "../../../../components/common/CustomDatePicker";
 
 const BasicInformation = ({ formik, mode = "create" }) => {
   return (
@@ -39,17 +40,17 @@ const BasicInformation = ({ formik, mode = "create" }) => {
 
       {/* Date of Birth */}
       <Grid item xs={6}>
-        <DebouncedTextField
+        <CustomDatePicker
           name="date_of_birth"
           label="Date of Birth"
-          type="date"
-          InputLabelProps={{ shrink: true }}
+          placeholder="DD/MM/YYYY"
           value={formik.values.date_of_birth}
+          maxDate={new Date()}
           onChange={(val) => formik.setFieldValue("date_of_birth", val)}
-          onBlur={formik.handleBlur}
+          onBlur={() => formik.setFieldTouched("date_of_birth", true, true)}
           error={formik.touched.date_of_birth && Boolean(formik.errors.date_of_birth)}
           helperText={formik.touched.date_of_birth && formik.errors.date_of_birth}
-          fullWidth
+          required
         />
       </Grid>
 

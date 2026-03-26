@@ -21,6 +21,8 @@ import { Close } from "@mui/icons-material";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import { useToast } from "../../../components/common/ToastProvider";
+import CustomDatePicker from "../../../components/common/CustomDatePicker";
+import CustomTimeInput from "../../../components/common/CustomTimeInput";
 import scheduleService from "../services/scheduleService";
 import jobService from "../../jobs/services/jobService";
 import employeeService from "../../employees/services/employeeService";
@@ -234,12 +236,14 @@ const CreateScheduleModal = ({
     <Dialog
       open={open}
       onClose={handleClose}
-      maxWidth="md"
+      maxWidth="lg"
       fullWidth
       TransitionComponent={Fade}
       transitionDuration={300}
       PaperProps={{
         sx: {
+          width: { xs: "96vw", md: "92vw", lg: "1120px" },
+          maxWidth: "1120px",
           borderRadius: 3,
           py: 0,
           px: 2,
@@ -453,71 +457,62 @@ const CreateScheduleModal = ({
                   <Typography fontWeight={600} mb={2}>
                     Date & Time
                   </Typography>
-                  <Grid container spacing={2}>
-                    <Grid item xs={6} sm={3}>
-                      <TextField
-                        fullWidth
+                  <Grid container spacing={2.5} alignItems="start">
+                    <Grid item xs={12} sm={6} md={3}>
+                      <CustomDatePicker
                         label="Start Date *"
-                        type="date"
                         name="start_date"
+                        placeholder="DD/MM/YYYY"
                         value={values.start_date}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
+                        onChange={(value) => setFieldValue("start_date", value)}
+                        onBlur={() => setFieldTouched("start_date", true, true)}
                         error={touched.start_date && Boolean(errors.start_date)}
                         helperText={touched.start_date && errors.start_date}
-                        size="small"
-                        InputLabelProps={{ shrink: true }}
+                        required
                       />
                     </Grid>
-                    <Grid item xs={6} sm={3}>
-                      <TextField
-                        fullWidth
+                    <Grid item xs={12} sm={6} md={3}>
+                      <CustomTimeInput
                         label="Start Time *"
-                        type="time"
                         name="start_time"
                         value={values.start_time}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
+                        onChange={(value) => setFieldValue("start_time", value)}
+                        onBlur={() => setFieldTouched("start_time", true, true)}
                         error={touched.start_time && Boolean(errors.start_time)}
                         helperText={touched.start_time && errors.start_time}
-                        size="small"
-                        InputLabelProps={{ shrink: true }}
+                        required
                       />
                     </Grid>
-                    <Grid item xs={6} sm={3}>
-                      <TextField
-                        fullWidth
+                    <Grid item xs={12} sm={6} md={3}>
+                      <CustomDatePicker
                         label="End Date *"
-                        type="date"
                         name="end_date"
+                        placeholder="DD/MM/YYYY"
                         value={values.end_date}
-                        onChange={(e) => {
-                          handleChange(e);
+                        minDate={values.start_date || null}
+                        onChange={(value) => {
+                          setFieldValue("end_date", value);
                           // Auto-toggle multi-day if dates differ
-                          if (values.start_date && e.target.value !== values.start_date) {
+                          if (values.start_date && value !== values.start_date) {
                             setFieldValue("is_multi_day", true);
                           }
                         }}
-                        onBlur={handleBlur}
+                        onBlur={() => setFieldTouched("end_date", true, true)}
                         error={touched.end_date && Boolean(errors.end_date)}
                         helperText={touched.end_date && errors.end_date}
-                        size="small"
-                        InputLabelProps={{ shrink: true }}
+                        required
                       />
                     </Grid>
-                    <Grid item xs={6} sm={3}>
-                      <TextField
-                        fullWidth
+                    <Grid item xs={12} sm={6} md={3}>
+                      <CustomTimeInput
                         label="End Time *"
-                        type="time"
                         name="end_time"
                         value={values.end_time}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
+                        onChange={(value) => setFieldValue("end_time", value)}
+                        onBlur={() => setFieldTouched("end_time", true, true)}
                         error={touched.end_time && Boolean(errors.end_time)}
                         helperText={touched.end_time && errors.end_time}
-                        size="small"
-                        InputLabelProps={{ shrink: true }}
+                        required
                       />
                     </Grid>
                   </Grid>

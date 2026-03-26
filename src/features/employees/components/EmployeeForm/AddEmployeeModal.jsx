@@ -24,6 +24,7 @@ import {
 import { Close } from "@mui/icons-material";
 import DebouncedTextField from "../../../../components/common/form/DebouncedTextField";
 import DebouncedSelect from "../../../../components/common/form/DebouncedSelect"; // 👈 Add this import
+import CustomDatePicker from "../../../../components/common/CustomDatePicker";
 
 const AddEmployeeModal = ({ open, onClose }) => {
   const [form, setForm] = useState({
@@ -163,11 +164,12 @@ const AddEmployeeModal = ({ open, onClose }) => {
           </Grid>
 
           <Grid item xs={6}>
-            <DebouncedTextField
+            <CustomDatePicker
+              name="dob"
               label="Date of Birth"
-              type="date"
-              InputLabelProps={{ shrink: true }}
+              placeholder="DD/MM/YYYY"
               value={form.dob}
+              maxDate={new Date()}
               onChange={(val) => handleChange("dob", val)}
             />
           </Grid>
