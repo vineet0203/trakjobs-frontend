@@ -1,12 +1,16 @@
 // features/clients/components/ClientForm/ResidentialClientForm.jsx
 import React from 'react';
-import { Grid, Paper } from '@mui/material';
+import { Grid, Paper, Box, Typography } from '@mui/material';
 import SectionHeader from '../../../../components/common/form/SectionHeader';
 import DebouncedTextField from '../../../../components/common/form/DebouncedTextField';
 import DebouncedSelect from '../../../../components/common/form/DebouncedSelect'; // <-- add
 import CommonContactFields from './CommonContactFields';
 import CommonAddressFields from './CommonAddressFields';
-import { getCategoryOptionsByClientType } from '../../constants/clientConstants'; // <-- add
+import {
+  getCategoryOptionsByClientType,
+  TAX_APPLICABLE_OPTIONS,
+  TAX_PERCENTAGE_OPTIONS,
+} from '../../constants/clientConstants'; // <-- add
 
 const ResidentialClientForm = ({ formik }) => {
   const categoryOptions = getCategoryOptionsByClientType('residential');
@@ -61,11 +65,49 @@ const ResidentialClientForm = ({ formik }) => {
         </Grid>
       </Paper>
 
+      <Paper elevation={0} sx={{ p: 0, mb: 4, borderRadius: 2, backgroundColor: '#fff' }}>
+        <SectionHeader number="4" title="Tax Preferences" />
+        <Grid container spacing={3}>
+          <Grid item xs={12} md={6}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: '100%' }}>
+              <Typography sx={{ fontWeight: 500 }}>Apply Tax?</Typography>
+              <DebouncedSelect
+                name="is_tax_applicable"
+                label=""
+                value={formik.values.is_tax_applicable ? 'yes' : 'no'}
+                onChange={(value) => {
+                  const isTaxApplicable = value === 'yes';
+                  formik.setFieldValue('is_tax_applicable', isTaxApplicable);
+                  if (!isTaxApplicable) {
+                    formik.setFieldValue('tax_percentage', '0');
+                  }
+                }}
+                options={TAX_APPLICABLE_OPTIONS}
+                fullWidth
+              />
+            </Box>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <DebouncedSelect
+              name="tax_percentage"
+              label="Tax Percentage"
+              value={formik.values.tax_percentage}
+              onChange={(value) => formik.setFieldValue('tax_percentage', value)}
+              options={TAX_PERCENTAGE_OPTIONS}
+              disabled={!formik.values.is_tax_applicable}
+              error={formik.touched.tax_percentage && formik.errors.tax_percentage}
+              helperText={formik.touched.tax_percentage && formik.errors.tax_percentage}
+              fullWidth
+            />
+          </Grid>
+        </Grid>
+      </Paper>
+
       <Paper
         elevation={0}
         sx={{ p: 0, mb: 4, borderRadius: 2, backgroundColor: '#fff' }}
       >
-        <SectionHeader number="4" title="Service Category" />
+        <SectionHeader number="5" title="Service Category" />
 
         <Grid container spacing={1} sx={{ mt: 2 }}>
           <Grid item xs={12} md={6}>

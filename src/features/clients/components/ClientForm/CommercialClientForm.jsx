@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Grid, Paper, Divider } from '@mui/material';
+import { Grid, Paper, Divider, Box, Typography } from '@mui/material';
 import SectionHeader from '../../../../components/common/form/SectionHeader';
 import DebouncedTextField from '../../../../components/common/form/DebouncedTextField';
 import DebouncedSelect from '../../../../components/common/form/DebouncedSelect';
@@ -13,6 +13,7 @@ import {
   PAYMENT_TERM_OPTIONS,
   CURRENCY_OPTIONS,
   TAX_PERCENTAGE_OPTIONS,
+  TAX_APPLICABLE_OPTIONS,
   getCategoryOptionsByClientType
 } from '../../constants/clientConstants';
 
@@ -360,12 +361,33 @@ const CommercialClientForm = ({ formik, mode = 'create' }) => {
           </Grid>
 
           <Grid item xs={12} md={6}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: '100%' }}>
+              <Typography sx={{ fontWeight: 500 }}>Apply Tax?</Typography>
+              <DebouncedSelect
+                name="is_tax_applicable"
+                label=""
+                value={formik.values.is_tax_applicable ? 'yes' : 'no'}
+                onChange={(value) => {
+                  const isTaxApplicable = value === 'yes';
+                  formik.setFieldValue('is_tax_applicable', isTaxApplicable);
+                  if (!isTaxApplicable) {
+                    formik.setFieldValue('tax_percentage', '0');
+                  }
+                }}
+                options={TAX_APPLICABLE_OPTIONS}
+                fullWidth
+              />
+            </Box>
+          </Grid>
+
+          <Grid item xs={12} md={6}>
             <DebouncedSelect
               name="tax_percentage"
               label="Tax Percentage"
               value={formik.values.tax_percentage}
               onChange={(value) => formik.setFieldValue('tax_percentage', value)}
               options={TAX_PERCENTAGE_OPTIONS}
+              disabled={!formik.values.is_tax_applicable}
               error={formik.touched.tax_percentage && formik.errors.tax_percentage}
               helperText={formik.touched.tax_percentage && formik.errors.tax_percentage}
               fullWidth

@@ -14,8 +14,8 @@ import QuoteFormActions from './QuoteFormActions';
 import { calculateQuoteTotals } from '../../utils/quoteTransformers';
 
 // Watches for client_id changes and auto-populates tax_rate on line items
-const ClientTaxSync = ({ formik, clients }) => {
-  const prevClientIdRef = useRef(formik.values.client_id);
+const ClientTaxSync = ({ formik, clients, isEditMode }) => {
+  const prevClientIdRef = useRef(isEditMode ? formik.values.client_id : null);
 
   useEffect(() => {
     const currentClientId = formik.values.client_id;
@@ -23,6 +23,11 @@ const ClientTaxSync = ({ formik, clients }) => {
       const client = clients.find(c => String(c.id) === String(currentClientId));
       if (client) {
         const clientTax = parseFloat(client.tax_percentage) || 0;
+        const clientTaxApplicable = Boolean(client.is_tax_applicable);
+
+        formik.setFieldValue('is_tax_applicable', clientTaxApplicable);
+        formik.setFieldValue('tax_percentage', clientTaxApplicable ? clientTax : 0);
+
         const updatedItems = formik.values.line_items.map(item => ({
           ...item,
           tax_rate: clientTax,
@@ -79,6 +84,8 @@ const QuoteForm = ({
 
     // Section 3: Pricing Summary
     discount: initialData.discount || 0,
+    is_tax_applicable: initialData.is_tax_applicable ?? false,
+    tax_percentage: initialData.tax_percentage ?? 0,
     deposit_required: initialData.deposit_required ?? false,
     deposit_type: initialData.deposit_type || 'percentage',
     deposit_amount: initialData.deposit_amount || 50,
@@ -206,7 +213,7 @@ const QuoteForm = ({
 
         return (
           <Form>
-            <ClientTaxSync formik={formik} clients={clients} />
+            <ClientTaxSync formik={formik} clients={clients} isEditMode={isEditMode} />
             <Paper sx={{ p: 4, borderRadius: 2 }}>
               {submitError && (
                 <Alert severity="error" sx={{ mb: 3 }}>

@@ -57,6 +57,8 @@ const QuoteEdit = () => {
     try {
       const formattedData = {
         ...quoteData,
+        is_tax_applicable: Boolean(quoteData.is_tax_applicable),
+        tax_percentage: quoteData.is_tax_applicable ? (parseInt(quoteData.tax_percentage, 10) || 0) : 0,
         line_items: quoteData.line_items?.map((item, index) => {
           const formattedItem = {
             ...item,

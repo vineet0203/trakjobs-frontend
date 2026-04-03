@@ -124,6 +124,11 @@ export const TAX_PERCENTAGE_OPTIONS = [
   { value: "28", label: "28%" }, // Added
 ];
 
+export const TAX_APPLICABLE_OPTIONS = [
+  { value: "yes", label: "Yes" },
+  { value: "no", label: "No" },
+];
+
 export const RESIDENTIAL_CATEGORY_OPTIONS = [
   { value: "handyman", label: "Handyman Services" },
   { value: "plumbing", label: "Plumbing Services" },
@@ -205,7 +210,8 @@ export const INITIAL_CLIENT_VALUES = {
   billing_name: "",
   payment_term: "net_30",
   preferred_currency: "usd",
-  tax_percentage: "",
+  is_tax_applicable: false,
+  tax_percentage: "0",
   website_url: "",
   logo_temp_id: null,
   remove_logo: false,

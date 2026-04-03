@@ -38,7 +38,8 @@ export const transformClientFromApi = (apiClient) => {
     preferred_currency: apiClient.payment?.preferred_currency?.toLowerCase() || "",
     
     // Tax
-    tax_percentage: apiClient.tax?.tax_percentage?.toString() || "",
+    is_tax_applicable: Boolean(apiClient.tax?.is_tax_applicable),
+    tax_percentage: apiClient.tax?.tax_percentage?.toString() || "0",
     
     // Additional
     website_url: apiClient.website_url || "",
@@ -113,7 +114,10 @@ export const transformClientForApi = (formData) => {
     
     // Tax - nest under tax object
     tax: {
-      tax_percentage: formData.tax_percentage ? parseFloat(formData.tax_percentage) : null,
+      is_tax_applicable: Boolean(formData.is_tax_applicable),
+      tax_percentage: Boolean(formData.is_tax_applicable)
+        ? parseInt(formData.tax_percentage || 0, 10)
+        : 0,
     },
     
     // Additional flat fields

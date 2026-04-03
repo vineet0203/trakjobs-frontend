@@ -35,9 +35,29 @@ const QuoteCreate = () => {
         client_id: selectedClient.id,
         client_name: selectedClient.name,
         client_email: selectedClient.email,
+        is_tax_applicable: Boolean(selectedClient.is_tax_applicable),
+        tax_percentage: Boolean(selectedClient.is_tax_applicable)
+          ? (parseInt(selectedClient.tax_percentage, 10) || 0)
+          : 0,
       });
     }
   }, [location.state]);
+
+  useEffect(() => {
+    if (location.state?.selectedClient) {
+      return;
+    }
+
+    const searchParams = new URLSearchParams(location.search);
+    const preselectedClientId = searchParams.get('clientId');
+
+    if (preselectedClientId) {
+      setInitialData((prev) => ({
+        ...prev,
+        client_id: preselectedClientId,
+      }));
+    }
+  }, [location.search, location.state]);
 
   // Load clients for dropdown
   useEffect(() => {
@@ -84,6 +104,8 @@ const QuoteCreate = () => {
     try {
       const formattedData = {
         ...quoteData,
+        is_tax_applicable: Boolean(quoteData.is_tax_applicable),
+        tax_percentage: quoteData.is_tax_applicable ? (parseInt(quoteData.tax_percentage, 10) || 0) : 0,
         line_items: quoteData.line_items?.map((item, index) => {
           const formattedItem = {
             ...item,

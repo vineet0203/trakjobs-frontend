@@ -50,6 +50,7 @@ import OnboardingAssign from './features/onboarding/pages/OnboardingAssign';
 
 // Time Tracking Approval Pages
 import TimeTrackingApproval from './features/time-tracking/pages/TimeTrackingApproval';
+import InvoiceList from './pages/invoice/InvoiceList';
 
 
 const AppContent = () => {
@@ -114,7 +115,7 @@ const AppContent = () => {
 
         <Route path="/employees" element={<EmployeeList />} />
 
-        <Route path="/invoices" element={<NotYetDesigned />} />
+        <Route path="/invoices" element={<InvoiceList />} />
         <Route path="/timesheets" element={<NotYetDesigned />} />
         <Route path="/online-booking" element={<OnlineBooking />} />
         <Route path="/reports" element={<NotYetDesigned />} />

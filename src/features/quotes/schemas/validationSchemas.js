@@ -90,6 +90,17 @@ export const quoteValidationSchema = Yup.object().shape({
     .min(0, "Discount cannot be negative")
     .typeError("Discount must be a number"),
 
+  is_tax_applicable: Yup.boolean().default(false),
+
+  tax_percentage: Yup.number().when("is_tax_applicable", {
+    is: true,
+    then: (schema) =>
+      schema
+        .required("Tax percentage is required")
+        .oneOf([0, 5, 12, 18, 28], "Select a valid tax percentage"),
+    otherwise: (schema) => schema.oneOf([0], "Tax percentage must be 0 when tax is not applicable"),
+  }),
+
   deposit_required: Yup.boolean().default(false),
 
   deposit_type: Yup.string().when("deposit_required", {

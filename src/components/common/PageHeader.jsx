@@ -7,7 +7,6 @@ import {
   Breadcrumbs,
   Paper
 } from '@mui/material';
-import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 
 const PageHeader = ({
   breadcrumb = [],
@@ -27,8 +26,16 @@ const PageHeader = ({
       {/* Breadcrumb */}
       {breadcrumb.length > 0 && (
         <Breadcrumbs
-          separator={<NavigateNextIcon fontSize="small" />}
-          sx={{ mb: 1 }}
+          separator=">"
+          sx={{
+            mb: 1,
+            '& .MuiBreadcrumbs-separator': {
+              mx: 0.75,
+              color: '#9ca3af',
+              fontSize: 14,
+              fontWeight: 500,
+            },
+          }}
         >
           {breadcrumb.map((item, index) =>
             item.path ? (
@@ -49,12 +56,23 @@ const PageHeader = ({
               >
                 {item.label}
               </Link>
+            ) : item.onClick ? (
+              <Typography
+                key={index}
+                fontSize={14}
+                color="#6b7280"
+                fontWeight={400}
+                sx={{ cursor: 'pointer' }}
+                onClick={item.onClick}
+              >
+                {item.label}
+              </Typography>
             ) : (
               <Typography
                 key={index}
                 fontSize={14}
-                color={item.current ? 'text.primary' : 'text.secondary'}
-                fontWeight={item.current ? 500 : 400}
+                color={item.current ? '#111827' : '#6b7280'}
+                fontWeight={item.current ? 600 : 400}
               >
                 {item.label}
               </Typography>
@@ -64,24 +82,24 @@ const PageHeader = ({
       )}
 
       {/* Title + Actions - Always in same row */}
-      <Box
-        display="flex"
-        alignItems="center"
-        justifyContent="space-between"
-        flexWrap="wrap"
-        gap={2}
-        sx={{ mb: subtitle ? 0.5 : 0 }}
-      >
-        <Typography variant="h5" fontWeight={600}>
-          {title}
-        </Typography>
+      {(title || actions) && (
+        <Box
+          display="flex"
+          alignItems="center"
+          justifyContent="space-between"
+          flexWrap="wrap"
+          gap={2}
+          sx={{ mb: subtitle ? 0.5 : 0 }}
+        >
+          {title ? <Typography variant="h5" fontWeight={600}>{title}</Typography> : <Box />}
 
-        {actions && (
-          <Box display="flex" alignItems="center" gap={1.5}>
-            {actions}
-          </Box>
-        )}
-      </Box>
+          {actions && (
+            <Box display="flex" alignItems="center" gap={1.5}>
+              {actions}
+            </Box>
+          )}
+        </Box>
+      )}
 
       {/* Subtitle - Always below title */}
       {subtitle && (

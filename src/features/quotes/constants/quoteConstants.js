@@ -46,6 +46,14 @@ export const DEPOSIT_TYPE_OPTIONS = [
   { value: 'fixed', label: 'Fixed Amount' },
 ];
 
+export const QUOTE_TAX_PERCENTAGE_OPTIONS = [
+  { value: 0, label: '0%' },
+  { value: 5, label: '5%' },
+  { value: 12, label: '12%' },
+  { value: 18, label: '18%' },
+  { value: 28, label: '28%' },
+];
+
 export const QUOTE_SORT_OPTIONS = [
   { value: 'created_at', label: 'Date Created' },
   { value: 'quote_number', label: 'Quote Number' },

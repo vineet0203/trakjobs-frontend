@@ -15,6 +15,8 @@ export const transformQuoteFromApi = (apiQuote) => {
     // Pricing
     subtotal: parseFloat(apiQuote.subtotal),
     discount: parseFloat(apiQuote.discount || 0),
+    is_tax_applicable: Boolean(apiQuote.is_tax_applicable),
+    tax_percentage: parseInt(apiQuote.tax_percentage || 0, 10),
     total_amount: parseFloat(apiQuote.total_amount),
     deposit_required: apiQuote.deposit_required,
     deposit_type: apiQuote.deposit_type,

@@ -2,6 +2,7 @@
 import React, { useMemo } from 'react';
 import { Box, Typography, Divider, Switch, TextField, Paper, MenuItem, Select } from '@mui/material';
 import SectionHeader from '../../../../components/common/form/SectionHeader';
+import { QUOTE_TAX_PERCENTAGE_OPTIONS } from '../../constants/quoteConstants';
 
 const PricingSummarySection = ({ formik }) => {
   // Auto-calculate totals from line items
@@ -62,6 +63,41 @@ const PricingSummarySection = ({ formik }) => {
         <Typography sx={{ fontWeight: 600, color: '#183B59' }}>
           {formatCurrency(total)}
         </Typography>
+      </Box>
+
+      <Divider sx={{ my: 2 }} />
+
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', py: 1 }}>
+        <Typography>Apply Tax?</Typography>
+        <Switch
+          checked={Boolean(formik.values.is_tax_applicable)}
+          onChange={(e) => {
+            const isApplicable = e.target.checked;
+            formik.setFieldValue('is_tax_applicable', isApplicable);
+            if (!isApplicable) {
+              formik.setFieldValue('tax_percentage', 0);
+            }
+          }}
+        />
+      </Box>
+
+      <Box sx={{ py: 1 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography>Tax Percentage</Typography>
+          <Select
+            value={formik.values.tax_percentage ?? 0}
+            onChange={(e) => formik.setFieldValue('tax_percentage', Number(e.target.value))}
+            size="small"
+            sx={{ width: 120 }}
+            disabled={!formik.values.is_tax_applicable}
+          >
+            {QUOTE_TAX_PERCENTAGE_OPTIONS.map((option) => (
+              <MenuItem key={option.value} value={option.value}>
+                {option.label}
+              </MenuItem>
+            ))}
+          </Select>
+        </Box>
       </Box>
 
       <Divider sx={{ my: 2 }} />

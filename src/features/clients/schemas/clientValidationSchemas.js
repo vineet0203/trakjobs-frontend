@@ -132,13 +132,19 @@ export const clientValidationSchema = (clientType) => {
           "Currency is required",
           (value) => value && value !== "",
         ),
+      is_tax_applicable: Yup.boolean().required(),
       tax_percentage: Yup.number()
         .transform((value, originalValue) => {
           return originalValue === "" ? null : value;
         })
-        .nullable()
-        .min(0, "Tax percentage cannot be negative")
-        .max(100, "Tax percentage cannot exceed 100"),
+        .when("is_tax_applicable", {
+          is: true,
+          then: (schema) =>
+            schema
+              .required("Tax percentage is required")
+              .oneOf([0, 5, 12, 18, 28], "Select a valid tax percentage"),
+          otherwise: (schema) => schema.oneOf([0], "Tax percentage must be 0 when tax is not applicable"),
+        }),
       website_url: Yup.string()
         .url("Invalid URL format")
         .nullable()

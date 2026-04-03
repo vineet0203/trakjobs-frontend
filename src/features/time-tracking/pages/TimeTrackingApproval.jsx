@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Button, CircularProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Chip, TextField, Grid, Alert } from '@mui/material';
 import vendorTimeTrackingService from '../services/vendorTimeTrackingService';
+import PageHeader from '../../../components/common/PageHeader';
 
 const statusColorMap = {
   pending: 'warning',
@@ -170,8 +171,16 @@ const TimeTrackingApproval = () => {
   const to = total === 0 ? 0 : Math.min(currentPage * perPage, total);
 
   return (
-    <Box sx={{ p: 3 }}>
-      <h1>Employee Time Tracking Approval</h1>
+    <div className="min-h-full bg-gray-50">
+      <PageHeader
+        breadcrumb={[
+          { label: 'Dashboard', path: '/dashboard' },
+          { label: 'Time Tracking Approval', current: true },
+        ]}
+        title="Employee Time Tracking Approval"
+      />
+
+      <Box sx={{ px: 3 }}>
 
       {error && (
         <Alert severity="error" onClose={() => setError('')} sx={{ mb: 2 }}>
@@ -361,7 +370,8 @@ const TimeTrackingApproval = () => {
           </Box>
         </>
       )}
-    </Box>
+      </Box>
+    </div>
   );
 };
 

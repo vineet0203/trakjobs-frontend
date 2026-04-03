@@ -1,5 +1,7 @@
 import React from 'react';
 import { useToast } from '../../../components/common/ToastProvider';
+import { Box } from '@mui/material';
+import PageHeader from '../../../components/common/PageHeader';
 import BookingForm from '../components/BookingForm/BookingForm';
 import bookingService from '../services/bookingService';
 
@@ -24,10 +26,19 @@ const OnlineBooking = () => {
   };
 
   return (
+    <Box>
+      <PageHeader
+        breadcrumb={[
+          { label: 'Dashboard', path: '/dashboard' },
+          { label: 'Online Booking', current: true },
+        ]}
+      />
+
       <BookingForm
         onSubmit={handleSubmit}
         isLoading={isLoading}
       />
+    </Box>
   );
 };
 
