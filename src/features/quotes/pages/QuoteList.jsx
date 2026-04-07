@@ -10,11 +10,14 @@ import { Plus, BriefcaseBusiness } from 'lucide-react';
 import { useQuotes } from '../hooks/useQuotes';
 import { useToast } from '../../../components/common/ToastProvider';
 import quoteService from '../services/quoteService';
+import QuotePreviewModal from '../components/QuotePreviewModal';
 
 const QuoteList = () => {
     const navigate = useNavigate();
     const [selectedQuotes, setSelectedQuotes] = useState([]);
     const [converting, setConverting] = useState(false);
+    const [previewQuote, setPreviewQuote] = useState(null);
+    const [previewOpen, setPreviewOpen] = useState(false);
     const { showToast } = useToast();
 
     // Use the custom hook
@@ -57,6 +60,18 @@ const QuoteList = () => {
                 console.error('Failed to delete quote:', err);
             }
         }
+    };
+
+    const handleView = (quoteId) => {
+        const quote = quotes.find((item) => item.id === quoteId);
+        if (!quote) return;
+        setPreviewQuote(quote);
+        setPreviewOpen(true);
+    };
+
+    const handleClosePreview = () => {
+        setPreviewOpen(false);
+        setPreviewQuote(null);
     };
 
     const handleAddQuote = () => {
@@ -179,6 +194,7 @@ const QuoteList = () => {
                         data={quotes}
                         onEdit={handleEdit}
                         onDelete={handleDelete}
+                        onView={handleView}
                         onSelect={setSelectedQuotes}
                         selectedQuotes={selectedQuotes}
                         pagination={tablePagination}
@@ -188,6 +204,16 @@ const QuoteList = () => {
                     />
                 )}
             </div>
+
+            <QuotePreviewModal
+                open={previewOpen}
+                quote={previewQuote}
+                onClose={handleClosePreview}
+                onEdit={(quoteId) => {
+                    handleClosePreview();
+                    handleEdit(quoteId);
+                }}
+            />
         </div>
     );
 };

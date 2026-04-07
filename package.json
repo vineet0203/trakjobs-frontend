@@ -29,6 +29,7 @@
     "date-fns": "^4.1.0",
     "formik": "^2.4.9",
     "framer-motion": "^12.5.0",
+    "html2pdf.js": "^0.14.0",
     "laravel-echo": "^2.1.6",
     "lucide-react": "^0.503.0",
     "moment": "^2.30.1",

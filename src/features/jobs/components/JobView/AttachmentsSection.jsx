@@ -183,7 +183,7 @@ const AttachmentsSection = ({
                     px: 0.5
                 }}>
                     <Box>
-                        <SectionHeader number="5" title="Attachments" />
+                        <SectionHeader number="4" title="Attachments" />
                         {hasAttachments && (
                             <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
                                 {attachments.length} file{attachments.length > 1 ? 's' : ''}

@@ -494,7 +494,7 @@ const BookingForm = ({ onSubmit, isLoading = false }) => {
                     </FormControl>
 
                     <FormControl fullWidth error={Boolean(touched.employeeId && errors.employeeId)} sx={fieldSx}>
-                        <InputLabel id="booking-employee-label">Select Service Provider *</InputLabel>
+                        <InputLabel id="booking-employee-label" shrink>Select Service Provider *</InputLabel>
                         <Select
                             labelId="booking-employee-label"
                             label="Select Service Provider *"
@@ -503,6 +503,18 @@ const BookingForm = ({ onSubmit, isLoading = false }) => {
                             disabled={loadingState.employees}
                             onBlur={handleBlur('employeeId')}
                             onChange={handleFieldChange('employeeId')}
+                            renderValue={(selected) => {
+                                if (!loadingState.employees && employees.length === 0) {
+                                    return 'No service providers found';
+                                }
+
+                                if (!selected) {
+                                    return 'Select';
+                                }
+
+                                const selectedEmployee = employees.find((employee) => String(employee.id) === String(selected));
+                                return selectedEmployee?.name || 'Select';
+                            }}
                         >
                             {placeholderMenuItem}
                             {employees.map((employee) => (

@@ -17,6 +17,7 @@ const QuotesTable = ({
   data = [],
   onEdit,
   onDelete,
+  onView,
   onSelect,
   selectedQuotes = [],
   showPagination = true,
@@ -95,6 +96,7 @@ const QuotesTable = ({
                   quote={quote}
                   isSelected={selectedQuotes.includes(quote.id)}
                   onSelect={handleSelect}
+                  onView={onView}
                   onEdit={onEdit}
                   onDelete={onDelete}
                 />

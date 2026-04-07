@@ -8,7 +8,6 @@ import PageHeader from '../../../components/common/PageHeader';
 import JobActionMenu from '../components/JobView/JobActionMenu';
 import JobDetailsSection from '../components/JobView/JobDetailsSection';
 import AttachmentsSection from '../components/JobView/AttachmentsSection';
-import ActivitySection from '../components/JobView/ActivitySection';
 import TasksSection from '../components/JobView/TasksSection';
 import InstructionsSection from '../components/JobView/InstructionsSection';
 import HeaderActions from '../components/JobView/HeaderActions';
@@ -295,10 +294,7 @@ const JobDetails = () => {
       </Grid>
 
       <Grid container spacing={3}>
-        <Grid item xs={12} md={6}>
-          <ActivitySection activities={currentJob?.activities || []} />
-        </Grid>
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12}>
           <AttachmentsSection
             attachments={localAttachments.general}
             onAddAttachment={() => document.getElementById('general-file-upload').click()}
