@@ -9,9 +9,41 @@ class AuthService extends BaseApiService {
   async login(credentials) {
     try {
       console.log("AuthService.login called with:", credentials);
-      const response = await this.client.post("/api/v1/auth/login", credentials);
-      
-      const { access_token, user, token_type, expires_in } = response.data.data;
+      const role = credentials?.role;
+      let loginEndpoint = "/api/v1/auth/login";
+
+      if (role === "Customer") {
+        loginEndpoint = "/api/v1/customer/login";
+      } else if (role === "Employee") {
+        loginEndpoint = "/api/v1/employee/login";
+      } else if (role === "Vendor") {
+        loginEndpoint = "/api/v1/auth/login";
+      }
+
+      const response = await this.client.post(loginEndpoint, credentials);
+      const responseData = response?.data?.data || {};
+
+      let access_token;
+      let user;
+      let token_type;
+      let expires_in;
+
+      if (role === "Customer") {
+        access_token = responseData.token;
+        user = responseData.customer;
+        token_type = responseData.token_type || "bearer";
+        expires_in = responseData.expires_in;
+      } else if (role === "Employee") {
+        access_token = responseData.token;
+        user = responseData.employee;
+        token_type = responseData.token_type || "bearer";
+        expires_in = responseData.expires_in;
+      } else {
+        access_token = responseData.access_token;
+        user = responseData.user;
+        token_type = responseData.token_type || "bearer";
+        expires_in = responseData.expires_in;
+      }
       
       if (access_token) {
         localStorage.setItem("access_token", access_token);
@@ -27,6 +59,7 @@ class AuthService extends BaseApiService {
         data: {
           access_token,
           user,
+          role,
           token_type: token_type || "bearer",
           expires_in
         }

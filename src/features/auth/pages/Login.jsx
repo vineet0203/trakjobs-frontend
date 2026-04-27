@@ -21,6 +21,7 @@ import ErrorDialog from '../../../components/common/ErrorDialog';
 const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const roles = ['Customer', 'Employee', 'Vendor'];
   const { 
     login, 
     loading, 
@@ -34,6 +35,7 @@ const Login = () => {
   const [currentError, setCurrentError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(location.state?.message || '');
   const [snackbarOpen, setSnackbarOpen] = useState(!!location.state?.message);
+  const [selectedRole, setSelectedRole] = useState('');
 
   // Handle success message from navigation state
   useEffect(() => {
@@ -69,11 +71,31 @@ const Login = () => {
 
   const handleSubmit = async (values, { setSubmitting, setFieldError }) => {
     try {
-      const from = location.state?.from?.pathname || '/dashboard';
-      const result = await login(values, from);
+      const role = values.role;
+      const result = await login(values, role === 'Vendor' ? '/dashboard' : null);
       
       if (result) {
-        navigate(from, { replace: true });
+        if (role === 'Customer') {
+          const customerAppUrl = import.meta.env.VITE_CUSTOMER_APP_URL || 'http://localhost:5175';
+          const token = result?.access_token;
+          if (token) {
+            const separator = customerAppUrl.includes('?') ? '&' : '?';
+            window.location.href = `${customerAppUrl}${separator}authToken=${encodeURIComponent(token)}`;
+          } else {
+            window.location.href = customerAppUrl;
+          }
+        } else if (role === 'Employee') {
+          const employeeAppUrl = import.meta.env.VITE_EMPLOYEE_APP_URL || 'http://localhost:5174';
+          const token = result?.access_token;
+          if (token) {
+            const separator = employeeAppUrl.includes('?') ? '&' : '?';
+            window.location.href = `${employeeAppUrl}${separator}authToken=${encodeURIComponent(token)}`;
+          } else {
+            window.location.href = employeeAppUrl;
+          }
+        } else {
+          navigate('/dashboard', { replace: true });
+        }
       }
     } catch (err) {
       console.error('Login error in component:', err);
@@ -111,8 +133,18 @@ const Login = () => {
     clearError();
   };
 
+  const handleSelectRole = (role) => {
+    setSelectedRole(role);
+    clearError();
+  };
+
+  const handleBackToRoleSelection = () => {
+    setSelectedRole('');
+    clearError();
+  };
+
   return (
-    <AuthLayout title="LOGIN">
+    <AuthLayout title={selectedRole ? `LOGIN as ${selectedRole}` : 'LOGIN'}>
       {/* Error Dialog for non-validation errors */}
       <ErrorDialog
         open={errorDialogOpen}
@@ -155,109 +187,156 @@ const Login = () => {
           boxShadow: '0 10px 40px rgba(0,0,0,0.08)'
         }}
       >
-        <Formik
-          initialValues={{
-            email: '',
-            password: ''
-          }}
-          validationSchema={loginSchema}
-          onSubmit={handleSubmit}
-          validateOnChange={false}
-          validateOnBlur={true}
-        >
-          {({ isSubmitting, errors, touched, handleChange, handleBlur, values }) => (
-            <Form>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                <DebouncedTextField
-                  name="email"
-                  type="email"
-                  label="Email Address"
-                  placeholder="Enter your email address"
-                  value={values.email}
-                  onChange={(value) => handleChange('email')(value)}
-                  onBlur={handleBlur}
-                  error={touched.email && Boolean(errors.email)}
-                  helperText={touched.email && errors.email}
-                  required
-                  size="medium"
-                  disabled={loading}
-                />
+        {!selectedRole ? (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {roles.map((role) => (
+              <Button
+                key={role}
+                variant="contained"
+                onClick={() => handleSelectRole(role)}
+                sx={{
+                  textTransform: 'none',
+                  fontSize: '18px',
+                  minHeight: '45px',
+                  borderRadius: '8px',
+                  boxShadow: 'none',
+                  '&:hover': {
+                    boxShadow: '0 8px 16px rgba(25, 118, 210, 0.3)'
+                  }
+                }}
+              >
+                {role}
+              </Button>
+            ))}
+          </Box>
+        ) : (
+          <>
+            <Box sx={{ mb: 2, textAlign: 'left' }}>
+              <Button
+                type="button"
+                onClick={handleBackToRoleSelection}
+                sx={{
+                  textTransform: 'none',
+                  fontSize: '0.875rem',
+                  px: 0,
+                  minWidth: 'auto'
+                }}
+              >
+                Back
+              </Button>
+            </Box>
 
-                <PasswordField
-                  name="password"
-                  label="Password"
-                  placeholder="Enter your password"
-                  value={values.password}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  error={touched.password && Boolean(errors.password)}
-                  helperText={touched.password && errors.password}
-                  required
-                  size="medium"
-                  disabled={loading}
-                />
+            <Formik
+              initialValues={{
+                email: '',
+                password: '',
+                role: selectedRole
+              }}
+              enableReinitialize
+              validationSchema={loginSchema}
+              onSubmit={handleSubmit}
+              validateOnChange={false}
+              validateOnBlur={true}
+            >
+              {({ isSubmitting, errors, touched, handleChange, handleBlur, values }) => (
+                <Form>
+                  <input type="hidden" name="role" value={values.role} />
 
-                <Box sx={{ textAlign: 'right', mt: -1 }}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                    <DebouncedTextField
+                      name="email"
+                      type="email"
+                      label="Email Address"
+                      placeholder="Enter your email address"
+                      value={values.email}
+                      onChange={(value) => handleChange('email')(value)}
+                      onBlur={handleBlur}
+                      error={touched.email && Boolean(errors.email)}
+                      helperText={touched.email && errors.email}
+                      required
+                      size="medium"
+                      disabled={loading}
+                    />
+
+                    <PasswordField
+                      name="password"
+                      label="Password"
+                      placeholder="Enter your password"
+                      value={values.password}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      error={touched.password && Boolean(errors.password)}
+                      helperText={touched.password && errors.password}
+                      required
+                      size="medium"
+                      disabled={loading}
+                    />
+
+                    <Box sx={{ textAlign: 'right', mt: -1 }}>
+                      <Link
+                        to="/auth/forgot-password"
+                        style={{
+                          color: '#1976d2',
+                          textDecoration: 'none',
+                          fontSize: '0.875rem',
+                          '&:hover': {
+                            textDecoration: 'underline'
+                          }
+                        }}
+                      >
+                        Forgot Password?
+                      </Link>
+                    </Box>
+
+                    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+                      <Button
+                        type="submit"
+                        variant="contained"
+                        disabled={isSubmitting || loading}
+                        sx={{
+                          textTransform: 'none',
+                          fontSize: '18px',
+                          minWidth: '220px',
+                          minHeight: '45px',
+                          borderRadius: '8px',
+                          boxShadow: 'none',
+                          '&:hover': {
+                            boxShadow: '0 8px 16px rgba(25, 118, 210, 0.3)'
+                          }
+                        }}
+                      >
+                        {loading || isSubmitting ? (
+                          <CircularProgress size={25} color="inherit" />
+                        ) : 'Login'}
+                      </Button>
+                    </Box>
+                  </Box>
+                </Form>
+              )}
+            </Formik>
+
+            {selectedRole === 'Vendor' ? (
+              <Box sx={{ textAlign: 'center', mt: 4 }}>
+                <Typography variant="body2" color="text.secondary">
+                  If you haven't Registered yet?{' '}
                   <Link
-                    to="/auth/forgot-password"
+                    to="/auth/register"
                     style={{
                       color: '#1976d2',
                       textDecoration: 'none',
-                      fontSize: '0.875rem',
+                      fontWeight: 500,
                       '&:hover': {
                         textDecoration: 'underline'
                       }
                     }}
                   >
-                    Forgot Password?
+                    Register Now
                   </Link>
-                </Box>
-
-                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    disabled={isSubmitting || loading}
-                    sx={{
-                      textTransform: 'none',
-                      fontSize: '18px',
-                      minWidth: '220px',
-                      minHeight: '45px',
-                      borderRadius: '8px',
-                      boxShadow: 'none',
-                      '&:hover': {
-                        boxShadow: '0 8px 16px rgba(25, 118, 210, 0.3)'
-                      }
-                    }}
-                  >
-                    {loading || isSubmitting ? (
-                      <CircularProgress size={25} color="inherit" />
-                    ) : 'Login'}
-                  </Button>
-                </Box>
+                </Typography>
               </Box>
-            </Form>
-          )}
-        </Formik>
-
-        <Box sx={{ textAlign: 'center', mt: 4 }}>
-          <Typography variant="body2" color="text.secondary">
-            If you haven't Registered yet?{' '}
-            <Link
-              to="/auth/register"
-              style={{
-                color: '#1976d2',
-                textDecoration: 'none',
-                fontWeight: 500,
-                '&:hover': {
-                  textDecoration: 'underline'
-                }
-              }}
-            >
-              Register Now
-            </Link>
-          </Typography>
-        </Box>
+            ) : null}
+          </>
+        )}
       </Paper>
     </AuthLayout>
   );
