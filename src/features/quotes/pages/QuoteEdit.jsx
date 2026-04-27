@@ -160,7 +160,7 @@ const QuoteEdit = () => {
         submitError={submitError}
         clients={clients}
         loadingClients={clientsLoading}
-        initialData={currentQuote}
+        initialData={{...currentQuote, items: currentQuote?.items || currentQuote?.line_items || []}}
         isEditMode={true}
       />
 
