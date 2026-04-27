@@ -15,7 +15,7 @@ const QuoteCreate = () => {
   const { clients, loadClients, loading: clientsLoading } = useClients({ limit: 100 });
   const [submitError, setSubmitError] = useState(null);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
-  const [initialData, setInitialData] = useState({});
+  const [initialData, setInitialData] = useState({ items: [] });
 
   // console.log('🎯 QuoteCreate rendered', { 
   //   loading, 
@@ -115,7 +115,7 @@ const QuoteCreate = () => {
           };
           console.log(`📦 Formatted item ${index}:`, formattedItem);
           return formattedItem;
-        }) || [],
+        }).filter(item => item.item_name && item.item_name.trim() !== '') || [],
       };
       
       console.log('📤 Sending formatted data to createQuote:', formattedData);

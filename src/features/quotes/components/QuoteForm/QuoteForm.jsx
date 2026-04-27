@@ -63,8 +63,8 @@ const QuoteForm = ({
     currency: initialData.currency || 'USD',
 
     // Section 2: Line Items
-    line_items: (isEditMode || initialData.items?.length > 0)
-      ? (initialData.items || []).map(item => ({
+    line_items: (initialData.items && initialData.items.length > 0)
+      ? initialData.items.map(item => ({
         id: item.id,
         item_name: item.item_name,
         description: item.description || '',
@@ -73,7 +73,7 @@ const QuoteForm = ({
         tax_rate: item.tax_rate || 0,
         package_id: item.package_id || null,
       }))
-      : [{
+      : isEditMode ? [] : [{
         item_name: '',
         description: '',
         quantity: 1,

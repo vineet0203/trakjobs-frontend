@@ -70,7 +70,7 @@ const QuoteEdit = () => {
           };
           console.log(`📦 Formatted item ${index}:`, formattedItem);
           return formattedItem;
-        }) || [],
+        }).filter(item => item.item_name && item.item_name.trim() !== '') || [],
         // Format reminders if any
         reminders: quoteData.reminders?.map(reminder => ({
           ...(reminder.id && !reminder.id.toString().startsWith('temp') ? { id: reminder.id } : {}),
