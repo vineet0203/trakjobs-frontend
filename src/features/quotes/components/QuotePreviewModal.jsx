@@ -121,6 +121,7 @@ const QuotePreviewModal = ({ open, quote, onClose, onEdit }) => {
       'currency',
       'approval_status',
       'client_signature',
+      'customer_signature',
       'approval_date',
       'approval_action_date',
       'status',
@@ -191,6 +192,14 @@ const QuotePreviewModal = ({ open, quote, onClose, onEdit }) => {
             <FieldRow label="Deposit Type" value={renderDetailValue(displayedQuote.deposit_type)} />
             <FieldRow label="Deposit Amount" value={renderDetailValue(displayedQuote.deposit_amount)} />
             <FieldRow label="Approval Status" value={renderDetailValue(displayedQuote.approval_status)} />
+            {displayedQuote.customer_signature && (
+              <Box sx={{ mt: 1, mb: 1 }}>
+                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>Customer Signature</Typography>
+                <Box sx={{ mt: 0.5 }}>
+                  <img src={displayedQuote.customer_signature} alt="Customer Signature" style={{ maxWidth: '300px', width: '100%', border: '1px solid #E5E7EB', borderRadius: '4px', background: '#fafafa', padding: '8px' }} />
+                </Box>
+              </Box>
+            )}
             <FieldRow label="Sent At" value={formatDate(displayedQuote.sent_at)} />
             <FieldRow label="Status" value={displayedQuote.status} />
 

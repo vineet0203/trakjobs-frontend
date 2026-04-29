@@ -283,6 +283,20 @@ const QuoteDetailsSection = ({ formik, clients = [], loadingClients = false }) =
             fullWidth
           />
         </Grid>
+
+      <Grid item xs={12}>
+        <DebouncedTextField
+          name="notes"
+          label="Notes / Terms"
+          multiline
+          rows={4}
+          fullWidth
+          value={formik.values.notes || ''}
+          onChange={(val) => formik.setFieldValue('notes', val)}
+          onBlur={formik.handleBlur}
+          placeholder="Add notes or terms for this quote..."
+        />
+      </Grid>
       </Grid>
     </Paper>
   );

@@ -22,7 +22,7 @@ import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import { useToast } from "../../../components/common/ToastProvider";
 import CustomDatePicker from "../../../components/common/CustomDatePicker";
-import CustomTimeInput from "../../../components/common/CustomTimeInput";
+import QuickTimePicker from "../../../components/common/QuickTimePicker";
 import scheduleService from "../services/scheduleService";
 import jobService from "../../jobs/services/jobService";
 import employeeService from "../../employees/services/employeeService";
@@ -62,6 +62,7 @@ const scheduleValidationSchema = Yup.object({
     .required("Priority is required"),
   crew_id: Yup.number().nullable(),
   notes: Yup.string().max(2000, "Notes cannot exceed 2000 characters").nullable(),
+  address: Yup.string().max(500, "Address cannot exceed 500 characters").nullable(),
 });
 
 const CreateScheduleModal = ({
@@ -82,15 +83,25 @@ const CreateScheduleModal = ({
 
   const isFromJobDetails = !!jobData;
 
+  const extractAddress = (job) => {
+    if (!job) return "";
+    let parts = [job.address_line_1, job.city, job.state, job.zip_code].filter(Boolean);
+    if (parts.length === 0 && job.client) {
+      parts = [job.client.address_line_1, job.client.city, job.client.state, job.client.zip_code].filter(Boolean);
+    }
+    return parts.join(", ");
+  };
+
   // Build initial values based on context
   const getInitialValues = () => {
     if (jobData) {
       return {
         ...INITIAL_SCHEDULE_VALUES,
         job_id: jobData.id,
+        address: extractAddress(jobData),
       };
     }
-    return INITIAL_SCHEDULE_VALUES;
+    return { ...INITIAL_SCHEDULE_VALUES, address: "" };
   };
 
   // Fetch jobs and employees when modal opens
@@ -150,6 +161,7 @@ const CreateScheduleModal = ({
         priority: values.priority,
         status: submitAction === "draft" ? "draft" : "scheduled",
         notes: values.notes || null,
+        address: values.address || null,
         is_multi_day: values.is_multi_day,
         is_recurring: values.is_recurring,
         notify_client: values.notify_client,
@@ -210,6 +222,9 @@ const CreateScheduleModal = ({
     formikProps.setFieldValue("job_id", jobId);
     const job = jobs.find((j) => j.id === jobId);
     setSelectedJob(job || null);
+    if (job) {
+      formikProps.setFieldValue("address", extractAddress(job));
+    }
   };
 
   const getClientName = () => {
@@ -219,17 +234,6 @@ const CreateScheduleModal = ({
     if (selectedJob?.client)
       return `${selectedJob.client.first_name || ""} ${selectedJob.client.last_name || ""}`.trim();
     return "—";
-  };
-
-  const getJobAddress = () => {
-    if (!selectedJob) return "";
-    const parts = [
-      selectedJob.address_line_1,
-      selectedJob.city,
-      selectedJob.state,
-      selectedJob.zip_code,
-    ].filter(Boolean);
-    return parts.join(", ");
   };
 
   return (
@@ -260,7 +264,7 @@ const CreateScheduleModal = ({
         validateOnBlur={true}
       >
         {(formikProps) => {
-          const { values, errors, touched, handleChange, handleBlur, setFieldValue } = formikProps;
+          const { values, errors, touched, handleChange, handleBlur, setFieldValue, setFieldTouched } = formikProps;
 
           return (
             <Form>
@@ -384,27 +388,38 @@ const CreateScheduleModal = ({
                       <TextField
                         fullWidth
                         label="Address"
-                        value={getJobAddress()}
-                        InputProps={{ readOnly: true }}
+                        name="address"
+                        value={values.address || ""}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        error={touched.address && Boolean(errors.address)}
+                        helperText={touched.address && errors.address}
                         size="small"
-                        sx={{ "& .MuiInputBase-root": { backgroundColor: "#f5f5f5" } }}
+                        placeholder="Enter location address..."
                       />
                     </Grid>
                     <Grid item xs={12}>
                       <Box
                         sx={{
-                          height: 120,
-                          backgroundColor: "#f0f0f0",
+                          height: 250,
+                          backgroundColor: "#f5f5f5",
                           borderRadius: 2,
+                          overflow: "hidden",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
-                          border: "1px dashed #ccc",
+                          border: "1px solid #e0e0e0",
                         }}
                       >
-                        <Typography variant="body2" color="text.secondary">
-                          Map preview (coming soon)
-                        </Typography>
+                        <iframe
+                          title="Location Map"
+                          width="100%"
+                          height="100%"
+                          frameBorder="0"
+                          style={{ border: 0 }}
+                          src={`https://maps.google.com/maps?q=${encodeURIComponent(values.address || 'Maharashtra, India')}&output=embed`}
+                          allowFullScreen
+                        />
                       </Box>
                     </Grid>
                   </Grid>
@@ -457,8 +472,9 @@ const CreateScheduleModal = ({
                   <Typography fontWeight={600} mb={2}>
                     Date & Time
                   </Typography>
-                  <Grid container spacing={2.5} alignItems="start">
-                    <Grid item xs={12} sm={6} md={3}>
+                  {/* Row 1: Dates */}
+                  <Grid container spacing={2} mb={1.5}>
+                    <Grid item xs={12} sm={6}>
                       <CustomDatePicker
                         label="Start Date *"
                         name="start_date"
@@ -471,19 +487,7 @@ const CreateScheduleModal = ({
                         required
                       />
                     </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
-                      <CustomTimeInput
-                        label="Start Time *"
-                        name="start_time"
-                        value={values.start_time}
-                        onChange={(value) => setFieldValue("start_time", value)}
-                        onBlur={() => setFieldTouched("start_time", true, true)}
-                        error={touched.start_time && Boolean(errors.start_time)}
-                        helperText={touched.start_time && errors.start_time}
-                        required
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
+                    <Grid item xs={12} sm={6}>
                       <CustomDatePicker
                         label="End Date *"
                         name="end_date"
@@ -492,7 +496,6 @@ const CreateScheduleModal = ({
                         minDate={values.start_date || null}
                         onChange={(value) => {
                           setFieldValue("end_date", value);
-                          // Auto-toggle multi-day if dates differ
                           if (values.start_date && value !== values.start_date) {
                             setFieldValue("is_multi_day", true);
                           }
@@ -503,8 +506,24 @@ const CreateScheduleModal = ({
                         required
                       />
                     </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
-                      <CustomTimeInput
+                  </Grid>
+
+                  {/* Row 2: Times */}
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sm={6}>
+                      <QuickTimePicker
+                        label="Start Time *"
+                        name="start_time"
+                        value={values.start_time}
+                        onChange={(value) => setFieldValue("start_time", value)}
+                        onBlur={() => setFieldTouched("start_time", true, true)}
+                        error={touched.start_time && Boolean(errors.start_time)}
+                        helperText={touched.start_time && errors.start_time}
+                        required
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <QuickTimePicker
                         label="End Time *"
                         name="end_time"
                         value={values.end_time}

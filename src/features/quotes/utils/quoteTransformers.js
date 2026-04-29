@@ -25,6 +25,7 @@ export const transformQuoteFromApi = (apiQuote) => {
     // Approval
     approval_status: apiQuote.approval_status,
     client_signature: apiQuote.client_signature,
+    customer_signature: apiQuote.customer_signature,
     approval_date: apiQuote.approval_date,
     approval_action_date: apiQuote.approval_action_date,
 

@@ -4,10 +4,57 @@ import { Grid, Paper, Typography, Box, Chip, Button } from '@mui/material';
 import { Business, Edit, Check, Schedule, Person, Description } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import SectionHeader from '../../../../components/common/form/SectionHeader';
+import DatePicker from 'react-datepicker';
+import { CalendarDays } from 'lucide-react';
+import { format, parseISO, isValid } from 'date-fns';
+import '../../../../components/common/CustomDatePicker.css';
+
+const toDateObject = (value) => {
+    if (!value) return null;
+    if (value instanceof Date) return isValid(value) ? value : null;
+    if (typeof value === 'string') {
+        const parsed = parseISO(value);
+        if (isValid(parsed)) return parsed;
+        const d = new Date(value);
+        return isValid(d) ? d : null;
+    }
+    return null;
+};
+
+const InlineDateInput = React.forwardRef(({ value, onClick }, ref) => (
+    <Box 
+        onClick={onClick} 
+        ref={ref}
+        title="Click to edit date"
+        sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: 0.75,
+            cursor: 'pointer',
+            color: value ? 'text.primary' : 'text.secondary',
+            padding: '2px 8px',
+            borderRadius: '6px',
+            border: '1px dashed transparent',
+            transition: 'all 0.2s',
+            '&:hover': { 
+                color: 'primary.main',
+                bgcolor: 'primary.50',
+                borderColor: 'primary.200'
+            },
+            minHeight: '26px'
+        }}
+    >
+        {value && (
+            <Typography variant="body1" sx={{ fontWeight: 400 }}>
+                {value}
+            </Typography>
+        )}
+        <CalendarDays size={16} />
+    </Box>
+));
 
 const JobDetailsSection = ({ jobData, onUpdateJob }) => {
     const navigate = useNavigate();
-    const endDateInputRef = useRef(null);
 
     // Safely access nested properties with fallbacks
     const clientName = jobData?.client?.name || 'N/A';
@@ -121,10 +168,9 @@ const JobDetailsSection = ({ jobData, onUpdateJob }) => {
                             display: 'flex',
                             alignItems: 'center',
                             gap: 1,
-                            width: '200px',
                             justifyContent: 'flex-start'
                         }}>
-                            <Typography variant="subtitle2" color="text.secondary">
+                            <Typography variant="subtitle2" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
                                 Issue Date:
                             </Typography>
                             <Typography variant="body1">{jobData?.issue_date || 'N/A'}</Typography>
@@ -182,10 +228,9 @@ const JobDetailsSection = ({ jobData, onUpdateJob }) => {
                             display: 'flex',
                             alignItems: 'center',
                             gap: 1,
-                            width: '200px',
                             justifyContent: 'flex-start'
                         }}>
-                            <Typography variant="subtitle2" color="text.secondary">
+                            <Typography variant="subtitle2" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
                                 Start Date:
                             </Typography>
                             <Typography variant="body1">{jobData?.start_date || 'N/A'}</Typography>
@@ -201,35 +246,24 @@ const JobDetailsSection = ({ jobData, onUpdateJob }) => {
                         alignItems: 'center'
                     }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Typography variant="subtitle2" color="text.secondary">
+                            <Typography variant="subtitle2" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
                                 End Date:
                             </Typography>
-                            <Typography
-                                variant="body1"
-                                onClick={() => endDateInputRef.current?.showPicker()}
-                                sx={{
-                                    cursor: 'pointer',
-                                    '&:hover': { color: 'primary.main', textDecoration: 'underline' },
-                                }}
-                            >
-                                {jobData?.end_date || 'N/A'}
-                            </Typography>
-                            <input
-                                ref={endDateInputRef}
-                                type="date"
-                                style={{
-                                    position: 'absolute',
-                                    opacity: 0,
-                                    width: 0,
-                                    height: 0,
-                                    pointerEvents: 'none',
-                                }}
-                                value={jobData?.end_date || ''}
-                                onChange={(e) => {
-                                    if (e.target.value && onUpdateJob) {
-                                        onUpdateJob({ end_date: e.target.value });
+                            <DatePicker
+                                selected={toDateObject(jobData?.end_date)}
+                                onChange={(date) => {
+                                    if (onUpdateJob) {
+                                        onUpdateJob({ end_date: date ? format(date, 'yyyy-MM-dd') : null });
                                     }
                                 }}
+                                dateFormat="MMM d, yyyy"
+                                customInput={<InlineDateInput />}
+                                popperPlacement="bottom-end"
+                                popperClassName="custom-date-picker-popper"
+                                calendarClassName="custom-date-picker-calendar"
+                                showMonthDropdown
+                                showYearDropdown
+                                dropdownMode="select"
                             />
                         </Box>
                     </Box>
@@ -295,15 +329,27 @@ const JobDetailsSection = ({ jobData, onUpdateJob }) => {
                             display: 'flex',
                             alignItems: 'center',
                             gap: 1,
-                            width: '200px',
                             justifyContent: 'flex-start'
                         }}>
-                            <Typography variant="subtitle2" color="text.secondary">
+                            <Typography variant="subtitle2" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
                                 Est. Completion:
                             </Typography>
-                            <Typography variant="body1">
-                                {jobData?.estimated_completion_date || 'Not set'}
-                            </Typography>
+                            <DatePicker
+                                selected={toDateObject(jobData?.estimated_completion_date)}
+                                onChange={(date) => {
+                                    if (onUpdateJob) {
+                                        onUpdateJob({ estimated_completion_date: date ? format(date, 'yyyy-MM-dd') : null });
+                                    }
+                                }}
+                                dateFormat="MMM d, yyyy"
+                                customInput={<InlineDateInput />}
+                                popperPlacement="bottom-start"
+                                popperClassName="custom-date-picker-popper"
+                                calendarClassName="custom-date-picker-calendar"
+                                showMonthDropdown
+                                showYearDropdown
+                                dropdownMode="select"
+                            />
                         </Box>
                     </Box>
                 </Grid>
