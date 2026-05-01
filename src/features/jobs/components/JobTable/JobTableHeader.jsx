@@ -30,6 +30,7 @@ const JobTableHeader = ({ selectAll, onSelectAll }) => {
                 <TableCell>Assigned To</TableCell>
                 <TableCell>Tasks / Files</TableCell>
                 <TableCell align="right">Amount</TableCell>
+                <TableCell align="center">Actions</TableCell>
             </TableRow>
         </TableHead>
     );

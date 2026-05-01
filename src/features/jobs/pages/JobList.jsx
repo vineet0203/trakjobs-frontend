@@ -10,6 +10,7 @@ import PageHeader from '../../../components/common/PageHeader';
 import ErrorAlert from '../../../components/feedback/ErrorAlert';
 import HeaderSearch from '../../../components/common/HeaderSearch';
 import CustomButton from '../../../components/common/CustomButton';
+import ConfirmDialog from '../../../components/common/ConfirmDialog';
 import { useJobs } from '../hooks/useJobs';
 import { useToast } from '../../../components/common/ToastProvider';
 
@@ -29,11 +30,14 @@ const JobList = () => {
         setPerPage,
         refresh,
         clearError,
+        deleteJob,
     } = useJobs({ autoFetch: true });
 
     const [selectedJobs, setSelectedJobs] = useState([]);
     const [selectAll, setSelectAll] = useState(false);
     const [searchInput, setSearchInput] = useState('');
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [jobToDelete, setJobToDelete] = useState(null);
 
     // Track loading state for smooth transitions
     const [showInitialSkeleton, setShowInitialSkeleton] = useState(true);
@@ -99,6 +103,27 @@ const JobList = () => {
             }
         });
     }, []);
+
+    // Handle delete job
+    const handleDeleteClick = useCallback((job) => {
+        setJobToDelete(job);
+        setDeleteDialogOpen(true);
+    }, []);
+
+    const handleConfirmDelete = async () => {
+        if (!jobToDelete) return;
+        try {
+            await deleteJob(jobToDelete.id);
+            setDeleteDialogOpen(false);
+            setJobToDelete(null);
+            // useJobs handles the toast and refresh
+        } catch (error) {
+            console.error("Failed to delete job", error);
+            // useJobs handles the error toast
+            setDeleteDialogOpen(false);
+            setJobToDelete(null);
+        }
+    };
 
     // Handle create job
     const handleCreateJob = useCallback(() => {
@@ -244,7 +269,6 @@ const JobList = () => {
                 {/* Main content */}
                 {!showInitialSkeleton && (
                     <Box sx={{ position: 'relative' }}>
-                        {/* Main table */}
                         <JobTable
                             jobs={jobs}
                             selectedJobs={selectedJobs}
@@ -258,6 +282,7 @@ const JobList = () => {
                             itemsPerPage={pagination?.perPage || 5}
                             onRowsPerPageChange={handleRowsPerPageChange}
                             showPagination={true}
+                            onDeleteClick={handleDeleteClick}
                         />
 
                         {/* Refresh skeleton overlay */}
@@ -291,6 +316,28 @@ const JobList = () => {
                     </Box>
                 )}
             </div>
+
+            <ConfirmDialog
+                open={deleteDialogOpen}
+                title={
+                    jobToDelete?.status === 'scheduled' 
+                        // && new Date(jobToDelete?.start_date || Date.now()) > new Date()
+                        ? "Warning: Scheduled Job Deletion"
+                        : "Delete Job"
+                }
+                message={
+                    jobToDelete?.status === 'scheduled'
+                        ? `This job is scheduled for ${jobToDelete.start_date || 'a future date'}. Deleting it will also remove it from the schedule. Are you sure?`
+                        : "Are you sure you want to delete this job? This action cannot be undone."
+                }
+                severity={jobToDelete?.status === 'scheduled' ? "warning" : "error"}
+                confirmText="Delete"
+                onConfirm={handleConfirmDelete}
+                onCancel={() => {
+                    setDeleteDialogOpen(false);
+                    setJobToDelete(null);
+                }}
+            />
         </div>
     );
 };

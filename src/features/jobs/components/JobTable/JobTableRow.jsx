@@ -1,10 +1,10 @@
 // src/features/jobs/components/JobTable/JobTableRow.jsx
 import React from 'react';
-import { TableRow, TableCell, Checkbox, Typography, Box, Chip } from '@mui/material';
+import { TableRow, TableCell, Checkbox, Typography, Box, Chip, IconButton } from '@mui/material';
 import { Link } from 'react-router-dom';
 import EllipsisText from '../../../../components/common/EllipsisText';
 import ProfileAvatar from '../../../../components/common/avatar/ProfileAvatar';
-import { Business, Person, Description, AttachFile, Assignment } from '@mui/icons-material';
+import { Business, Person, Description, AttachFile, Assignment, Delete } from '@mui/icons-material';
 import { BriefcaseBusiness, Home, Calendar, Clock, DollarSign } from 'lucide-react';
 
 // Helper function to get priority chip color
@@ -56,7 +56,7 @@ const getClientDisplayName = (client) => {
     return client.name || 'Unnamed Client';
 };
 
-const JobTableRow = ({ job, isSelected, onSelect }) => {
+const JobTableRow = ({ job, isSelected, onSelect, onDeleteClick }) => {
     const clientName = getClientDisplayName(job.client);
     const clientType = job.client?.client_type || 'commercial';
     const jobNumber = job.job_number || 'N/A';
@@ -224,6 +224,21 @@ const JobTableRow = ({ job, isSelected, onSelect }) => {
                         maxWidth: 100 // Adjust based on your needs
                     }}
                 />
+            </TableCell>
+
+            {/* Actions Column */}
+            <TableCell align="center" onClick={(e) => e.stopPropagation()}>
+                <IconButton 
+                    size="small" 
+                    onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        onDeleteClick && onDeleteClick(job);
+                    }}
+                    sx={{ color: 'error.main' }}
+                >
+                    <Delete fontSize="small" />
+                </IconButton>
             </TableCell>
 
             {/* Start Date Column - Uncomment if you want to show it */}

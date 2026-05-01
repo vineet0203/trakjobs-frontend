@@ -17,7 +17,8 @@ const JobTable = ({
     totalPages = 1,
     totalItems = 0,
     itemsPerPage = 5,
-    showPagination = false
+    showPagination = false,
+    onDeleteClick
 }) => {
     const pageIndex = currentPage - 1;
 
@@ -59,6 +60,7 @@ const JobTable = ({
                                 job={job}
                                 isSelected={selectedJobs.includes(job.id)}
                                 onSelect={onSelectJob}
+                                onDeleteClick={onDeleteClick}
                             />
                         ))}
 
