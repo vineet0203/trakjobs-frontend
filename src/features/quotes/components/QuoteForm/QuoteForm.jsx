@@ -9,7 +9,6 @@ import QuoteLineItems from './QuoteLineItems';
 import PricingSummarySection from './PricingSummarySection';
 import ClientApprovalSection from './ClientApprovalSection';
 import FollowUpRemindersSection from './FollowUpRemindersSection';
-import ConversionToJobSection from './ConversionToJobSection';
 import QuoteFormActions from './QuoteFormActions';
 import { calculateQuoteTotals } from '../../utils/quoteTransformers';
 
@@ -104,7 +103,6 @@ const QuoteForm = ({
       reminder_status: reminder.reminder_status,
     })) || [],
 
-    // Section 6: Conversion to Job
     can_convert_to_job: initialData.can_convert_to_job ?? true,
     job_id: initialData.job_id || '',
     converted_at: initialData.converted_at || null,
@@ -263,11 +261,10 @@ const QuoteForm = ({
               {/* Sections 5 & 6 */}
               <Box sx={{ mb: 4 }}>
                 <Grid container spacing={3}>
-                  <Grid item xs={12} md={6}>
+                  <Grid item xs={12} md={12}>
                     <FollowUpRemindersSection formik={formik} />
                   </Grid>
                   <Grid item xs={12} md={6}>
-                    <ConversionToJobSection formik={formik} />
                   </Grid>
                 </Grid>
               </Box>

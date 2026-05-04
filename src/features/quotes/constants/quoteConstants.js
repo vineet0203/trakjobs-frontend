@@ -1,10 +1,6 @@
 export const QUOTE_STATUS_OPTIONS = [
   { value: 'draft', label: 'Draft' },
-  { value: 'sent', label: 'Sent' },
-  { value: 'pending', label: 'Pending Approval' },
-  { value: 'accepted', label: 'Accepted' },
-  { value: 'rejected', label: 'Rejected' },
-  { value: 'expired', label: 'Expired' },
+  { value: 'pending', label: 'Pending Approval' }
 ];
 
 export const APPROVAL_STATUS_OPTIONS = [

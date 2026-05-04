@@ -7,7 +7,6 @@ export {
 export { default as BaseApiService } from "./baseApiService";
 export { default as clientsService } from "./clientService";
 export { default as quotesService } from "./quotesService";
-export { default as authService } from "./authService";
 export { default as fileUploadService } from "./fileUploadService";
 export { API_ENDPOINTS } from "./config/apiConfig";
 

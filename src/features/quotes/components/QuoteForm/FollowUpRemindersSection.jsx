@@ -73,7 +73,7 @@ const FollowUpRemindersSection = ({ formik }) => {
         p: 3,
         borderRadius: 2,
         border: '1px solid #e5e7eb',
-        height: '280px',
+        minHeight: '280px',
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden'
@@ -110,7 +110,7 @@ const FollowUpRemindersSection = ({ formik }) => {
                   justifyContent: 'center',
                   bgcolor: '#f9fafb',
                   borderRadius: 2,
-                  border: '1px dashed #d1d5db',
+                  border: '1px dashed #d1d5db', minHeight: '200px',
                 }}
               >
                 <NotificationsActive sx={{ fontSize: 32, color: '#9ca3af', mb: 1 }} />
