@@ -448,9 +448,7 @@ const InvoiceList = () => {
 
                 <Stack direction="row" spacing={2}>
                   <TextField
-                    type={jobFromDate ? 'date' : 'text'}
-                    onFocus={(e) => (e.target.type = 'date')}
-                    onBlur={(e) => { if (!jobFromDate) e.target.type = 'text'; }}
+                    type="date"
                     size="small"
                     label="From"
                     name="jobFilterFrom"
@@ -461,9 +459,7 @@ const InvoiceList = () => {
                     sx={{ width: 140, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                   />
                   <TextField
-                    type={jobToDate ? 'date' : 'text'}
-                    onFocus={(e) => (e.target.type = 'date')}
-                    onBlur={(e) => { if (!jobToDate) e.target.type = 'text'; }}
+                    type="date"
                     size="small"
                     label="To"
                     name="jobFilterTo"
@@ -628,9 +624,7 @@ const InvoiceList = () => {
                 </Select>
               </FormControl>
               <TextField
-                type={historyFromDate ? 'date' : 'text'}
-                onFocus={(e) => (e.target.type = 'date')}
-                onBlur={(e) => { if (!historyFromDate) e.target.type = 'text'; }}
+                type="date"
                 size="small"
                 label="From"
                 name="historyFilterFrom"
@@ -641,9 +635,7 @@ const InvoiceList = () => {
                 sx={{ width: 140, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
               />
               <TextField
-                type={historyToDate ? 'date' : 'text'}
-                onFocus={(e) => (e.target.type = 'date')}
-                onBlur={(e) => { if (!historyToDate) e.target.type = 'text'; }}
+                type="date"
                 size="small"
                 label="To"
                 name="historyFilterTo"
