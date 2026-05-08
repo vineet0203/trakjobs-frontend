@@ -26,9 +26,15 @@ import {
   TableRow,
   List,
   ListItemButton,
-  ListItemText
+  ListItemText,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
+import DeleteIcon from '@mui/icons-material/Delete';
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import DownloadIcon from '@mui/icons-material/Download';
@@ -129,6 +135,7 @@ const InvoiceList = () => {
   const [historyPage, setHistoryPage] = useState(0);
   const [historyRowsPerPage, setHistoryRowsPerPage] = useState(10);
   const [reasonDrawer, setReasonDrawer] = useState({ open: false, reason: '', invoice: '' });
+  const [deleteDialog, setDeleteDialog] = useState({ open: false, invoice: null });
 
   useEffect(() => {
     const fetchEmployees = async () => {
@@ -185,7 +192,7 @@ const InvoiceList = () => {
       }
     };
     fetchJobsForEmployee();
-  }, [selectedEmpId, showToast]);
+  }, [selectedEmpId, showToast, previewInvoiceId]);
 
   const loadHistory = async () => {
     try {
@@ -305,18 +312,18 @@ const InvoiceList = () => {
     }));
 
   const getStatusChipSx = (status) => {
-  const map = {
-    scheduled: { color: '#2563eb', bg: '#eff6ff' },
-    pending: { color: '#d97706', bg: '#fffbeb' },
-    completed: { color: '#16a34a', bg: '#f0fdf4' },
-    paid: { color: '#16a34a', bg: '#f0fdf4' },
-    cancelled: { color: '#dc2626', bg: '#fef2f2' },
-    draft: { color: '#64748b', bg: '#f8fafc' },
-    sent: { color: '#2563eb', bg: '#eff6ff' },
-    overdue: { color: '#ea580c', bg: '#fff7ed' },
+    const map = {
+      scheduled: { color: '#2563eb', bg: '#eff6ff' },
+      pending: { color: '#d97706', bg: '#fffbeb' },
+      completed: { color: '#16a34a', bg: '#f0fdf4' },
+      paid: { color: '#16a34a', bg: '#f0fdf4' },
+      cancelled: { color: '#dc2626', bg: '#fef2f2' },
+      draft: { color: '#64748b', bg: '#f8fafc' },
+      sent: { color: '#2563eb', bg: '#eff6ff' },
+      overdue: { color: '#ea580c', bg: '#fff7ed' },
+    };
+    return map[status?.toLowerCase()] || { color: '#64748b', bg: '#f8fafc' };
   };
-  return map[status?.toLowerCase()] || { color: '#64748b', bg: '#f8fafc' };
-};
 
   const getMetrics = () => {
     const totalJobs = jobs.length;
@@ -335,6 +342,18 @@ const InvoiceList = () => {
       loadHistory();
     } catch (e) {
       showToast('Failed to send invoice.', 'error');
+    }
+  };
+
+  const handleDeleteInvoice = async () => {
+    if (!deleteDialog.invoice) return;
+    try {
+      await invoiceService.delete(deleteDialog.invoice.id);
+      showToast('Invoice deleted successfully.', 'success');
+      setDeleteDialog({ open: false, invoice: null });
+      loadHistory();
+    } catch (error) {
+      showToast('Failed to delete invoice.', 'error');
     }
   };
 
@@ -495,9 +514,9 @@ const InvoiceList = () => {
                       <MenuItem value="cancelled">Cancelled</MenuItem>
                     </Select>
                   </FormControl>
-                  <Button 
-                    variant="contained" 
-                    size="small" 
+                  <Button
+                    variant="contained"
+                    size="small"
                     onClick={() => {
                       setAppliedJobFromDate(jobFromDate);
                       setAppliedJobToDate(jobToDate);
@@ -507,9 +526,9 @@ const InvoiceList = () => {
                     Apply
                   </Button>
                   {(appliedJobFromDate || appliedJobToDate || jobFromDate || jobToDate || jobStatus !== 'all') && (
-                    <Button 
-                      variant="outlined" 
-                      size="small" 
+                    <Button
+                      variant="outlined"
+                      size="small"
                       onClick={() => {
                         setJobFromDate('');
                         setJobToDate('');
@@ -570,18 +589,28 @@ const InvoiceList = () => {
                               size="small"
                               onClick={() => handleGenerateInvoice(job)}
                               startIcon={<ReceiptIcon />}
-                              disabled={creatingInvoiceId === job.id}
+                              disabled={creatingInvoiceId === job.id || !!job.rawJob.is_invoiced}
                               sx={{
                                 textTransform: 'none',
                                 borderRadius: 2,
-                                borderColor: '#2563eb',
-                                color: '#2563eb',
+                                borderColor: !!job.rawJob.is_invoiced ? '#cbd5e1 !important' : '#2563eb',
+                                color: !!job.rawJob.is_invoiced ? '#94a3b8 !important' : '#2563eb',
+                                bgcolor: !!job.rawJob.is_invoiced ? '#f8fafc !important' : 'transparent',
                                 fontWeight: 600,
                                 fontSize: 12,
-                                '&:hover': { borderColor: '#1d4ed8', bgcolor: '#eff6ff' }
+                                cursor: !!job.rawJob.is_invoiced ? 'not-allowed' : 'pointer',
+                                '&:hover': { 
+                                  borderColor: !!job.rawJob.is_invoiced ? '#cbd5e1' : '#1d4ed8', 
+                                  bgcolor: !!job.rawJob.is_invoiced ? '#f8fafc' : '#eff6ff' 
+                                },
+                                '&.Mui-disabled': {
+                                  borderColor: '#cbd5e1',
+                                  color: '#94a3b8',
+                                  bgcolor: '#f8fafc'
+                                }
                               }}
                             >
-                              {creatingInvoiceId === job.id ? '...' : 'Generate Invoice'}
+                              {creatingInvoiceId === job.id ? '...' : (!!job.rawJob.is_invoiced ? 'Invoiced' : 'Generate Invoice')}
                             </Button>
                           </TableCell>
                         </TableRow>
@@ -676,9 +705,9 @@ const InvoiceList = () => {
                   }
                 }}
               />
-              <Button 
-                variant="contained" 
-                size="small" 
+              <Button
+                variant="contained"
+                size="small"
                 onClick={() => {
                   setAppliedHistoryFromDate(historyFromDate);
                   setAppliedHistoryToDate(historyToDate);
@@ -688,9 +717,9 @@ const InvoiceList = () => {
                 Apply
               </Button>
               {(appliedHistoryFromDate || appliedHistoryToDate || historyFromDate || historyToDate || historyEmpId !== 'all' || historyStatus !== 'all' || historySearch !== '') && (
-                <Button 
-                  variant="outlined" 
-                  size="small" 
+                <Button
+                  variant="outlined"
+                  size="small"
                   onClick={() => {
                     setHistoryFromDate('');
                     setHistoryToDate('');
@@ -744,7 +773,7 @@ const InvoiceList = () => {
               <Table>
                 <TableHead sx={{ bgcolor: '#f4f6fb' }}>
                   <TableRow>
-                    <TableCell sx={{ color: '#64748b', fontWeight: 600 }}>Invoice #</TableCell>
+                    <TableCell sx={{ color: '#64748b', fontWeight: 600 }}>Invoice</TableCell>
                     <TableCell sx={{ color: '#64748b', fontWeight: 600 }}>Employee</TableCell>
                     <TableCell sx={{ color: '#64748b', fontWeight: 600 }}>Customer</TableCell>
                     <TableCell sx={{ color: '#64748b', fontWeight: 600 }}>Date</TableCell>
@@ -801,6 +830,16 @@ const InvoiceList = () => {
                           )}
                         </TableCell>
                         <TableCell align="right">
+                          {inv.status === 'draft' && (
+                            <IconButton
+                              size="small"
+                              onClick={() => setDeleteDialog({ open: true, invoice: inv })}
+                              title="Delete"
+                              sx={{ color: '#ef4444' }}
+                            >
+                              <DeleteIcon fontSize="small" />
+                            </IconButton>
+                          )}
                           <IconButton
                             size="small"
                             onClick={() => navigate('/invoices/pdf-view', { state: { invoiceId: inv.id } })}
@@ -855,6 +894,27 @@ const InvoiceList = () => {
           </Box>
         </Box>
       )}
+
+      <Dialog
+        open={deleteDialog.open}
+        onClose={() => setDeleteDialog({ open: false, invoice: null })}
+        PaperProps={{ sx: { borderRadius: 3, p: 1 } }}
+      >
+        <DialogTitle sx={{ fontWeight: 700, color: '#0f172a' }}>Delete Invoice</DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ color: '#475569' }}>
+            Are you sure you want to delete invoice <b>{deleteDialog.invoice?.invoice_number}</b>? This action cannot be undone and will permanently remove this invoice and its related records.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setDeleteDialog({ open: false, invoice: null })} sx={{ color: '#64748b', textTransform: 'none', fontWeight: 600 }}>
+            Cancel
+          </Button>
+          <Button onClick={handleDeleteInvoice} variant="contained" color="error" sx={{ textTransform: 'none', fontWeight: 600, borderRadius: 2, boxShadow: 'none' }}>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

@@ -367,45 +367,37 @@ const InvoicePreview = ({ invoiceId, onBackToList }) => {
                     </td>
                     <td>
                       <TextField
-                        type="number"
                         value={item.mileage}
                         onChange={(event) => handleItemChange(index, 'mileage', event.target.value)}
                         size="small"
                         fullWidth
-                        inputProps={{ step: '0.01', min: 0 }}
                         className="invoice-cell-input"
                       />
                     </td>
                     <td>
                       <TextField
-                        type="number"
                         value={item.other_expense}
                         onChange={(event) => handleItemChange(index, 'other_expense', event.target.value)}
                         size="small"
                         fullWidth
-                        inputProps={{ step: '0.01', min: 0 }}
                         className="invoice-cell-input"
                       />
                     </td>
                     <td>
                       <TextField
-                        type="number"
                         value={item.amount}
                         onChange={(event) => handleItemChange(index, 'amount', event.target.value)}
                         size="small"
                         fullWidth
-                        inputProps={{ step: '0.01', min: 0 }}
                         className="invoice-cell-input"
                       />
                     </td>
                     <td>
                       <TextField
-                        type="number"
                         value={item.vat}
                         onChange={(event) => handleItemChange(index, 'vat', event.target.value)}
                         size="small"
                         fullWidth
-                        inputProps={{ step: '0.01', min: 0 }}
                         className="invoice-cell-input"
                       />
                     </td>
@@ -446,8 +438,11 @@ const InvoicePreview = ({ invoiceId, onBackToList }) => {
                 <Typography className="invoice-section-label">Payment Deadline</Typography>
                 <Typography className="invoice-date-value">{paymentDeadline}</Typography>
 
-                <Typography className="invoice-section-label">Add Milage</Typography>
-                <Typography className="invoice-date-value invoice-date-mileage">{mileage}</Typography>
+                <Typography className="invoice-section-label">Add Mileage</Typography>
+                <Typography className="invoice-date-value invoice-date-mileage">${formatCurrency(derivedTotals.mileageTotal)}</Typography>
+
+                <Typography className="invoice-section-label">Other Expense</Typography>
+                <Typography className="invoice-date-value">${formatCurrency(derivedTotals.otherExpenseTotal)}</Typography>
               </Box>
 
               <Box className="invoice-address-wrap">
