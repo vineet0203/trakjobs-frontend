@@ -52,6 +52,7 @@ import OnboardingAssign from './features/onboarding/pages/OnboardingAssign';
 import TimeTrackingApproval from './features/time-tracking/pages/TimeTrackingApproval';
 import InvoiceList from './pages/invoice/InvoiceList';
 import InvoicePDFView from './pages/invoice/InvoicePDFView';
+import ReportsPage from './pages/reports/ReportsPage';
 
 
 const AppContent = () => {
@@ -120,7 +121,7 @@ const AppContent = () => {
         <Route path="/invoices/pdf-view" element={<InvoicePDFView />} />
         <Route path="/timesheets" element={<NotYetDesigned />} />
         <Route path="/online-booking" element={<OnlineBooking />} />
-        <Route path="/reports" element={<NotYetDesigned />} />
+        <Route path="/reports" element={<ReportsPage />} />
         <Route path="/settings" element={<NotYetDesigned />} />
         {/* <Route path="/test" element={<TestPage />} /> */}
 
