@@ -18,6 +18,7 @@ export const transformJobFromApi = (apiJob) => {
 
     // Pricing
     total_amount: parseFloat(apiJob.total_amount || 0),
+    is_invoiced: apiJob.is_invoiced || false,
     currency: apiJob.currency || "USD",
 
     // Dates

@@ -170,7 +170,11 @@ const InvoiceList = () => {
       }
       try {
         setLoadingJobs(true);
-        const response = await jobService.getAll({ per_page: 100, page: 1 });
+        const response = await jobService.getAll({ 
+          per_page: 100, 
+          page: 1,
+          _t: new Date().getTime()
+        });
         const data = Array.isArray(response?.data) ? response.data : [];
         const filtered = data.filter((job) => {
           const latestEmployeeId = Number(job?.latest_assignment?.employee_id || 0);
@@ -214,10 +218,15 @@ const InvoiceList = () => {
   };
 
   useEffect(() => {
-    if (currentTab === 1) {
+    loadHistory();
+
+    // Auto-refresh the table every 15 seconds to catch status updates (e.g. customer acceptance)
+    const interval = setInterval(() => {
       loadHistory();
-    }
-  }, [currentTab, historyPage, historyRowsPerPage, historyEmpId, historyStatus, appliedHistoryFromDate, appliedHistoryToDate]);
+    }, 15000);
+
+    return () => clearInterval(interval);
+  }, [historyPage, historyRowsPerPage, historyEmpId, historyStatus, appliedHistoryFromDate, appliedHistoryToDate]);
 
   const handleGenerateInvoice = async (jobRecord) => {
     if (!selectedEmpId) {
@@ -254,8 +263,13 @@ const InvoiceList = () => {
       const created = await invoiceService.create(payload);
       setPreviewInvoiceId(created.id);
       showToast('Invoice generated successfully.', 'success');
+      loadHistory(); // Refresh metrics after generation
     } catch (error) {
-      showToast(error?.response?.data?.message || 'Failed to generate invoice.', 'error');
+      const msg = error?.response?.data?.message || 'Failed to generate invoice.';
+      showToast(msg, 'error');
+      if (msg.toLowerCase().includes('already exists')) {
+        setJobs(prev => prev.map(j => j.id === jobRecord.id ? { ...j, rawJob: { ...j.rawJob, is_invoiced: true } } : j));
+      }
     } finally {
       setCreatingInvoiceId(null);
     }
