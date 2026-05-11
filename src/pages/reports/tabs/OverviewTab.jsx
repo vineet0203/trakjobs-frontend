@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Skeleton } from '@mui/material';
+import { Box, Typography, Skeleton } from '@mui/material';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import ReportsKpiCards from '../components/ReportsKpiCards';
@@ -30,7 +30,7 @@ const OverviewTab = ({ filters }) => {
       try {
         setLoading(true);
         const token = localStorage.getItem('access_token');
-        const response = await axios.get('http://localhost:8000/api/v1/vendors/reports/overview', {
+        const response = await axios.get('https://api.trakjobs.com/api/v1/vendors/reports/overview', {
           headers: { Authorization: `Bearer ${token}` },
           signal: controller.signal
         });

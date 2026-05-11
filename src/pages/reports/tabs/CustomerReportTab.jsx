@@ -23,7 +23,7 @@ const CustomerReportTab = ({ filters }) => {
       try {
         setLoading(true);
         const token = localStorage.getItem('access_token');
-        const response = await axios.get('http://localhost:8000/api/v1/vendors/reports/overview', {
+        const response = await axios.get('https://api.trakjobs.com/api/v1/vendors/reports/overview', {
           headers: { Authorization: `Bearer ${token}` },
           signal: controller.signal
         });
