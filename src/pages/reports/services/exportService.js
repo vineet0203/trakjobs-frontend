@@ -41,7 +41,7 @@ export const exportAsExcel = (data, filename = 'TrackJobs_Report') => {
     const wb = XLSX.utils.book_new();
 
     // KPI Summary Sheet
-    const kpiData = (data.kpi_stats || []).map(k => ({ Metric: k.label, Value: k.value, Change: k.change }));
+    const kpiData = (data.kpi_stats || []).map(k => ({ Metric: k.label, Value: k.value, Growth: k.growth }));
     const wsKpi = XLSX.utils.json_to_sheet(kpiData);
     XLSX.utils.book_append_sheet(wb, wsKpi, 'KPI Summary');
 
@@ -57,12 +57,12 @@ export const exportAsExcel = (data, filename = 'TrackJobs_Report') => {
     XLSX.utils.book_append_sheet(wb, wsJobs, 'Jobs');
 
     // Revenue Sheet
-    const revenueData = (data.revenue_chart || []).map(r => ({ Date: r.name, Revenue: r.revenue, Expenses: r.expenses }));
+    const revenueData = (data.revenue_chart || []).map(r => ({ Month: r.month, Revenue: r.value }));
     const wsRev = XLSX.utils.json_to_sheet(revenueData);
     XLSX.utils.book_append_sheet(wb, wsRev, 'Revenue');
 
     // Invoices Sheet
-    const invoiceData = (data.invoice_analytics || []).map(i => ({ Month: i.name, Sent: i.sent, Paid: i.paid }));
+    const invoiceData = (data.invoice_analytics || []).map(i => ({ Month: i.month, Paid: i.paid, Unpaid: i.unpaid, Overdue: i.overdue }));
     const wsInv = XLSX.utils.json_to_sheet(invoiceData);
     XLSX.utils.book_append_sheet(wb, wsInv, 'Invoices');
 

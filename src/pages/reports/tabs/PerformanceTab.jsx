@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { useReportsData } from '../data/reportsDummyData.jsx';
 import { Box, Grid, Skeleton } from '@mui/material';
 import { motion } from 'framer-motion';
-import axios from 'axios';
 import QuickFilters from '../components/QuickFilters';
 import ReportsKpiCards from '../components/ReportsKpiCards';
 import EmployeePerformanceChart from '../components/EmployeePerformanceChart';
@@ -13,34 +13,9 @@ const fadeUp = {
 };
 
 const PerformanceTab = ({ filters }) => {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { data, loading, error } = useReportsData();
 
-  useEffect(() => {
-    const controller = new AbortController();
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const token = localStorage.getItem('access_token') || localStorage.getItem('token');
-        const response = await axios.get('https://api.trakjobs.com/api/v1/vendors/reports/overview', {
-          headers: { Authorization: `Bearer ${token}` },
-          signal: controller.signal
-        });
-        setData(response.data.data);
-        setError(null);
-      } catch (err) {
-        if (err.name !== 'CanceledError') {
-          setError(err.response?.data?.message || 'Failed to fetch performance data');
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
 
-    fetchData();
-    return () => controller.abort();
-  }, [filters.activeFilter]);
 
   if (loading) return <Box sx={{ p: 4 }}><Skeleton variant="rectangular" height={500} sx={{ borderRadius: '16px' }} /></Box>;
 

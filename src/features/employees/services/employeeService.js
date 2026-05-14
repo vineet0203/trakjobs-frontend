@@ -39,24 +39,30 @@ class EmployeeService extends BaseApiService {
     this.employeesController = new AbortController();
 
     try {
+      const defaultParams = { vendor_id: this.getVendorId() };
       const response = await super.getAll({
+        ...defaultParams,
         ...params,
-        signal: this.employeesController.signal,
+        // signal removed from params
       });
 
+      const raw = response.data || response;
+      const arr = Array.isArray(raw) ? raw : (raw.data || []);
       return {
-        data: response.data.map(transformEmployeeFromApi),
+        data: arr.map(transformEmployeeFromApi),
         pagination: {
-          total: response.meta.total,
-          perPage: response.meta.per_page,
-          currentPage: response.meta.current_page,
-          totalPages: response.meta.total_pages,
-        },
+          total: response.meta?.total || arr.length,
+          perPage: response.meta?.per_page || 5,
+          currentPage: response.meta?.current_page || 1,
+          totalPages: response.meta?.total_pages || 1,
+          from: response.meta?.from || null,
+          to: response.meta?.to || null,
+        }
       };
     } catch (error) {
       if (error.name === "AbortError") {
         console.log("Previous request cancelled");
-        return { data: [], pagination: {} };
+        return [];
       }
       throw error;
     }
@@ -93,7 +99,9 @@ class EmployeeService extends BaseApiService {
   }
 
   async getStatistics() {
-    const response = await this.client.get(API_ENDPOINTS.employees.statistics);
+    const response = await this.client.get(
+      API_ENDPOINTS.employees.statistics,
+    );
     return response.data;
   }
 

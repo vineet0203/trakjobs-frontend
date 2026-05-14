@@ -30,8 +30,6 @@ import EmployeeReportTab from './tabs/EmployeeReportTab';
 import RevenueTab from './tabs/RevenueTab';
 import InvoiceReportTab from './tabs/InvoiceReportTab';
 import JobStatusTab from './tabs/JobStatusTab';
-import ExpensesTab from './tabs/ExpensesTab';
-import PerformanceTab from './tabs/PerformanceTab';
 
 const stagger = {
   hidden: { opacity: 0 },
@@ -39,7 +37,7 @@ const stagger = {
 };
 
 const ReportsPageContent = () => {
-  const { data } = useReportsData();
+  const { data, refetch } = useReportsData();
   const [activeTab, setActiveTab] = useState('overview');
   const [activeFilter, setActiveFilter] = useState('Monthly');
   const [exportAnchor, setExportAnchor] = useState(null);
@@ -50,16 +48,29 @@ const ReportsPageContent = () => {
   const [customerFilter, setCustomerFilter] = useState('All Customers');
   const [employeeFilter, setEmployeeFilter] = useState('All Employees');
   const [jobStatusFilter, setJobStatusFilter] = useState('All Status');
-  const [paymentFilter, setPaymentFilter] = useState('All Status');
   const [serviceFilter, setServiceFilter] = useState('All Services');
+  const [applyTrigger, setApplyTrigger] = useState(0);
+
+  const handleApplyFilters = () => {
+    const filtersToApply = {
+      period: activeFilter,
+      customer: customerFilter,
+      employee: employeeFilter,
+      jobStatus: jobStatusFilter,
+      serviceType: serviceFilter,
+    };
+    refetch(filtersToApply);
+    setApplyTrigger(prev => prev + 1);
+  };
 
   const filters = {
     activeFilter, setActiveFilter,
     customerFilter, setCustomerFilter,
     employeeFilter, setEmployeeFilter,
     jobStatusFilter, setJobStatusFilter,
-    paymentFilter, setPaymentFilter,
     serviceFilter, setServiceFilter,
+    onApply: handleApplyFilters,
+    applyTrigger,
   };
 
   const handleExport = async (type) => {
@@ -184,7 +195,7 @@ const ReportsPageContent = () => {
               '& .MuiTabs-indicator': { backgroundColor: '#2563eb', height: 3 },
             }}
           >
-            {tabOptions.map(t => <Tab key={t.key} label={t.label} value={t.key} />)}
+            {tabOptions.filter(t => !['expense', 'performance'].includes(t.key)).map(t => <Tab key={t.key} label={t.label} value={t.key} />)}
           </Tabs>
         </Paper>
 
@@ -196,8 +207,6 @@ const ReportsPageContent = () => {
             {activeTab === 'revenue' && <RevenueTab filters={filters} />}
             {activeTab === 'invoice' && <InvoiceReportTab filters={filters} />}
             {activeTab === 'jobs' && <JobStatusTab filters={filters} />}
-            {activeTab === 'expense' && <ExpensesTab filters={filters} />}
-            {activeTab === 'performance' && <PerformanceTab filters={filters} />}
           </motion.div>
         </Box>
       </Box>

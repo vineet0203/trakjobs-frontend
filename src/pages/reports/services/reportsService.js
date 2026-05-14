@@ -5,9 +5,14 @@ import httpClient from '../../../services/api/httpClient';
  * Fetches real analytics data from the backend.
  */
 class ReportsService {
-  async getOverview() {
-    const response = await httpClient.get('/api/v1/vendors/reports/overview');
+  async getOverview(params = {}) {
+    const response = await httpClient.get('/api/v1/vendors/reports/overview', { params });
     return response?.data?.data || response?.data || {};
+  }
+
+  async getServiceTypes() {
+    const response = await httpClient.get('/api/v1/vendors/reports/service-types');
+    return response?.data?.data || [];
   }
 }
 

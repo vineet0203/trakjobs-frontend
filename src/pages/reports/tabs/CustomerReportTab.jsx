@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Box, Paper, Typography, Grid, Skeleton } from '@mui/material';
 import { motion } from 'framer-motion';
-import { Users, TrendingUp } from 'lucide-react';
-import axios from 'axios';
+import { TrendingUp } from 'lucide-react';
 import QuickFilters from '../components/QuickFilters';
 import ReportsTable from '../components/ReportsTable';
 import { TopCustomersPanel } from '../components/SidePanels';
+import { useReportsData } from '../data/reportsDummyData.jsx';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -13,36 +13,10 @@ const fadeUp = {
 };
 
 const CustomerReportTab = ({ filters }) => {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const token = localStorage.getItem('access_token');
-        const response = await axios.get('https://api.trakjobs.com/api/v1/vendors/reports/overview', {
-          headers: { Authorization: `Bearer ${token}` },
-          signal: controller.signal
-        });
-        setData(response.data.data);
-        setError(null);
-      } catch (err) {
-        if (err.name !== 'CanceledError') {
-          setError(err.response?.data?.message || 'Failed to fetch customer data');
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-    return () => controller.abort();
-  }, [filters.activeFilter]); // Refetch when filters change
+  const { data, loading, error } = useReportsData();
 
   if (loading) return <Skeleton variant="rectangular" height={400} sx={{ borderRadius: '16px' }} />;
+  if (error) return <Box sx={{ p: 4, textAlign: 'center' }}><Typography color="error" sx={{ fontWeight: 600 }}>{error}</Typography></Box>;
 
   return (
     <Box>
@@ -56,13 +30,13 @@ const CustomerReportTab = ({ filters }) => {
             <ReportsTable title="Customer Jobs History" data={data?.recent_jobs} />
           </motion.div>
         </Grid>
-        
+
         <Grid item xs={12} lg={4}>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
             <motion.div variants={fadeUp}>
               <TopCustomersPanel data={data?.top_customers} />
             </motion.div>
-            
+
             <motion.div variants={fadeUp}>
               <Paper sx={{ p: 3, borderRadius: '16px', border: '1px solid #e2e8f0', bgcolor: '#fff' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>

@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Grid, Skeleton } from '@mui/material';
+import React from 'react';
+import { Box, Grid, Skeleton, Typography } from '@mui/material';
 import { motion } from 'framer-motion';
-import axios from 'axios';
 import QuickFilters from '../components/QuickFilters';
 import JobStatusChart from '../components/JobStatusChart';
 import ReportsTable from '../components/ReportsTable';
+import { useReportsData } from '../data/reportsDummyData.jsx';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -12,36 +12,10 @@ const fadeUp = {
 };
 
 const JobStatusTab = ({ filters }) => {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const token = localStorage.getItem('access_token') || localStorage.getItem('token');
-        const response = await axios.get('https://api.trakjobs.com/api/v1/vendors/reports/overview', {
-          headers: { Authorization: `Bearer ${token}` },
-          signal: controller.signal
-        });
-        setData(response.data.data);
-        setError(null);
-      } catch (err) {
-        if (err.name !== 'CanceledError') {
-          setError(err.response?.data?.message || 'Failed to fetch job data');
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-    return () => controller.abort();
-  }, [filters.activeFilter]);
+  const { data, loading, error } = useReportsData();
 
   if (loading) return <Box sx={{ p: 4 }}><Skeleton variant="rectangular" height={500} sx={{ borderRadius: '16px' }} /></Box>;
+  if (error) return <Box sx={{ p: 4, textAlign: 'center' }}><Typography color="error" sx={{ fontWeight: 600 }}>{error}</Typography></Box>;
 
   return (
     <Box>
@@ -55,7 +29,7 @@ const JobStatusTab = ({ filters }) => {
             <JobStatusChart data={data?.job_status} />
           </motion.div>
         </Grid>
-        
+
         <Grid item xs={12} lg={8}>
           <motion.div variants={fadeUp}>
             <ReportsTable title="Active & Recent Jobs" data={data?.recent_jobs} />
