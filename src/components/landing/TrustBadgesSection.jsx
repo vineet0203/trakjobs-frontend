@@ -2,32 +2,41 @@ import React from "react";
 import { Star } from "lucide-react";
 
 const badges = [
-  { name: "Google", rating: "4.9" },
-  { name: "facebook", rating: "4.8" },
-  { name: "yelp", rating: "4.7" },
-  { name: "Angi", rating: "4.8" },
-  { name: "BBB", rating: "A+" },
+  { name: "Google", hasStars: true, bold: false },
+  { name: "facebook", hasStars: true, bold: true },
+  { name: "yelp", hasStars: true, bold: true, icon: "yelp" },
+  { name: "Angi", hasStars: true, bold: true },
+  { name: "BBB", hasStars: false, bold: true, subtitle: "ACCREDITED BUSINESS" },
 ];
 
 const TrustBadgesSection = () => {
   return (
-    <section className="bg-white">
-      <div className="mx-auto w-full max-w-none px-6 md:px-10 lg:px-14 xl:px-16 2xl:px-20 py-10">
-        <p className="text-center text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+    <section className="bg-[#fafafa] pb-16 pt-4 border-b border-slate-200">
+      <div className="mx-auto w-full max-w-none px-6 md:px-10 lg:px-14">
+        <p className="text-center text-[15px] font-semibold text-slate-600">
           Trusted by homeowners and businesses across the country
         </p>
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-8 text-sm font-semibold text-slate-500">
+        <div className="mt-8 flex flex-wrap items-end justify-center gap-14 text-sm font-semibold text-slate-500">
           {badges.map((badge) => (
-            <div key={badge.name} className="text-center">
-              <div className="text-lg font-semibold text-slate-400">{badge.name}</div>
-              <div className="mt-1 flex items-center justify-center gap-1 text-brand-gold">
-                <Star size={12} />
-                <Star size={12} />
-                <Star size={12} />
-                <Star size={12} />
-                <Star size={12} />
-                <span className="ml-1 text-xs text-slate-400">{badge.rating}</span>
+            <div key={badge.name} className="flex flex-col items-center">
+              <div className={`text-2xl ${badge.bold ? 'font-bold' : 'font-medium'} text-slate-400 font-sans flex items-center gap-1`}>
+                {badge.icon === 'yelp' && <span className="text-3xl leading-none text-slate-400 -mt-1">*</span>}
+                {badge.name}
               </div>
+              {badge.hasStars && (
+                <div className="mt-1.5 flex items-center justify-center gap-0.5 text-slate-400">
+                  <Star size={14} className="fill-current text-slate-400" />
+                  <Star size={14} className="fill-current text-slate-400" />
+                  <Star size={14} className="fill-current text-slate-400" />
+                  <Star size={14} className="fill-current text-slate-400" />
+                  <Star size={14} className="fill-current text-slate-400" />
+                </div>
+              )}
+              {badge.subtitle && (
+                <div className="mt-1 text-[10px] font-bold text-slate-400 text-center leading-tight">
+                  ACCREDITED <br /> BUSINESS
+                </div>
+              )}
             </div>
           ))}
         </div>
