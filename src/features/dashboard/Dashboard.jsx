@@ -1,901 +1,606 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import httpClient from '../../services/api/httpClient';
+import { useAuth } from '../auth/hooks/useAuth';
+import moment from 'moment';
+import { 
+  Calendar, ClipboardCheck, DollarSign, Star, 
+  ChevronDown, Clock, Check, Plus, Receipt
+} from 'lucide-react';
 import './Dashboard.css';
 
 const Dashboard = () => {
   const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [range, setRange] = useState(null);
-  const [earningPeriod, setEarningPeriod] = useState('this_month');
-  const [earningOpen, setEarningOpen] = useState(false);
-  const [earningLoading, setEarningLoading] = useState(false);
-  const [displayAmount, setDisplayAmount] = useState('0.00');
-  const [displayChange, setDisplayChange] = useState('0%');
 
-  const rangeParams = useMemo(() => {
-    const now = new Date();
-    if (earningPeriod === 'last_month') {
-      const start = new Date(now.getFullYear(), now.getMonth()-1, 1);
-      const end = new Date(now.getFullYear(), now.getMonth(), 0);
-      return { earning_from: formatYmd(start), earning_to: formatYmd(end) };
-    }
-    if (earningPeriod === 'this_year') {
-      return { earning_from: now.getFullYear() + '-01-01', earning_to: now.getFullYear() + '-12-31' };
-    }
-    if (earningPeriod === 'this_month') {
-      const start = new Date(now.getFullYear(), now.getMonth(), 1);
-      const end = new Date(now.getFullYear(), now.getMonth()+1, 0);
-      return { earning_from: formatYmd(start), earning_to: formatYmd(end) };
-    }
-    if (!range) return {};
-    return { from: formatYmd(range.start), to: formatYmd(range.end) };
-  }, [range, earningPeriod]);
+  const [error, setError] = useState('');
+  const [availability, setAvailability] = useState(true);
+  const [timeRange, setTimeRange] = useState('this_month');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isDropdownOpen2, setIsDropdownOpen2] = useState(false);
+
+  // Get real user from auth context
+  const { user } = useAuth();
+  
+  const getFirstName = () => {
+    if (user?.full_name) return user.full_name.split(' ')[0];
+    if (user?.first_name) return user.first_name;
+    if (user?.name) return user.name.split(' ')[0];
+    return 'Vendor';
+  };
+  const firstName = getFirstName();
 
   useEffect(() => {
     let mounted = true;
     const fetchDashboard = async () => {
       try {
-        setLoading(true);
-        setError('');
-        const response = await httpClient.get('/api/v1/dashboard', { params: rangeParams });
+        let fromDate = moment().startOf('month').format('YYYY-MM-DD');
+        let toDate = moment().endOf('month').format('YYYY-MM-DD');
+
+        if (timeRange === 'last_month') {
+          fromDate = moment().subtract(1, 'month').startOf('month').format('YYYY-MM-DD');
+          toDate = moment().subtract(1, 'month').endOf('month').format('YYYY-MM-DD');
+        } else if (timeRange === 'this_year') {
+          fromDate = moment().startOf('year').format('YYYY-MM-DD');
+          toDate = moment().endOf('year').format('YYYY-MM-DD');
+        }
+
+        const response = await httpClient.get(`/api/v1/dashboard?earning_from=${fromDate}&earning_to=${toDate}`);
         if (!mounted) return;
-        setData(response?.data?.data || response?.data || {});
+        const dashboardData = response?.data?.data || response?.data || {};
+        setData(dashboardData);
+        setAvailability(!!dashboardData.is_available);
       } catch (err) {
         if (!mounted) return;
-        const message = err?.response?.data?.message || err?.message || 'Failed to load dashboard.';
-        setError(message);
-      } finally {
-        if (mounted) setLoading(false);
+        setError(err?.response?.data?.message || err?.message || 'Failed to load dashboard.');
       }
     };
     fetchDashboard();
     return () => { mounted = false; };
-  }, [rangeParams, earningPeriod]);
-
-  // Auto-refresh every 60 seconds
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setData(prev => prev); // trigger re-fetch
-    }, 60000);
-    return () => clearInterval(interval);
-  }, []);
+  }, [timeRange]);
 
   const stats = data?.stats || [];
-  const todaySchedule = data?.todaySchedule || [];
-  const teamStatus = data?.teamStatus || { summary: [], members: [] };
-  const totalEarning = data?.totalEarning || { amount: '0.00', change: '0%', changeLabel: '' };
-  useEffect(() => {
-    if (totalEarning.amount) {
-      setEarningLoading(false);
-      const target = parseFloat(totalEarning.amount.replace(/,/g, ''));
-      const start = parseFloat(displayAmount.replace(/,/g, '')) || 0;
-      const duration = 800;
-      const steps = 40;
-      const increment = (target - start) / steps;
-      let current = start;
-      let step = 0;
-      const timer = setInterval(() => {
-        step++;
-        current += increment;
-        if (step >= steps) { current = target; clearInterval(timer); }
-        setDisplayAmount(current.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
-      }, duration / steps);
-      setDisplayChange(totalEarning.change);
-      return () => clearInterval(timer);
-    }
-  }, [totalEarning.amount]);
-  const earningChart = data?.earningChart || [];
+  const totalEarning = data?.totalEarning || { amount: '0', change: '0%', changeLabel: 'from last month' };
+  const recentBookings = data?.recentBookings || [];
+  const upcomingBookings = data?.upcomingBookings || [];
   const recentQuotes = data?.recentQuotes || [];
-  const recentInvoices = data?.recentInvoices || [];
-
-  const statCards = useMemo(() => {
-    const config = [
-      { key: 'active', label: 'Active Job', color: 'green', icon: 'briefcase' },
-      { key: 'quote', label: 'Total Quote', color: 'blue', icon: 'file' },
-      { key: 'job', label: 'Total Job', color: 'purple', icon: 'chart' },
-      { key: 'invoice', label: 'Total Invoice', color: 'orange', icon: 'invoice' },
-      { key: 'booking', label: 'Total Booking', color: 'cyan', icon: 'calendar' },
-    ];
-    return config.map((item) => {
-      const match = stats.find((stat) => stat.label === item.label) || null;
-      return {
-        ...item,
-        value: match?.value ?? 0,
-        change: match?.change ?? '0%',
-        changeLabel: match?.changeLabel ?? '',
-      };
-    });
-  }, [stats]);
-
-  const summary = useMemo(() => buildSummary(teamStatus.summary || []), [teamStatus.summary]);
+  
+  // Maps API stats to UI
+  const totalBookingsStat = stats.find(s => s.label === 'Total Booking') || { value: 0, change: '0%' };
+  const completedJobsStat = stats.find(s => s.label === 'Total Job') || { value: 0, change: '0%' };
+  const totalInvoiceStat = stats.find(s => s.label === 'Total Invoice') || { value: 0, change: '0%' };
+  
+  // Chart Data
+  const earningChart = data?.earningChart?.length ? data.earningChart : [];
   const chartData = useMemo(() => buildLineChart(earningChart), [earningChart]);
-  const dateRange = useMemo(() => formatDisplayRange(range), [range]);
+
+  // Donut Chart logic
+  const bookingStatus = data?.bookingStatus || { completed: 0, upcoming: 0, cancelled: 0 };
+  const compCount = bookingStatus.completed;
+  const upCount = bookingStatus.upcoming;
+  const cancCount = bookingStatus.cancelled;
+  const totalJobsCount = compCount + upCount + cancCount;
+  
+  const compPct = totalJobsCount ? (compCount / totalJobsCount) * 100 : 0;
+  const upPct = totalJobsCount ? (upCount / totalJobsCount) * 100 : 0;
+  const cancPct = totalJobsCount ? (cancCount / totalJobsCount) * 100 : 0;
+  const C = 2 * Math.PI * 38; // ~238.76
+  const compDash = `${(compPct/100) * C} ${C}`;
+  const upDash = `${(upPct/100) * C} ${C}`;
+  const cancDash = `${(cancPct/100) * C} ${C}`;
+
+  const handleToggleAvailability = async () => {
+    try {
+      const newStatus = !availability;
+      setAvailability(newStatus); // Optimistic UI update
+      await httpClient.post('/api/v1/dashboard/availability', { is_available: newStatus });
+    } catch (err) {
+      console.error('Failed to update availability:', err);
+      setAvailability(availability); // Revert on failure
+    }
+  };
+  const compOffset = 0;
+  const upOffset = -((compPct/100) * C);
+  const cancOffset = -(((compPct + upPct)/100) * C);
+
+  // Status map
+  const getStatusColor = (status) => {
+    switch(status) {
+      case 'completed': return 'text-green-500 border-green-100 bg-white shadow-sm';
+      case 'scheduled': return 'text-blue-500 border-blue-100 bg-white shadow-sm';
+      case 'cancelled': return 'text-orange-500 border-orange-100 bg-white shadow-sm';
+      default: return 'text-purple-500 border-purple-100 bg-white shadow-sm';
+    }
+  };
+
+  const getStatusIcon = (status) => {
+    switch(status) {
+      case 'completed': return Check;
+      case 'scheduled': return Clock;
+      default: return Calendar;
+    }
+  };
 
   return (
-    <div className="dashboard servicepro">
-      {error && <div className="error-banner">{error}</div>}
+    <div className="min-h-screen bg-[#f8fafc] p-8 font-sans w-full box-border">
+      {error && <div className="mb-4 rounded-lg bg-red-50 p-4 text-red-600">{error}</div>}
+      
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-[28px] font-bold text-slate-800">Welcome back, {firstName}! 👋</h1>
+        <p className="mt-1 text-slate-500 text-[15px]">Here's what's happening with your business today.</p>
+      </div>
 
-      <header className="dashboard-header">
-        <div className="header-left">
-          <h1>Dashboard</h1>
-          <p>Welcome back! Here&apos;s what&apos;s happening today.</p>
-        </div>
-        <div className="header-actions">
-          <DateRangePicker value={range} onApply={setRange} label={dateRange} />
-          {range && (
-            <button className="reset-btn" onClick={() => setRange(null)}>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-              Reset
-            </button>
-          )}
-        </div>
-      </header>
-
-      <section className="stats-row">
-        {loading && Array.from({ length: 5 }).map((_, i) => (
-          <div key={i} className="stat-card skeleton-card" />
-        ))}
-        {!loading && statCards.map((stat) => (
-          <div key={stat.key} className="stat-card">
-            <div className={`stat-icon ${stat.color}`}>
-              {getStatIcon(stat.icon)}
+      {/* 4 Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-6">
+        <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex flex-col">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-orange-50 flex items-center justify-center text-orange-500">
+              <Calendar size={24} />
             </div>
-            <div className="stat-details">
-              <div className="stat-label">{stat.label}</div>
-              <div className={`stat-value ${stat.color}`}>{stat.value}</div>
+            <div>
+              <p className="text-[13px] font-medium text-slate-500">Total Bookings</p>
+              <p className="text-2xl font-bold text-slate-800 leading-tight">{totalBookingsStat.value}</p>
             </div>
           </div>
-        ))}
-      </section>
-
-      <section className="dashboard-grid">
-        <div className="card schedule-card">
-          <div className="card-header">
-            <h3>Today Job Schedule</h3>
-            <span className="card-date">{formatShortDate(new Date())}</span>
+          <div className="mt-4 flex items-center gap-1 text-[13px] font-semibold text-green-500">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="18 15 12 9 6 15" transform="rotate(180 12 12)"/></svg>
+            <span>{totalBookingsStat.change}</span>
+            <span className="text-slate-400 font-medium ml-1">from last month</span>
           </div>
-          {!loading && todaySchedule.length > 0 && (() => {
-            const completedCount = todaySchedule.filter((item) => item.status === 'completed').length;
-            const percent = Math.round((completedCount / todaySchedule.length) * 100);
-            return (
-              <div className="schedule-progress">
-                <div className="progress-text">
-                  {completedCount} of {todaySchedule.length} jobs completed today
-                </div>
-                <div className="progress-track">
-                  <div className="progress-fill" style={{ '--progress': `${percent}%` }} />
-                </div>
-              </div>
-            );
-          })()}
+        </div>
 
-          <div className="schedule-list timeline">
-            {loading && Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="schedule-row skeleton-line" />
-            ))}
-            {!loading && todaySchedule.length === 0 && (
-              <div className="schedule-empty">
-                <div className="empty-illustration">
-                  <svg width="80" height="60" viewBox="0 0 120 80" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect x="8" y="12" width="104" height="60" rx="12" />
-                    <path d="M32 10v8M88 10v8M8 28h104" />
-                    <path d="M36 46h24M36 58h44" />
-                  </svg>
-                </div>
-                <div className="empty-text">No jobs scheduled for today</div>
-              </div>
-            )}
-            {!loading && todaySchedule.map((item, index) => (
-              <div
-                key={item.id}
-                className={`schedule-item status-${item.status}`}
-                style={{ animationDelay: `${index * 100}ms` }}
+        <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex flex-col">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-500">
+              <ClipboardCheck size={24} />
+            </div>
+            <div>
+              <p className="text-[13px] font-medium text-slate-500">Total Jobs</p>
+              <p className="text-2xl font-bold text-slate-800 leading-tight">{completedJobsStat.value}</p>
+            </div>
+          </div>
+          <div className="mt-4 flex items-center gap-1 text-[13px] font-semibold text-green-500">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="18 15 12 9 6 15" transform="rotate(180 12 12)"/></svg>
+            <span>{completedJobsStat.change}</span>
+            <span className="text-slate-400 font-medium ml-1">from last month</span>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex flex-col">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-green-50 flex items-center justify-center text-green-500">
+              <DollarSign size={24} />
+            </div>
+            <div>
+              <p className="text-[13px] font-medium text-slate-500">Total Earnings</p>
+              <p className="text-2xl font-bold text-slate-800 leading-tight">${totalEarning.amount}</p>
+            </div>
+          </div>
+          <div className="mt-4 flex items-center gap-1 text-[13px] font-semibold text-green-500">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="18 15 12 9 6 15" transform="rotate(180 12 12)"/></svg>
+            <span>{totalEarning.change}</span>
+            <span className="text-slate-400 font-medium ml-1">{totalEarning.changeLabel}</span>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex flex-col">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-purple-50 flex items-center justify-center text-purple-500">
+              <Receipt size={24} />
+            </div>
+            <div>
+              <p className="text-[13px] font-medium text-slate-500">Total Invoices</p>
+              <p className="text-2xl font-bold text-slate-800 leading-tight">{totalInvoiceStat.value}</p>
+            </div>
+          </div>
+          <div className="mt-4 flex items-center gap-1 text-[13px] font-semibold text-green-500">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="18 15 12 9 6 15" transform="rotate(180 12 12)"/></svg>
+            <span>{totalInvoiceStat.change}</span>
+            <span className="text-slate-400 font-medium ml-1">from last month</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid xl:grid-cols-[1.5fr_1fr_1fr] gap-6">
+        
+        {/* Earnings Overview Line Chart */}
+        <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex flex-col min-h-[340px]">
+          <div className="flex items-center justify-between mb-4 relative">
+            <h3 className="font-bold text-slate-800 text-[15px]">Earnings Overview</h3>
+            <div className="relative">
+              <button 
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                className="flex items-center gap-2 text-xs font-semibold text-slate-600 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-sm"
               >
-                <div className="timeline-col">
-                  <div className={`timeline-dot ${item.status}`} />
-                  <div className="timeline-time">
-                    <span className="time-main">{formatTime(item.time).time}</span>
-                    <span className="time-sub">{formatTime(item.time).suffix}</span>
-                    <span className="schedule-date">{new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
-                  </div>
-                </div>
-                <div className="timeline-card">
-                  <div className="timeline-main">
-                    <div className="schedule-service">{item.service}</div>
-                    <div className="schedule-client">{item.client}</div>
-                  </div>
-                  <div className="schedule-actions">
-                    <span className={`status-pill ${item.status}`}>{formatStatus(item.status)}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="card-footer">
-            <Link className="link" to="/schedule">View all schedules <span className="link-arrow">&gt;</span></Link>
-          </div>
-        </div>
-
-        <div className="right-stack">
-          <div className="card team-card">
-            <div className="card-header">
-              <h3>Crew Status</h3>
-              <Link className="link" to="/employees">View all</Link>
-            </div>
-            <div className="team-summary">
-              {summary.map((item) => (
-                <div key={item.key} className={`summary-chip ${item.key}`}>
-                  <div className="chip-icon">{getTeamIcon(item.key)}</div>
-                  <div className="chip-text">
-                    <div className="chip-count">{item.count}</div>
-                    <div className="chip-label">{item.label}</div>
-                    <div className="chip-percent">{item.percent}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="team-list">
-              {loading && Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="team-row skeleton-line" />
-              ))}
-              {!loading && teamStatus.members.length === 0 && (
-                <div className="empty-state">No team members</div>
-              )}
-              {!loading && teamStatus.members.map((member) => (
-                <div key={member.id} className="team-row">
-                  <div className="avatar" style={{ background: avatarColor(member.name) }}>
-                    {getInitials(member.name)}
-                  </div>
-                  <div className="team-info">
-                    <div className="team-name">{member.name}</div>
-                    <div className="team-role">{member.role}</div>
-                  </div>
-                  <div className="team-status">
-                    <span className={`status-dot ${member.status}`} />
-                    {formatTeamStatus(member.status)}
-                  </div>
-                  <div className="team-task">
-                    <div>{member.currentTask || '-'}</div>
-                    <div className="team-time">{member.jobTime || ''}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="card earning-card">
-            <div className="card-header">
-              <h3>Total Earning</h3>
-              <div style={{position:'relative'}}>
-              <button className="dropdown-pill" onClick={() => setEarningOpen(o => !o)}>
-                {earningPeriod === 'this_month' ? 'This Month' : earningPeriod === 'last_month' ? 'Last Month' : 'This Year'} ▾
+                {timeRange === 'this_month' ? 'This Month' : timeRange === 'last_month' ? 'Last Month' : 'This Year'} <ChevronDown size={14} />
               </button>
-              {earningOpen && (
-                <div style={{position:'absolute',right:0,top:'110%',background:'#fff',border:'1px solid #E2E8F0',borderRadius:8,boxShadow:'0 4px 16px rgba(0,0,0,0.1)',zIndex:100,minWidth:130}}>
-                  {[['this_month','This Month'],['last_month','Last Month'],['this_year','This Year']].map(([val,label]) => (
-                    <div key={val} onClick={() => { setEarningLoading(true); setEarningPeriod(val); setEarningOpen(false); }}
-                      style={{padding:'10px 16px',cursor:'pointer',fontSize:13,fontWeight:earningPeriod===val?600:400,color:earningPeriod===val?'#2563EB':'#374151',background:earningPeriod===val?'#EFF6FF':'transparent'}}>
-                      {label}
-                    </div>
-                  ))}
+              {isDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-36 bg-white border border-slate-100 rounded-xl shadow-lg z-10 py-1">
+                  <button onClick={() => { setTimeRange('this_month'); setIsDropdownOpen(false); }} className="w-full text-left px-4 py-2 text-[13px] font-medium text-slate-700 hover:bg-slate-50">This Month</button>
+                  <button onClick={() => { setTimeRange('last_month'); setIsDropdownOpen(false); }} className="w-full text-left px-4 py-2 text-[13px] font-medium text-slate-700 hover:bg-slate-50">Last Month</button>
+                  <button onClick={() => { setTimeRange('this_year'); setIsDropdownOpen(false); }} className="w-full text-left px-4 py-2 text-[13px] font-medium text-slate-700 hover:bg-slate-50">This Year</button>
                 </div>
               )}
             </div>
-            </div>
-            <div className="earning-amount" style={{transition:'opacity 0.3s', opacity: earningLoading ? 0.4 : 1}}>
-              {earningLoading ? '...' : '$' + displayAmount}
-            </div>
-            <div className="earning-change">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="18 15 12 9 6 15"/></svg>
-              <span>{totalEarning.change}</span>
-              <span className="trend-label">{totalEarning.changeLabel}</span>
-            </div>
-            <div className="chart-wrapper">
-              {loading && <div className="skeleton-chart" />}
-              {!loading && (
-                <svg viewBox={`0 0 ${chartData.width} ${chartData.height}`} width="100%" height="180" preserveAspectRatio="none">
-                  <defs>
-                    <linearGradient id="earningGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#22C55E" stopOpacity="0.25" />
-                      <stop offset="100%" stopColor="#22C55E" stopOpacity="0" />
-                    </linearGradient>
-                  </defs>
-                  {chartData.yTicks.map((tick) => (
-                    <g key={tick.value}>
-                      <line x1="36" x2={chartData.width - 20} y1={tick.y} y2={tick.y} stroke="#E2E8F0" strokeDasharray="4 4" />
-                      <text x="0" y={tick.y + 4} className="axis-label">{tick.label}</text>
+          </div>
+          <div className="flex-1 relative w-full mt-4">
+            <svg viewBox={`0 0 ${chartData.width} ${chartData.height}`} className="w-full h-full overflow-visible">
+              <defs>
+                <linearGradient id="earningGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#ffb800" stopOpacity="0.2" />
+                  <stop offset="100%" stopColor="#ffb800" stopOpacity="0" />
+                </linearGradient>
+              </defs>
+              {chartData.yTicks.map((tick) => (
+                <g key={tick.value}>
+                  <line x1="40" x2={chartData.width} y1={tick.y} y2={tick.y} stroke="#f1f5f9" strokeWidth="1.5" />
+                  <text x="0" y={tick.y + 4} className="text-[11px] fill-slate-400 font-medium">{tick.label}</text>
+                </g>
+              ))}
+              <path d={chartData.areaPath} fill="url(#earningGradient)" />
+              <path d={chartData.linePath} fill="none" stroke="#ffb800" strokeWidth="3" />
+              {chartData.points.map((point, i) => (
+                <g key={i}>
+                  {i === chartData.points.length - 1 && point.origValue > 0 && (
+                    <g transform={`translate(${point.x - 35}, ${point.y - 45})`}>
+                      <rect width="70" height="34" rx="8" fill="white" filter="drop-shadow(0 4px 6px rgba(0,0,0,0.1))" />
+                      <text x="35" y="14" className="text-[9px] fill-slate-400 font-medium" textAnchor="middle">Latest</text>
+                      <text x="35" y="26" className="text-[11px] fill-slate-800 font-bold" textAnchor="middle">${point.origValue}</text>
                     </g>
-                  ))}
-                  <path d={chartData.areaPath} fill="url(#earningGradient)" />
-                  <path d={chartData.linePath} fill="none" stroke="#22C55E" strokeWidth="2" />
-                  {chartData.points.map((point, i) => (
-                    <circle key={i} cx={point.x} cy={point.y} r="3" fill="#22C55E" />
-                  ))}
-                  {chartData.xLabels.map((label) => (
-                    <text key={label.value} x={label.x} y={chartData.height - 6} className="axis-label">{label.value}</text>
-                  ))}
-                </svg>
+                  )}
+                  {(point.origValue > 0 || i === chartData.points.length - 1) && (
+                    <circle cx={point.x} cy={point.y} r={i === chartData.points.length - 1 ? "4" : "2"} fill="#fff" stroke="#ffb800" strokeWidth="2" />
+                  )}
+                </g>
+              ))}
+              {chartData.xLabels.map((label) => (
+                <text key={label.value} x={label.x} y={chartData.height - 5} className="text-[11px] fill-slate-400 font-medium" textAnchor="middle">{label.value}</text>
+              ))}
+            </svg>
+          </div>
+        </div>
+
+        {/* Bookings by Status Donut Chart */}
+        <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex flex-col">
+          <h3 className="font-bold text-slate-800 text-[15px] mb-8">Bookings by Status</h3>
+          <div className="flex items-center justify-between flex-1">
+            <div className="relative w-36 h-36 flex-shrink-0">
+              <svg viewBox="0 0 100 100" className="w-full h-full transform -rotate-90 drop-shadow-sm">
+                <circle cx="50" cy="50" r="38" fill="none" stroke="#f1f5f9" strokeWidth="24" />
+                {totalJobsCount > 0 && (
+                  <>
+                    <circle cx="50" cy="50" r="38" fill="none" stroke="#22c55e" strokeWidth="24" strokeDasharray={compDash} strokeDashoffset={compOffset} />
+                    <circle cx="50" cy="50" r="38" fill="none" stroke="#3b82f6" strokeWidth="24" strokeDasharray={upDash} strokeDashoffset={upOffset} />
+                    <circle cx="50" cy="50" r="38" fill="none" stroke="#f97316" strokeWidth="24" strokeDasharray={cancDash} strokeDashoffset={cancOffset} />
+                  </>
+                )}
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="text-[22px] font-black text-slate-800">{totalJobsCount}</span>
+                <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Total</span>
+              </div>
+            </div>
+            <div className="flex flex-col gap-5 mr-4">
+              <div className="flex items-center gap-3">
+                <div className="w-2.5 h-2.5 rounded-full bg-green-500 shadow-sm"></div>
+                <div className="flex flex-col">
+                  <span className="text-[11px] text-slate-500 font-semibold">Completed</span>
+                  <span className="text-[13px] font-bold text-slate-800">{compCount} ({compPct.toFixed(1)}%)</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-sm"></div>
+                <div className="flex flex-col">
+                  <span className="text-[11px] text-slate-500 font-semibold">Upcoming</span>
+                  <span className="text-[13px] font-bold text-slate-800">{upCount} ({upPct.toFixed(1)}%)</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-2.5 h-2.5 rounded-full bg-orange-500 shadow-sm"></div>
+                <div className="flex flex-col">
+                  <span className="text-[11px] text-slate-500 font-semibold">Cancelled</span>
+                  <span className="text-[13px] font-bold text-slate-800">{cancCount} ({cancPct.toFixed(1)}%)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column Top - Availability Status */}
+        <div className="flex flex-col gap-6">
+          <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex flex-col">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-bold text-slate-800 text-[15px]">Availability Status</h3>
+              <span className={`px-2.5 py-1 rounded border text-[11px] font-bold ${availability ? 'bg-green-50 border-green-200 text-green-600' : 'bg-slate-50 border-slate-200 text-slate-500'}`}>
+                {availability ? 'Online' : 'Offline'}
+              </span>
+            </div>
+            <p className="text-[13px] font-medium text-slate-500 mb-5">
+              {availability ? 'You are available for new bookings' : 'You are currently not accepting new bookings'}
+            </p>
+            <button 
+              onClick={handleToggleAvailability}
+              className={`w-[52px] h-[28px] rounded-full relative transition-colors shadow-inner ${availability ? 'bg-green-500' : 'bg-slate-300'}`}
+            >
+              <div className={`absolute top-1 w-5 h-5 rounded-full bg-white shadow-sm transition-all ${availability ? 'right-1' : 'left-1'}`}></div>
+            </button>
+            <Link 
+              to="/schedule" 
+              className="mt-7 w-full py-2.5 border border-slate-200 rounded-xl text-[13px] font-bold text-green-600 hover:bg-green-50 transition-colors flex items-center justify-center gap-2"
+            >
+              <Calendar size={16} /> Edit Availability
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid xl:grid-cols-[1.5fr_1fr_1fr] gap-6 mt-6">
+        {/* Recent Bookings */}
+        <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex flex-col h-[420px]">
+          <div className="flex items-center justify-between mb-5">
+            <h3 className="font-bold text-slate-800 text-[15px]">Recent Bookings</h3>
+            <Link to="/schedule" className="text-[13px] font-bold text-orange-500 hover:text-orange-600">View All</Link>
+          </div>
+          <div className="flex-1 overflow-y-auto pr-2 space-y-5 custom-scrollbar">
+            {recentBookings.map((b, i) => {
+              const Icon = getStatusIcon(b.status);
+              const colorClass = getStatusColor(b.status);
+              return (
+                <div key={i} className="flex items-center justify-between pb-4 border-b border-slate-100 last:border-0 last:pb-0">
+                  <div className="flex items-center gap-4">
+                    <div className={`w-[46px] h-[46px] rounded-full border flex items-center justify-center ${colorClass}`}>
+                      <Icon size={20} strokeWidth={2.5} />
+                    </div>
+                    <div>
+                      <p className="text-[14px] font-bold text-slate-800">{b.service}</p>
+                      <p className="text-[12px] font-medium text-slate-500 mt-0.5">{b.date} • {b.time}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <span className="font-bold text-slate-800 text-[13px]">{b.client}</span>
+                    <span className="px-3 py-1.5 rounded-md bg-green-50 text-green-600 text-[11px] font-bold uppercase">{b.status}</span>
+                    <ChevronRight size={18} className="text-slate-300" />
+                  </div>
+                </div>
+              );
+            })}
+            {recentBookings.length === 0 && (
+              <div className="text-center text-slate-500 text-sm mt-8">No recent bookings found.</div>
+            )}
+          </div>
+          <div className="mt-5 pt-4 border-t border-slate-100 flex justify-center">
+            <Link to="/schedule" className="text-[13px] font-bold text-orange-500 hover:text-orange-600 flex items-center gap-1.5">
+              View All Bookings <ArrowRight size={16} />
+            </Link>
+          </div>
+        </div>
+
+        {/* Recent Quotes */}
+        <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex flex-col h-[420px]">
+          <div className="flex items-center justify-between mb-5">
+            <h3 className="font-bold text-slate-800 text-[15px]">Recent Quotes</h3>
+            <Link to="/quotes" className="text-[13px] font-bold text-orange-500 hover:text-orange-600">View All</Link>
+          </div>
+          <div className="flex-1 overflow-y-auto pr-2 space-y-6 custom-scrollbar">
+            {recentQuotes.map((q, i) => (
+              <div key={i} className="flex gap-3 items-center">
+                <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 font-bold flex items-center justify-center">
+                  {q.client.charAt(0)}
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between">
+                    <p className="text-[14px] font-bold text-slate-800">{q.client}</p>
+                    <p className="text-[12px] font-medium text-slate-400">{q.date}</p>
+                  </div>
+                  <div className="flex items-center justify-between mt-1">
+                    <span className="text-[13px] font-bold text-slate-600">{q.amount}</span>
+                    <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-bold uppercase">{q.status}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+            {recentQuotes.length === 0 && (
+              <div className="text-center text-slate-500 text-sm mt-8">No recent quotes found.</div>
+            )}
+          </div>
+          <div className="mt-5 pt-4 border-t border-slate-100 flex justify-center">
+            <Link to="/quotes" className="text-[13px] font-bold text-orange-500 hover:text-orange-600 flex items-center gap-1.5">
+              View All Quotes <ArrowRight size={16} />
+            </Link>
+          </div>
+        </div>
+
+        {/* Right Column Bottom - Upcoming Bookings */}
+        <div className="flex flex-col gap-6">
+          <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex flex-col flex-1 max-h-[420px]">
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="font-bold text-slate-800 text-[15px]">Upcoming Bookings</h3>
+              <Link to="/schedule" className="text-[13px] font-bold text-orange-500 hover:text-orange-600">View All</Link>
+            </div>
+            <div className="flex-1 overflow-y-auto pr-2 space-y-4 custom-scrollbar">
+              {upcomingBookings.map((b, i) => (
+                <div key={i} className="flex gap-4 pb-4 border-b border-slate-50 last:border-0 last:pb-0">
+                  <div className="w-[52px] h-[52px] flex flex-col items-center justify-center bg-slate-50 rounded-xl flex-shrink-0 border border-slate-100 shadow-sm">
+                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">JOB</span>
+                    <span className="text-[18px] font-black text-slate-800 leading-none mt-0.5">#{b.job_number}</span>
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-start justify-between">
+                      <p className="text-[14px] font-bold text-slate-800 leading-snug">{b.service}</p>
+                      <span className="px-2.5 py-1 rounded bg-blue-50 text-blue-600 text-[10px] font-bold uppercase shrink-0">Upcoming</span>
+                    </div>
+                    <p className="text-[12px] font-medium text-slate-500 mt-1">{b.date} • {b.time}</p>
+                    <p className="text-[12px] font-medium text-slate-500 mt-0.5">Customer: {b.client}</p>
+                  </div>
+                </div>
+              ))}
+              {upcomingBookings.length === 0 && (
+                <div className="text-center text-slate-500 text-sm mt-8">No upcoming bookings found.</div>
               )}
             </div>
           </div>
         </div>
-      </section>
-
-      <section className="bottom-grid">
-        <div className="card list-card">
-          <div className="card-header">
-            <h3>Quote to Review</h3>
-              <Link className="link" to="/quotes">View all</Link>
-          </div>
-          <div className="list-body">
-            {loading && Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="list-row skeleton-line" />
-            ))}
-            {!loading && recentQuotes.length === 0 && (
-              <div className="empty-state">No quotes to review</div>
-            )}
-            {!loading && recentQuotes.map((quote) => (
-              <div key={quote.id} className="list-row">
-                <div>
-                  <div className="list-title">{quote.client}</div>
-                  <div className="list-sub">{quote.date}</div>
-                </div>
-                <div className="list-meta">
-                  <div className="list-amount">{quote.amount}</div>
-                  <span className={`badge ${quote.status}`}>{formatQuoteStatus(quote.status)}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="card list-card">
-          <div className="card-header">
-            <h3>Create Invoice</h3>
-              <Link className="link" to="/invoices">View all</Link>
-          </div>
-          <div className="list-body">
-            {loading && Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="list-row skeleton-line" />
-            ))}
-            {!loading && recentInvoices.length === 0 && (
-              <div className="empty-state">No invoices available</div>
-            )}
-            {!loading && recentInvoices.map((invoice) => (
-              <div key={invoice.id} className="list-row">
-                <div>
-                  <div className="list-title">{invoice.number}</div>
-                  <div className="list-sub">{invoice.client}</div>
-                </div>
-                <div className="list-meta">
-                  <div className="list-amount">{invoice.amount}</div>
-                  <span className={`badge ${invoice.status}`}>{formatInvoiceStatus(invoice.status)}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-    </div>
-  );
-};
-
-const DateRangePicker = ({ value, onApply, label }) => {
-  const [open, setOpen] = useState(false);
-  const today = new Date();
-  const [tempRange, setTempRange] = useState(value || { start: today, end: today });
-  const [hoverDate, setHoverDate] = useState(null);
-  const [focusedDate, setFocusedDate] = useState(null);
-  const [viewMonth, setViewMonth] = useState(startOfMonth(value?.start || today));
-  const wrapperRef = useRef(null);
-
-  useEffect(() => {
-    if (open) {
-      const t = new Date();
-      setTempRange(value || { start: t, end: t });
-      setHoverDate(null);
-      setViewMonth(startOfMonth(value?.start || t));
-      setFocusedDate(value?.end || value?.start || t);
-    }
-  }, [open, value]);
-
-  useEffect(() => {
-    if (!open || !focusedDate) return;
-    const key = formatYmd(focusedDate);
-    const target = wrapperRef.current?.querySelector(`[data-date="${key}"]`);
-    if (target) {
-      target.focus();
-    }
-  }, [open, focusedDate]);
-
-  useEffect(() => {
-    if (!open) return undefined;
-    const handleOutside = (event) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleOutside);
-    return () => document.removeEventListener('mousedown', handleOutside);
-  }, [open]);
-
-  const nextMonth = useMemo(() => addMonths(viewMonth, 1), [viewMonth]);
-  const days = useMemo(() => buildCalendarDays(viewMonth), [viewMonth]);
-  const nextDays = useMemo(() => buildCalendarDays(nextMonth), [nextMonth]);
-
-  const getPreviewRange = () => {
-    if (tempRange.start && !tempRange.end && hoverDate) {
-      const start = tempRange.start.getTime() <= hoverDate.getTime() ? tempRange.start : hoverDate;
-      const end = tempRange.start.getTime() <= hoverDate.getTime() ? hoverDate : tempRange.start;
-      return { start, end };
-    }
-    return tempRange;
-  };
-
-  const selectDay = (date) => {
-    const selected = normalizeDate(date);
-    if (!tempRange.start || (tempRange.start && tempRange.end)) {
-      setTempRange({ start: selected, end: null });
-      setHoverDate(null);
-      setFocusedDate(selected);
-      return;
-    }
-    if (selected.getTime() < tempRange.start.getTime()) {
-      setTempRange({ start: selected, end: null });
-      setHoverDate(null);
-      setFocusedDate(selected);
-      return;
-    }
-    setTempRange({ start: tempRange.start, end: selected });
-    setHoverDate(null);
-    setFocusedDate(selected);
-  };
-
-  const applyRange = () => {
-    if (!tempRange.start || !tempRange.end) return;
-    onApply({ start: tempRange.start, end: tempRange.end });
-    setOpen(false);
-  };
-
-  const cancelRange = () => {
-    setTempRange(value);
-    setHoverDate(null);
-    setFocusedDate(value.end || value.start);
-    setOpen(false);
-  };
-
-  const applyPreset = (preset) => {
-    const presetRange = getPresetRange(preset);
-    setTempRange(presetRange);
-    setHoverDate(null);
-    setViewMonth(startOfMonth(presetRange.start));
-    setFocusedDate(presetRange.end || presetRange.start);
-  };
-
-  const moveFocus = (daysOffset) => {
-    const base = focusedDate || tempRange.end || tempRange.start || normalizeDate(new Date());
-    const next = new Date(base.getFullYear(), base.getMonth(), base.getDate() + daysOffset);
-    setFocusedDate(normalizeDate(next));
-
-    const viewStart = startOfMonth(viewMonth);
-    const nextStart = startOfMonth(nextMonth);
-    const nextEnd = new Date(nextStart.getFullYear(), nextStart.getMonth() + 1, 0);
-    if (next < viewStart || next > nextEnd) {
-      setViewMonth(startOfMonth(next));
-    }
-  };
-
-  const handleKeyDown = (event) => {
-    if (!open) return;
-    switch (event.key) {
-      case 'Escape':
-        event.preventDefault();
-        setOpen(false);
-        break;
-      case 'ArrowLeft':
-        event.preventDefault();
-        moveFocus(-1);
-        break;
-      case 'ArrowRight':
-        event.preventDefault();
-        moveFocus(1);
-        break;
-      case 'ArrowUp':
-        event.preventDefault();
-        moveFocus(-7);
-        break;
-      case 'ArrowDown':
-        event.preventDefault();
-        moveFocus(7);
-        break;
-      case 'Enter':
-        event.preventDefault();
-        if (focusedDate) {
-          selectDay(focusedDate);
-        }
-        break;
-      default:
-        break;
-    }
-  };
-
-  const previewRange = getPreviewRange();
-  const previewLabel = formatTempRange(previewRange);
-
-  const renderCalendar = (calendarDays, monthLabel) => (
-    <div className="picker-calendar">
-      <div className="weekday-row">
-        {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((day) => (
-          <div key={`${monthLabel}-${day}`} className="weekday-cell">{day}</div>
-        ))}
       </div>
-      <div className="calendar-grid">
-        {calendarDays.map((day) => {
-          const isStart = previewRange.start && isSameDay(day.date, previewRange.start);
-          const isEnd = previewRange.end && isSameDay(day.date, previewRange.end);
-          const inRange = previewRange.start && previewRange.end && isWithinRange(day.date, previewRange.start, previewRange.end);
-          const isFocused = focusedDate && isSameDay(day.date, focusedDate);
-          return (
-            <button
-              key={day.key}
-              type="button"
-              className={`day-cell${day.isCurrentMonth ? '' : ' muted'}${inRange ? ' in-range' : ''}${isStart ? ' range-start' : ''}${isEnd ? ' range-end' : ''}`}
-              data-date={formatYmd(day.date)}
-              tabIndex={isFocused ? 0 : -1}
-              onClick={() => selectDay(day.date)}
-              onFocus={() => setFocusedDate(normalizeDate(day.date))}
-              onMouseEnter={() => {
-                if (tempRange.start && !tempRange.end) {
-                  setHoverDate(normalizeDate(day.date));
-                }
-              }}
-              onMouseLeave={() => {
-                if (tempRange.start && !tempRange.end) {
-                  setHoverDate(null);
-                }
-              }}
-            >
-              {day.label}
+
+      <div className="grid xl:grid-cols-[2.5fr_1fr] gap-6 mt-6 pb-12">
+        {/* My Services */}
+        <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex flex-col">
+          <div className="flex items-center justify-between mb-5">
+            <h3 className="font-bold text-slate-800 text-[15px]">My Services</h3>
+            <button className="text-[13px] font-bold text-orange-500 hover:text-orange-600">Manage Services</button>
+          </div>
+          <div className="flex gap-5 overflow-x-auto pb-3 custom-scrollbar">
+            {[
+              { name: 'Plumbing', icon: '💧', color: 'bg-blue-50 text-blue-500 border-blue-100' },
+              { name: 'Pipe Fitting', icon: '🔧', color: 'bg-orange-50 text-orange-500 border-orange-100' },
+              { name: 'Bathroom Installation', icon: '🛁', color: 'bg-green-50 text-green-500 border-green-100' },
+            ].map((s, i) => (
+              <div key={i} className="flex-shrink-0 flex items-center gap-3 border border-slate-100 rounded-xl p-3 pr-4 shadow-sm w-56 hover:shadow-md transition-shadow bg-white">
+                <div className={`w-11 h-11 rounded-xl border flex items-center justify-center text-xl shadow-sm ${s.color}`}>
+                  {s.icon}
+                </div>
+                <div className="flex-1">
+                  <p className="text-[14px] font-bold text-slate-800 truncate">{s.name}</p>
+                  <div className="flex items-center justify-between mt-1.5">
+                    <span className="text-[11px] font-bold text-slate-500">Active</span>
+                    <div className="w-7 h-4 bg-green-500 rounded-full relative shadow-inner">
+                      <div className="absolute right-0.5 top-0.5 w-3 h-3 bg-white rounded-full shadow-sm"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+            <button className="flex-shrink-0 flex items-center justify-center gap-2 border-2 border-dashed border-slate-200 rounded-xl px-8 text-[14px] font-bold text-slate-500 hover:bg-slate-50 hover:text-slate-800 hover:border-slate-300 transition-colors">
+              <Plus size={20} strokeWidth={2.5} /> Add Service
             </button>
-          );
-        })}
-      </div>
-    </div>
-  );
+          </div>
+        </div>
 
-  return (
-    <div className="date-picker-wrapper" ref={wrapperRef}>
-      <button className="date-pill" type="button" onClick={() => setOpen((prev) => !prev)}>
-        <span className="date-icon">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <rect x="3" y="4" width="18" height="18" rx="2" />
-            <path d="M16 2v4M8 2v4M3 10h18" />
-          </svg>
-        </span>
-        <span>{label}</span>
-      </button>
-
-      {open && (
-        <div className="date-picker" onKeyDown={handleKeyDown} tabIndex={-1}>
-          <div className="picker-layout">
-            <div className="picker-presets">
-              {['today', 'yesterday', 'last7', 'last30', 'thisMonth', 'lastMonth'].map((preset) => (
-                <button key={preset} type="button" className="preset-button" onClick={() => applyPreset(preset)}>
-                  {formatPresetLabel(preset)}
-                </button>
+        {/* Earnings Summary */}
+        <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex flex-col">
+          <div className="flex items-center justify-between mb-6 relative">
+            <h3 className="font-bold text-slate-800 text-[15px]">Earnings Summary</h3>
+            <div className="relative">
+              <button 
+                onClick={() => setIsDropdownOpen2(!isDropdownOpen2)}
+                className="flex items-center gap-2 text-xs font-semibold text-slate-600 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-sm"
+              >
+                {timeRange === 'this_month' ? 'This Month' : timeRange === 'last_month' ? 'Last Month' : 'This Year'} <ChevronDown size={14} />
+              </button>
+              {isDropdownOpen2 && (
+                <div className="absolute right-0 mt-2 w-36 bg-white border border-slate-100 rounded-xl shadow-lg z-10 py-1">
+                  <button onClick={() => { setTimeRange('this_month'); setIsDropdownOpen2(false); }} className="w-full text-left px-4 py-2 text-[13px] font-medium text-slate-700 hover:bg-slate-50">This Month</button>
+                  <button onClick={() => { setTimeRange('last_month'); setIsDropdownOpen2(false); }} className="w-full text-left px-4 py-2 text-[13px] font-medium text-slate-700 hover:bg-slate-50">Last Month</button>
+                  <button onClick={() => { setTimeRange('this_year'); setIsDropdownOpen2(false); }} className="w-full text-left px-4 py-2 text-[13px] font-medium text-slate-700 hover:bg-slate-50">This Year</button>
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="flex items-end justify-between mb-6">
+            <div>
+              <p className="text-[32px] font-black text-slate-800 leading-none">${totalEarning.amount}</p>
+              <p className="text-[13px] font-medium text-slate-500 mt-2">Total Earnings</p>
+              <div className="flex items-center gap-1 mt-1 text-[11px] font-bold text-green-500">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="18 15 12 9 6 15" transform="rotate(180 12 12)"/></svg>
+                <span>{totalEarning.change} vs previous period</span>
+              </div>
+            </div>
+            {/* Mini Bar Chart */}
+            <div className="flex items-end gap-2 h-16">
+              {[40, 60, 30, 80, 50, 90, 70].map((h, i) => (
+                <div key={i} className="w-[14px] bg-[#ffb800] rounded-sm hover:bg-orange-500 transition-colors" style={{ height: `${h}%` }}></div>
               ))}
             </div>
-            <div className="picker-calendars">
-              <div className="calendars-header">
-                <div className="calendar-nav">
-                  <button type="button" className="nav-button" onClick={() => setViewMonth(addMonths(viewMonth, -1))}>&lt;</button>
-                  <div className="month-label">{formatMonthYear(viewMonth)}</div>
-                </div>
-                <div className="calendar-nav">
-                  <div className="month-label">{formatMonthYear(nextMonth)}</div>
-                  <button type="button" className="nav-button" onClick={() => setViewMonth(addMonths(viewMonth, 1))}>&gt;</button>
-                </div>
-              </div>
-              <div className="calendars-grid">
-                {renderCalendar(days, formatMonthYear(viewMonth))}
-                {renderCalendar(nextDays, formatMonthYear(nextMonth))}
-              </div>
-            </div>
           </div>
-
-          <div className="picker-actions">
-            <div className="range-preview">{previewLabel}</div>
-            <div className="action-buttons">
-              <button type="button" className="secondary-button" onClick={cancelRange}>Cancel</button>
-              <button type="button" className="primary-button" onClick={applyRange} disabled={!tempRange.start || !tempRange.end}>Apply</button>
+          <div className="flex items-center justify-between border-t border-slate-100 pt-5 mt-auto">
+            <div>
+              <p className="text-[11px] font-bold text-slate-500 uppercase">Completed Jobs</p>
+              <p className="text-[16px] font-black text-slate-800 mt-1">{completedJobsStat.value}</p>
+            </div>
+            <div>
+              <p className="text-[11px] font-bold text-slate-500 uppercase">Total Bookings</p>
+              <p className="text-[16px] font-black text-slate-800 mt-1">{totalBookingsStat.value}</p>
+            </div>
+            <div>
+              <p className="text-[11px] font-bold text-slate-500 uppercase">Avg Job Value</p>
+              <p className="text-[16px] font-black text-slate-800 mt-1">
+                ${totalJobsCount > 0 ? (parseFloat(totalEarning.amount.replace(/,/g, '')) / totalJobsCount).toFixed(2) : '0.00'}
+              </p>
             </div>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };
 
-const getStatIcon = (icon) => {
-  switch (icon) {
-    case 'briefcase':
-      return (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M10 6h4a2 2 0 012 2v2H8V8a2 2 0 012-2z" />
-          <path d="M4 10h16v8a2 2 0 01-2 2H6a2 2 0 01-2-2v-8z" />
-        </svg>
-      );
-    case 'file':
-      return (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
-          <path d="M14 2v6h6" />
-        </svg>
-      );
-    case 'invoice':
-      return (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <rect x="4" y="3" width="16" height="18" rx="2" />
-          <path d="M8 7h8M8 11h8M8 15h5" />
-        </svg>
-      );
-    case 'calendar':
-      return (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <rect x="3" y="4" width="18" height="18" rx="2" />
-          <path d="M16 2v4M8 2v4M3 10h18" />
-        </svg>
-      );
-    case 'chart':
-    default:
-      return (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M4 19h16" />
-          <path d="M8 17V9" />
-          <path d="M12 17V5" />
-          <path d="M16 17v-7" />
-        </svg>
-      );
+// --- Helpers for the chart ---
+const buildLineChart = (data) => {
+  const width = 600;
+  const height = 240;
+  const paddingX = 40;
+  const paddingY = 30;
+
+  if (!data || data.length === 0) return { width, height, yTicks: [], xLabels: [], areaPath: '', linePath: '', points: [] };
+
+  const values = data.map(d => parseFloat(d.value) || parseFloat(d.amount) || 0);
+  const maxVal = Math.max(...values, 10);
+  const minVal = 0;
+  const range = maxVal - minVal;
+
+  const getX = (index) => paddingX + (index * (width - paddingX * 2)) / Math.max(data.length - 1, 1);
+  const getY = (val) => height - paddingY - ((val - minVal) / range) * (height - paddingY * 2);
+
+  const points = data.map((d, i) => ({ x: getX(i), y: getY(parseFloat(d.value) || parseFloat(d.amount) || 0), origValue: parseFloat(d.value) || parseFloat(d.amount) || 0 }));
+  
+  let linePath = '';
+  let areaPath = '';
+  
+  if (points.length > 0) {
+    // Generate curved path instead of sharp lines
+    linePath = `M ${points[0].x},${points[0].y}`;
+    for (let i = 1; i < points.length; i++) {
+      const prev = points[i - 1];
+      const curr = points[i];
+      const midX = (prev.x + curr.x) / 2;
+      linePath += ` C ${midX},${prev.y} ${midX},${curr.y} ${curr.x},${curr.y}`;
+    }
+    
+    areaPath = `${linePath} L ${points[points.length-1].x},${height - paddingY} L ${points[0].x},${height - paddingY} Z`;
   }
-};
 
-const formatCurrency = (value) => {
-  const number = Number(String(value).replace(/[^0-9.-]+/g, ''));
-  if (Number.isNaN(number)) return `$${value}`;
-  return number.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
-};
-
-const formatStatus = (status) => {
-  if (!status) return '';
-  return String(status).replace(/_/g, ' ').replace(/\b\w/g, (m) => m.toUpperCase());
-};
-
-const formatTeamStatus = (status) => {
-  if (status === 'on_job')     return 'On Job';
-  if (status === 'on_route')   return 'On Route';
-  if (status === 'clocked_in') return 'Clocked In';
-  return 'Offline';
-};
-
-const formatQuoteStatus = (status) => {
-  if (!status) return 'Pending';
-  return String(status).replace(/_/g, ' ');
-};
-
-const formatInvoiceStatus = (status) => {
-  if (!status) return 'Unpaid';
-  return String(status).replace(/_/g, ' ');
-};
-
-const buildSummary = (summary) => {
-  const base = [
-    { key: 'ideal', label: 'Ideal Sitting', count: 0, percent: '0%' },
-    { key: 'busy', label: 'Busy', count: 0, percent: '0%' },
-    { key: 'offline', label: 'Offline', count: 0, percent: '0%' },
-  ];
-  return base.map((item) => {
-    const match = summary.find((entry) => entry.key === item.key);
-    return match ? { ...item, ...match } : item;
+  const yTicks = [0, 0.5, 1].map(pct => {
+    const val = minVal + pct * range;
+    return {
+      value: val,
+      label: `$${val.toFixed(0)}`,
+      y: getY(val)
+    };
   });
-};
 
-const getTeamIcon = (key) => {
-  if (key === 'on_job') return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2">
-      <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/>
-    </svg>
-  );
-  if (key === 'on_route') return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#C2410C" strokeWidth="2">
-      <circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/>
-    </svg>
-  );
-  if (key === 'clocked_in') return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1D4ED8" strokeWidth="2">
-      <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-    </svg>
-  );
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="2">
-      <circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/>
-    </svg>
-  );
-};
-
-const getInitials = (name = '') => name
-  .split(' ')
-  .filter(Boolean)
-  .slice(0, 2)
-  .map((part) => part[0].toUpperCase())
-  .join('');
-
-const avatarColor = (name = '') => {
-  const colors = ['#2563EB', '#10B981', '#F59E0B', '#8B5CF6', '#EF4444'];
-  let hash = 0;
-  for (let i = 0; i < name.length; i += 1) {
-    hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  return colors[Math.abs(hash) % colors.length];
-};
-
-const formatDisplayRange = (r) => {
-  if (!r || !r.start || !r.end) return 'All Time';
-  return formatShortDate(r.start) + ' – ' + formatShortDate(r.end);
-};
-
-const formatTempRange = (range) => {
-  if (!range.start) return 'Select a start date';
-  if (!range.end) return `${formatFullDate(range.start)} - ...`;
-  return `${formatFullDate(range.start)} - ${formatFullDate(range.end)}`;
-};
-
-const formatFullDate = (date) => date.toLocaleDateString('en-US', {
-  month: 'short',
-  day: 'numeric',
-  year: 'numeric',
-});
-
-const formatMonthYear = (date) => date.toLocaleDateString('en-US', {
-  month: 'long',
-  year: 'numeric',
-});
-
-const normalizeDate = (date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
-
-const formatYmd = (date) => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
-
-const getTodayRange = () => {
-  const today = normalizeDate(new Date());
-  return { start: today, end: today };
-};
-
-const startOfMonth = (date) => new Date(date.getFullYear(), date.getMonth(), 1);
-
-const addMonths = (date, count) => new Date(date.getFullYear(), date.getMonth() + count, 1);
-
-const isSameDay = (a, b) => a && b && a.getTime() === b.getTime();
-
-const isWithinRange = (date, start, end) => {
-  const time = date.getTime();
-  return time >= start.getTime() && time <= end.getTime();
-};
-
-const buildCalendarDays = (monthDate) => {
-  const start = startOfMonth(monthDate);
-  const startDay = start.getDay();
-  const gridStart = new Date(start.getFullYear(), start.getMonth(), 1 - startDay);
-  const days = [];
-
-  for (let i = 0; i < 42; i += 1) {
-    const date = new Date(gridStart.getFullYear(), gridStart.getMonth(), gridStart.getDate() + i);
-    days.push({
-      key: `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`,
-      date,
-      label: date.getDate(),
-      isCurrentMonth: date.getMonth() === monthDate.getMonth(),
-    });
-  }
-
-  return days;
-};
-
-const getPresetRange = (preset) => {
-  const today = normalizeDate(new Date());
-
-  switch (preset) {
-    case 'yesterday': {
-      const yesterday = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1);
-      return { start: yesterday, end: yesterday };
+  // Only show about 6 x-axis labels to avoid overlap
+  const labelStep = Math.max(1, Math.ceil(data.length / 6));
+  const xLabels = data.map((d, i) => {
+    if (i % labelStep === 0 || i === data.length - 1) {
+      return { value: d.date, x: getX(i) };
     }
-    case 'last7': {
-      const start = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 6);
-      return { start, end: today };
-    }
-    case 'last30': {
-      const start = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 29);
-      return { start, end: today };
-    }
-    case 'thisMonth': {
-      const start = startOfMonth(today);
-      return { start, end: today };
-    }
-    case 'lastMonth': {
-      const start = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-      const end = new Date(today.getFullYear(), today.getMonth(), 0);
-      return { start: normalizeDate(start), end: normalizeDate(end) };
-    }
-    case 'today':
-    default:
-      return { start: today, end: today };
-  }
+    return null;
+  }).filter(Boolean);
+
+  return { width, height, yTicks, xLabels, linePath, areaPath, points };
 };
 
-const formatPresetLabel = (preset) => {
-  switch (preset) {
-    case 'today':
-      return 'Today';
-    case 'yesterday':
-      return 'Yesterday';
-    case 'last7':
-      return 'Last 7 Days';
-    case 'last30':
-      return 'Last 30 Days';
-    case 'thisMonth':
-      return 'This Month';
-    case 'lastMonth':
-      return 'Last Month';
-    default:
-      return preset;
-  }
-};
+const ArrowRight = ({ size = 24, className }) => (
+  <svg width={size} height={size} className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="5" y1="12" x2="19" y2="12"></line>
+    <polyline points="12 5 19 12 12 19"></polyline>
+  </svg>
+);
 
-const formatShortDate = (date) => date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-
-const formatTime = (time) => {
-  const parts = String(time).split(' ');
-  if (parts.length >= 2) {
-    return { time: parts[0], suffix: parts.slice(1).join(' ') };
-  }
-  return { time, suffix: '' };
-};
-
-const buildLineChart = (series) => {
-  if (!series || series.length === 0) {
-    return { width: 560, height: 190, points: [], linePath: '', areaPath: '', yTicks: [], xLabels: [] };
-  }
-  const W = 560, H = 190, PL = 40, PR = 20, PT = 10, PB = 24;
-  const values = series.map(d => Number(d.value) || 0);
-  const maxV = Math.max(...values);
-  const effectiveMax = maxV > 0 ? maxV * 1.1 : 1000;
-  const chartW = W - PL - PR;
-  const chartH = H - PT - PB;
-  const step = series.length > 1 ? chartW / (series.length - 1) : chartW;
-  const points = series.map((d, i) => ({
-    x: PL + i * step,
-    y: PT + chartH - (Number(d.value) / effectiveMax) * chartH,
-    label: d.date,
-  }));
-  const linePath = points.map((p, i) => (i === 0 ? `M ${p.x} ${p.y}` : `L ${p.x} ${p.y}`)).join(' ');
-  const areaPath = points.length > 0
-    ? linePath + ` L ${points[points.length-1].x} ${PT+chartH} L ${points[0].x} ${PT+chartH} Z`
-    : '';
-  const tickValues = maxV > 0
-    ? [0, Math.round(effectiveMax*0.25), Math.round(effectiveMax*0.5), Math.round(effectiveMax*0.75), Math.round(effectiveMax)]
-    : [0, 250, 500, 750, 1000];
-  const yTicks = tickValues.map(tick => ({
-    value: tick,
-    label: tick >= 1000 ? (tick/1000).toFixed(0)+'K' : String(tick),
-    y: PT + chartH - (tick / effectiveMax) * chartH,
-  }));
-  const xLabels = points.filter((_, i) => i % Math.max(1, Math.floor(points.length / 8)) === 0).map(p => ({ value: p.label, x: p.x - 6 }));
-  return { width: W, height: H, points, linePath, areaPath, yTicks, xLabels };
-};
+const ChevronRight = ({ size = 24, className }) => (
+  <svg width={size} height={size} className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="9 18 15 12 9 6"></polyline>
+  </svg>
+);
 
 export default Dashboard;

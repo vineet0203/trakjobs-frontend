@@ -42,6 +42,7 @@ export const NAV_ITEMS = [
   { path: "/invoices", label: "Invoices", icon: "invoices" },
 
   { path: "/reports", label: "Reports", icon: "reports" },
+  { path: "#notifications", label: "Notifications", icon: "notifications", isComponent: true },
   { path: "/settings", label: "Settings", icon: "settings" },
 ];
 

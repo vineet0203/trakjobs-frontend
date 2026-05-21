@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Bell, Check, CheckCheck } from 'lucide-react';
 import httpClient from '../../../../../services/api/httpClient';
 
-const Notifications = () => {
+const Notifications = ({ align = 'right', direction = 'down', customTrigger }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [notifications, setNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
@@ -32,7 +32,9 @@ const Notifications = () => {
             await httpClient.post(`/api/v1/notifications/${id}/read`);
             setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
             setUnreadCount(prev => Math.max(0, prev - 1));
-        } catch (e) {}
+        } catch (err) {
+            console.error('Failed to mark notification as read', err);
+        }
     };
 
     const markAllRead = async () => {
@@ -40,7 +42,9 @@ const Notifications = () => {
             await httpClient.post('/api/v1/notifications/read-all');
             setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
             setUnreadCount(0);
-        } catch (e) {}
+        } catch (err) {
+            console.error('Failed to mark all notifications as read', err);
+        }
     };
 
     const timeAgo = (dateStr) => {
@@ -51,24 +55,33 @@ const Notifications = () => {
         return `${Math.floor(diff/86400)}d ago`;
     };
 
+    const toggleOpen = () => {
+        setIsOpen(!isOpen);
+        if (!isOpen) fetchNotifications();
+    };
+
     return (
-        <div className="relative">
-            <button
-                className="relative p-2 bg-none border-none cursor-pointer rounded-md hover:bg-gray-50 transition-colors"
-                onClick={() => { setIsOpen(!isOpen); if (!isOpen) fetchNotifications(); }}
-            >
-                <Bell className="w-5 h-5 text-gray-700" />
-                {unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-full min-w-4 text-center">
-                        {unreadCount > 99 ? '99+' : unreadCount}
-                    </span>
-                )}
-            </button>
+        <div className="relative w-full">
+            {customTrigger ? (
+                customTrigger(unreadCount, toggleOpen)
+            ) : (
+                <button
+                    className="relative p-2 bg-none border-none cursor-pointer rounded-md hover:bg-gray-50 transition-colors"
+                    onClick={toggleOpen}
+                >
+                    <Bell className="w-5 h-5 text-gray-700" />
+                    {unreadCount > 0 && (
+                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-full min-w-4 text-center">
+                            {unreadCount > 99 ? '99+' : unreadCount}
+                        </span>
+                    )}
+                </button>
+            )}
 
             {isOpen && (
                 <>
                     <div className="fixed inset-0 z-50" onClick={() => setIsOpen(false)}></div>
-                    <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                    <div className={`absolute ${align === 'right' ? 'right-0' : 'left-0'} ${direction === 'up' ? 'bottom-full mb-2' : 'mt-2'} w-80 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50`}>
                         <div className="px-4 py-3 border-b border-gray-100 flex justify-between items-center">
                             <h3 className="text-sm font-semibold text-gray-900">Notifications</h3>
                             {unreadCount > 0 && (
