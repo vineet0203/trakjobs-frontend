@@ -30,7 +30,7 @@ const LandingPage = () => {
 
   return (
     <div className="bg-white text-slate-900 font-sans">
-      <Navbar />
+      <Navbar onBook={handleStartBooking} />
       <main className="overflow-hidden">
         <HeroSection catalog={serviceCatalog} onBook={handleStartBooking} />
         <PopularServices onBook={handleStartBooking} catalog={serviceCatalog} />

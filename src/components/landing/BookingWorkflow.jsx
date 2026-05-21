@@ -265,7 +265,7 @@ const BookingWorkflow = ({ catalog, initialSelection }) => {
               </span>
               <h3 className="text-2xl font-display text-brand-navy">Request submitted</h3>
               <p className="max-w-lg text-sm text-slate-600">
-                Your request is sent to TrackJobs vendor network. Vendors can review and send a
+                Your request is sent to TrakJobs vendor network. Vendors can review and send a
                 quotation shortly.
               </p>
               <div className="flex items-center gap-2 text-xs text-slate-500">

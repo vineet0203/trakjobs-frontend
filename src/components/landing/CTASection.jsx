@@ -14,7 +14,7 @@ const CTASection = () => {
         >
           <h2 className="text-3xl font-display text-white">Ready to Scale Your Service Business?</h2>
           <p className="max-w-2xl text-sm text-slate-200">
-            Launch your service marketplace, dispatch, and vendor network with TrackJobs.
+            Launch your service marketplace, dispatch, and vendor network with TrakJobs.
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <button className="rounded-full bg-brand-gold px-6 py-2.5 text-sm font-semibold text-brand-navy">

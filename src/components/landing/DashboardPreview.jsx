@@ -23,7 +23,7 @@ const DashboardPreview = () => {
         >
           <div>
             <p className="text-sm font-semibold uppercase tracking-widest text-brand-gold">
-              TrackJobs OS
+              TrakJobs
             </p>
             <h2 className="mt-2 text-3xl font-display text-brand-navy">
               A complete business operating system

@@ -38,7 +38,7 @@ const FeaturesSection = () => {
           className="text-center"
         >
           <p className="text-sm font-semibold uppercase tracking-widest text-brand-gold">
-            Why TrackJobs
+            Why TrakJobs
           </p>
           <h2 className="mt-2 text-3xl font-display text-brand-navy">
             Everything you need to scale field service operations

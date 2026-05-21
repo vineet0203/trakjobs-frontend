@@ -20,7 +20,7 @@ const MobileAppSection = () => {
               Customer app, employee app, vendor dashboard
             </h2>
             <p className="mt-4 text-slate-600">
-              TrackJobs keeps every stakeholder in sync with mobile-first experiences, live
+              TrakJobs keeps every stakeholder in sync with mobile-first experiences, live
               updates, and secure payments.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
@@ -42,7 +42,7 @@ const MobileAppSection = () => {
                     <Smartphone size={18} />
                   </span>
                   <div>
-                    <p className="text-sm font-semibold text-brand-navy">TrackJobs Mobile</p>
+                    <p className="text-sm font-semibold text-brand-navy">TrakJobs Mobile</p>
                     <p className="text-xs text-slate-500">Live job tracking</p>
                   </div>
                 </div>

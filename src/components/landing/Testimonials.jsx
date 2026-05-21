@@ -7,7 +7,7 @@ const testimonials = [
     name: "Amit Verma",
     company: "Northside Realty",
     quote:
-      "TrackJobs unified our vendors and crews in one dashboard. Dispatching is now effortless.",
+      "TrakJobs unified our vendors and crews in one dashboard. Dispatching is now effortless.",
   },
   {
     name: "Priya Sharma",
@@ -32,7 +32,7 @@ const Testimonials = () => {
             Testimonials
           </p>
           <h2 className="mt-2 text-3xl font-display text-brand-navy">Trusted by leading operators</h2>
-          <p className="mt-3 text-slate-600">Enterprise teams scale confidently with TrackJobs.</p>
+          <p className="mt-3 text-slate-600">Enterprise teams scale confidently with TrakJobs.</p>
         </div>
 
         <div className="mt-10 grid gap-8 md:grid-cols-3">
