@@ -14,13 +14,16 @@ import {
   CURRENCY_OPTIONS,
   TAX_PERCENTAGE_OPTIONS,
   TAX_APPLICABLE_OPTIONS,
-  getCategoryOptionsByClientType
+  MAIN_CATEGORY_OPTIONS,
+  SERVICE_CATEGORIES
 } from '../../constants/clientConstants';
 
 const CommercialClientForm = ({ formik, mode = 'create' }) => {
+  const selectedMainCategory = formik.values.service_category;
+  const subcategoryOptions = selectedMainCategory && SERVICE_CATEGORIES[selectedMainCategory] 
+    ? SERVICE_CATEGORIES[selectedMainCategory].subcategories 
+    : [];
 
-  const categoryOptions = getCategoryOptionsByClientType('commercial');
-  // Add this debug effect
   useEffect(() => {
     console.log('📋 CommercialClientForm - Formik State:', {
       values: formik.values,
@@ -434,14 +437,32 @@ const CommercialClientForm = ({ formik, mode = 'create' }) => {
           <Grid item xs={12} md={6}>
             <DebouncedSelect
               name="service_category"
-              label="Service Category"
+              label="Main Service Category"
               value={formik.values.service_category}
-              onChange={(value) => formik.setFieldValue('service_category', value)}
-              options={categoryOptions}
+              onChange={(value) => {
+                formik.setFieldValue('service_category', value);
+                formik.setFieldValue('service_sub_category', ''); // Reset subcategory when main changes
+              }}
+              options={MAIN_CATEGORY_OPTIONS}
               error={formik.touched.service_category && formik.errors.service_category}
               helperText={formik.touched.service_category && formik.errors.service_category}
               fullWidth
               required
+            />
+          </Grid>
+
+          <Grid item xs={12} md={6}>
+            <DebouncedSelect
+              name="service_sub_category"
+              label="Service Subcategory"
+              value={formik.values.service_sub_category}
+              onChange={(value) => formik.setFieldValue('service_sub_category', value)}
+              options={subcategoryOptions}
+              error={formik.touched.service_sub_category && formik.errors.service_sub_category}
+              helperText={formik.touched.service_sub_category && formik.errors.service_sub_category}
+              fullWidth
+              required
+              disabled={!selectedMainCategory}
             />
           </Grid>
 

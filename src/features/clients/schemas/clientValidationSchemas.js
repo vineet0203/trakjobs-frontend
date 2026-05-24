@@ -84,6 +84,7 @@ export const clientValidationSchema = (clientType) => {
       "Availability schedule is required",
     ),
     service_category: Yup.string().required('Service category is required'),
+    service_sub_category: Yup.string().required('Service subcategory is required'),
 
     // Commercial/Residential specific fields will be added below
   };

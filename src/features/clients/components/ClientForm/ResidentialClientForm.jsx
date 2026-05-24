@@ -7,13 +7,17 @@ import DebouncedSelect from '../../../../components/common/form/DebouncedSelect'
 import CommonContactFields from './CommonContactFields';
 import CommonAddressFields from './CommonAddressFields';
 import {
-  getCategoryOptionsByClientType,
   TAX_APPLICABLE_OPTIONS,
   TAX_PERCENTAGE_OPTIONS,
+  MAIN_CATEGORY_OPTIONS,
+  SERVICE_CATEGORIES
 } from '../../constants/clientConstants'; // <-- add
 
 const ResidentialClientForm = ({ formik }) => {
-  const categoryOptions = getCategoryOptionsByClientType('residential');
+  const selectedMainCategory = formik.values.service_category;
+  const subcategoryOptions = selectedMainCategory && SERVICE_CATEGORIES[selectedMainCategory] 
+    ? SERVICE_CATEGORIES[selectedMainCategory].subcategories 
+    : [];
 
   return (
     <>
@@ -113,12 +117,13 @@ const ResidentialClientForm = ({ formik }) => {
           <Grid item xs={12} md={6}>
             <DebouncedSelect
               name="service_category"
-              label="Service Category"
+              label="Main Service Category"
               value={formik.values.service_category}
-              onChange={(value) =>
-                formik.setFieldValue('service_category', value)
-              }
-              options={categoryOptions}
+              onChange={(value) => {
+                formik.setFieldValue('service_category', value);
+                formik.setFieldValue('service_sub_category', ''); // Reset subcategory when main changes
+              }}
+              options={MAIN_CATEGORY_OPTIONS}
               error={
                 formik.touched.service_category &&
                 formik.errors.service_category
@@ -129,6 +134,21 @@ const ResidentialClientForm = ({ formik }) => {
               }
               fullWidth
               required
+            />
+          </Grid>
+          
+          <Grid item xs={12} md={6}>
+            <DebouncedSelect
+              name="service_sub_category"
+              label="Service Subcategory"
+              value={formik.values.service_sub_category}
+              onChange={(value) => formik.setFieldValue('service_sub_category', value)}
+              options={subcategoryOptions}
+              error={formik.touched.service_sub_category && formik.errors.service_sub_category}
+              helperText={formik.touched.service_sub_category && formik.errors.service_sub_category}
+              fullWidth
+              required
+              disabled={!selectedMainCategory}
             />
           </Grid>
         </Grid>

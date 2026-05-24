@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import axios from "axios";
 import {
   Calendar,
   CheckCircle2,
@@ -73,6 +74,7 @@ import {
   Briefcase,
   SprayCan
 } from "lucide-react";
+import { SERVICE_CATEGORIES } from "../../features/clients/constants/clientConstants";
 
 const steps = [
   { id: 1, name: "Select Location" },
@@ -191,6 +193,17 @@ const BookingWorkflow = ({ catalog, initialSelection }) => {
   const [startDate, setStartDate] = useState("");
   const [startTime, setStartTime] = useState("");
   const [files, setFiles] = useState([]);
+
+  // Step 4 state
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    address: initialSelection.location || "",
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [matchedProviders, setMatchedProviders] = useState(0);
 
   const categoryData = useMemo(() => {
     return catalog.find((category) => category.name === selectedCategory) || catalog[0];
@@ -424,8 +437,8 @@ const BookingWorkflow = ({ catalog, initialSelection }) => {
 
         </div>
 
-        {/* BOTTOM SECTION: Details, Upload, Pricing (Only fully active if service selected) */}
-        <div className={`mt-6 grid gap-6 lg:grid-cols-[1.5fr_1.5fr_1fr] transition-opacity duration-300 ${!serviceData ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
+        {/* BOTTOM SECTION: Details, Upload, Pricing (Only fully active if service selected and step is not 4 or success) */}
+        <div className={`mt-6 grid gap-6 lg:grid-cols-[1.5fr_1.5fr_1fr] transition-opacity duration-300 ${!serviceData ? 'opacity-50 pointer-events-none' : 'opacity-100'} ${(activeStep === 4 || submitSuccess) ? 'hidden' : ''}`}>
           
           {/* Service Details Config */}
           <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -593,6 +606,134 @@ const BookingWorkflow = ({ catalog, initialSelection }) => {
           </div>
 
         </div>
+
+        {/* Step 4: Final Booking Form */}
+        {activeStep === 4 && !submitSuccess && (
+          <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm max-w-3xl mx-auto">
+            <h3 className="text-[18px] font-bold text-slate-800 mb-6 text-center">Complete Your Booking</h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div>
+                <label className="block text-[13px] font-bold text-slate-700 mb-2">Full Name</label>
+                <input 
+                  type="text" 
+                  required
+                  value={formData.name}
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  className="w-full border border-slate-200 rounded-xl px-4 py-3 text-[14px] text-slate-700 outline-none focus:border-brand-navy focus:ring-1 focus:ring-brand-navy"
+                  placeholder="John Doe"
+                />
+              </div>
+              <div>
+                <label className="block text-[13px] font-bold text-slate-700 mb-2">Email Address</label>
+                <input 
+                  type="email" 
+                  required
+                  value={formData.email}
+                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  className="w-full border border-slate-200 rounded-xl px-4 py-3 text-[14px] text-slate-700 outline-none focus:border-brand-navy focus:ring-1 focus:ring-brand-navy"
+                  placeholder="john@example.com"
+                />
+              </div>
+              <div>
+                <label className="block text-[13px] font-bold text-slate-700 mb-2">Phone Number</label>
+                <input 
+                  type="tel" 
+                  required
+                  value={formData.phone}
+                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                  className="w-full border border-slate-200 rounded-xl px-4 py-3 text-[14px] text-slate-700 outline-none focus:border-brand-navy focus:ring-1 focus:ring-brand-navy"
+                  placeholder="(555) 123-4567"
+                />
+              </div>
+              <div>
+                <label className="block text-[13px] font-bold text-slate-700 mb-2">Service Address</label>
+                <input 
+                  type="text" 
+                  required
+                  value={formData.address}
+                  onChange={(e) => setFormData({...formData, address: e.target.value})}
+                  className="w-full border border-slate-200 rounded-xl px-4 py-3 text-[14px] text-slate-700 outline-none focus:border-brand-navy focus:ring-1 focus:ring-brand-navy"
+                  placeholder="123 Main St, City"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-between items-center mt-8">
+              <button 
+                type="button"
+                onClick={() => setActiveStep(2)}
+                className="px-6 py-3 text-slate-500 font-bold hover:text-slate-700"
+                disabled={isSubmitting}
+              >
+                Back
+              </button>
+              <button 
+                onClick={async () => {
+                  if (!formData.name || !formData.email || !formData.phone || !formData.address) {
+                    alert('Please fill out all contact details.');
+                    return;
+                  }
+                  if (!startDate || !startTime) {
+                    alert('Please select a preferred date and time in the previous step.');
+                    return;
+                  }
+                  
+                  setIsSubmitting(true);
+                  try {
+                    const matchedCategory = Object.keys(SERVICE_CATEGORIES).find(key => 
+                      SERVICE_CATEGORIES[key].label === selectedCategory || SERVICE_CATEGORIES[key].label === selectedCategory + " Services"
+                    ) || 'home_repair';
+
+                    const matchedSubCategory = SERVICE_CATEGORIES[matchedCategory]?.subcategories.find(
+                      sub => sub.label === selectedService
+                    )?.value || selectedService.toLowerCase().replace(/ & /g, '_').replace(/ /g, '_');
+
+                    const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/v1/public/bookings`, {
+                      name: formData.name,
+                      email: formData.email,
+                      phone: formData.phone,
+                      location: formData.address,
+                      service_category: matchedCategory,
+                      service_sub_category: matchedSubCategory,
+                      date: startDate,
+                      time: startTime,
+                      notes: notes
+                    });
+                    
+                    setMatchedProviders(response.data.data.matched_providers);
+                    setSubmitSuccess(true);
+                  } catch (error) {
+                    console.error('Booking failed:', error);
+                    alert(error.response?.data?.message || 'Failed to submit booking. Please try again.');
+                  } finally {
+                    setIsSubmitting(false);
+                  }
+                }}
+                disabled={isSubmitting}
+                className="px-8 py-3 bg-brand-navy text-white rounded-xl font-bold flex items-center gap-2 hover:bg-slate-800 disabled:opacity-70"
+              >
+                {isSubmitting ? 'Confirming...' : 'Confirm Booking'} <CheckCircle2 size={18} />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Success State */}
+        {submitSuccess && (
+          <div className="mt-6 rounded-2xl border border-green-200 bg-green-50 p-10 shadow-sm max-w-2xl mx-auto text-center flex flex-col items-center">
+            <div className="h-20 w-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-6">
+              <CheckCircle2 size={40} />
+            </div>
+            <h2 className="text-2xl font-bold text-slate-800 mb-2">Booking Confirmed!</h2>
+            <p className="text-slate-600 text-[15px] mb-6 max-w-md">
+              We have successfully received your booking. We found <strong>{matchedProviders}</strong> verified service providers in your area for this service.
+            </p>
+            <p className="text-slate-500 text-[14px]">
+              They have been notified and will send you their quotes shortly. Please check your email ({formData.email}) for further details and to review incoming quotes.
+            </p>
+          </div>
+        )}
 
       </div>
     </section>

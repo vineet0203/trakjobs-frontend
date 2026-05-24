@@ -129,47 +129,124 @@ export const TAX_APPLICABLE_OPTIONS = [
   { value: "no", label: "No" },
 ];
 
-export const RESIDENTIAL_CATEGORY_OPTIONS = [
-  { value: "handyman", label: "Handyman Services" },
-  { value: "plumbing", label: "Plumbing Services" },
-  { value: "electrical", label: "Electrical Services" },
-  { value: "hvac", label: "HVAC Services" },
-  { value: "home_cleaning", label: "Home Cleaning Services" },
-  { value: "roof_repair", label: "Roof Repair Services" },
-  { value: "home_renovation", label: "Home Renovation Services" },
-  { value: "landscaping", label: "Landscaping Services" },
-  { value: "pest_control", label: "Pest Control Services" },
-  { value: "appliance_repair", label: "Appliance Repair Services" },
-  { value: "flooring", label: "Flooring Installation Services" },
-  { value: "painting", label: "Painting Services" },
-  { value: "window_glass", label: "Window and Glass Services" },
-  { value: "home_security", label: "Home Security Installation" },
-  { value: "pool_maintenance", label: "Pool Maintenance Services" },
-];
-
-export const COMMERCIAL_CATEGORY_OPTIONS = [
-  { value: "commercial_plumbing", label: "Commercial Plumbing Services" },
-  { value: "commercial_electrical", label: "Commercial Electrical Services" },
-  { value: "commercial_hvac", label: "Commercial HVAC Services" },
-  { value: "commercial_cleaning", label: "Commercial Cleaning Services" },
-  { value: "commercial_roofing", label: "Commercial Roofing Services" },
-  { value: "office_renovation", label: "Office Renovation Services" },
-  { value: "commercial_landscaping", label: "Commercial Landscaping Services" },
-  { value: "fire_protection", label: "Fire Protection Services" },
-  { value: "commercial_security", label: "Commercial Security Systems" },
-  { value: "elevator_maintenance", label: "Elevator Maintenance Services" },
-  { value: "industrial_equipment", label: "Industrial Equipment Maintenance" },
-  { value: "commercial_flooring", label: "Commercial Flooring Services" },
-  { value: "signage_installation", label: "Signage Installation Services" },
-  { value: "it_network", label: "IT and Network Services" },
-  { value: "facility_management", label: "Facility Management Services" },
-];
-
-export const getCategoryOptionsByClientType = (clientType) => {
-  return clientType === "commercial"
-    ? COMMERCIAL_CATEGORY_OPTIONS
-    : RESIDENTIAL_CATEGORY_OPTIONS;
+export const SERVICE_CATEGORIES = {
+  home_repair: {
+    label: "Home Repair Services",
+    subcategories: [
+      { value: "door_repair", label: "Door Repair & Installation" },
+      { value: "window_repair", label: "Window Repair" },
+      { value: "drywall_repair", label: "Drywall Repair" },
+      { value: "wall_patching", label: "Wall Patching" },
+      { value: "ceiling_repair", label: "Ceiling Repair" },
+      { value: "furniture_assembly", label: "Furniture Assembly" },
+      { value: "curtain_blind", label: "Curtain & Blind Installation" },
+      { value: "lock_replacement", label: "Lock Replacement" },
+      { value: "shelf_installation", label: "Shelf Installation" },
+      { value: "tv_mounting", label: "TV Wall Mounting" },
+    ]
+  },
+  electrical: {
+    label: "Electrical Services",
+    subcategories: [
+      { value: "light_installation", label: "Light Installation" },
+      { value: "fan_installation", label: "Fan Installation" },
+      { value: "switch_socket", label: "Switch & Socket Repair" },
+      { value: "wiring_repair", label: "Wiring Repair" },
+      { value: "doorbell", label: "Doorbell Installation" },
+      { value: "cctv", label: "CCTV Installation" },
+      { value: "power_backup", label: "Power Backup Setup" },
+    ]
+  },
+  plumbing: {
+    label: "Plumbing Services",
+    subcategories: [
+      { value: "tap_repair", label: "Tap Repair" },
+      { value: "pipe_leakage", label: "Pipe Leakage Repair" },
+      { value: "toilet_repair", label: "Toilet Repair" },
+      { value: "sink_installation", label: "Sink Installation" },
+      { value: "water_tank_cleaning", label: "Water Tank Cleaning" },
+      { value: "bathroom_fitting", label: "Bathroom Fitting Installation" },
+      { value: "shower_repair", label: "Shower Repair" },
+    ]
+  },
+  painting_wall: {
+    label: "Painting & Wall Services",
+    subcategories: [
+      { value: "interior_painting", label: "Interior Painting" },
+      { value: "exterior_painting", label: "Exterior Painting" },
+      { value: "texture_painting", label: "Texture Painting" },
+      { value: "wallpaper", label: "Wallpaper Installation" },
+      { value: "wall_cleaning", label: "Wall Cleaning" },
+      { value: "waterproofing", label: "Waterproofing" },
+    ]
+  },
+  carpentry: {
+    label: "Carpentry Services",
+    subcategories: [
+      { value: "modular_furniture", label: "Modular Furniture Work" },
+      { value: "cabinet_repair", label: "Cabinet Repair" },
+      { value: "wooden_door", label: "Wooden Door Repair" },
+      { value: "bed_repair", label: "Bed Repair" },
+      { value: "custom_shelves", label: "Custom Shelves" },
+      { value: "kitchen_cabinet", label: "Kitchen Cabinet Installation" },
+    ]
+  },
+  cleaning: {
+    label: "Cleaning Services",
+    subcategories: [
+      { value: "deep_home", label: "Deep Home Cleaning" },
+      { value: "sofa_cleaning", label: "Sofa Cleaning" },
+      { value: "carpet_cleaning", label: "Carpet Cleaning" },
+      { value: "kitchen_cleaning", label: "Kitchen Cleaning" },
+      { value: "bathroom_cleaning", label: "Bathroom Cleaning" },
+      { value: "water_tank", label: "Water Tank Cleaning" },
+    ]
+  },
+  appliance: {
+    label: "Appliance Services",
+    subcategories: [
+      { value: "ac_service", label: "AC Service & Repair" },
+      { value: "refrigerator", label: "Refrigerator Repair" },
+      { value: "washing_machine", label: "Washing Machine Repair" },
+      { value: "microwave", label: "Microwave Repair" },
+      { value: "geyser", label: "Geyser Installation" },
+      { value: "chimney", label: "Chimney Cleaning" },
+    ]
+  },
+  outdoor: {
+    label: "Outdoor Services",
+    subcategories: [
+      { value: "garden_maintenance", label: "Garden Maintenance" },
+      { value: "grass_cutting", label: "Grass Cutting" },
+      { value: "fence_repair", label: "Fence Repair" },
+      { value: "pressure_washing", label: "Pressure Washing" },
+      { value: "outdoor_lighting", label: "Outdoor Lighting" },
+    ]
+  },
+  smart_home: {
+    label: "Smart Home & Installation",
+    subcategories: [
+      { value: "wifi_setup", label: "WiFi Setup" },
+      { value: "smart_lock", label: "Smart Lock Installation" },
+      { value: "smart_camera", label: "Smart Camera Setup" },
+      { value: "home_automation", label: "Home Automation Setup" },
+    ]
+  },
+  moving_support: {
+    label: "Moving & Support Services",
+    subcategories: [
+      { value: "packing_unpacking", label: "Packing & Unpacking" },
+      { value: "local_shifting", label: "Local Shifting Help" },
+      { value: "heavy_item", label: "Heavy Item Moving" },
+      { value: "office_setup", label: "Office Setup Assistance" },
+    ]
+  }
 };
+
+export const MAIN_CATEGORY_OPTIONS = Object.keys(SERVICE_CATEGORIES).map(key => ({
+  value: key,
+  label: SERVICE_CATEGORIES[key].label
+}));
 
 export const WEEKDAYS = [
   "monday",
@@ -216,6 +293,7 @@ export const INITIAL_CLIENT_VALUES = {
   logo_temp_id: null,
   remove_logo: false,
   service_category: "",
+  service_sub_category: "",
   notes: "",
 
   // availability - will be transformed in transformer
