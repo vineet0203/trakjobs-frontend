@@ -50,6 +50,10 @@ export const registerSchema = Yup.object({
 
   website_name: websiteValidationYup, // Using Yup's built-in URL validation
 
+  business_type: Yup.string()
+    .required("Business type is required")
+    .oneOf(["commercial", "residential"], "Select a valid business type"),
+
   full_name: Yup.string()
     .required("Full name is required")
     .max(100, "Full name must not exceed 100 characters"),
@@ -60,6 +64,45 @@ export const registerSchema = Yup.object({
     .max(255, "Email must not exceed 255 characters"),
 
   mobile_number: mobileValidation,
+
+  service_category: Yup.string().required("Main service category is required"),
+
+  service_category_custom: Yup.string().when("service_category", {
+    is: "custom",
+    then: (schema) => schema.required("New main service is required"),
+    otherwise: (schema) => schema.nullable(),
+  }),
+
+  service_sub_category: Yup.string().required("Service subcategory is required"),
+
+  service_sub_category_custom: Yup.string().when("service_sub_category", {
+    is: "custom",
+    then: (schema) => schema.required("New sub-service is required"),
+    otherwise: (schema) => schema.nullable(),
+  }),
+
+  availability_type: Yup.string()
+    .required("Availability is required")
+    .oneOf(["mon_fri", "full_week", "custom"], "Select a valid availability"),
+
+  availability_days: Yup.array().when("availability_type", {
+    is: "custom",
+    then: (schema) => schema.min(1, "Select at least one day").required("Availability days are required"),
+    otherwise: (schema) => schema.nullable(),
+  }),
+
+  office_start_time: Yup.string()
+    .required("Office start time is required")
+    .matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format"),
+
+  office_end_time: Yup.string()
+    .required("Office end time is required")
+    .matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format")
+    .test("is-after-start", "End time must be after start time", function (value) {
+      const { office_start_time } = this.parent;
+      if (!office_start_time || !value) return true;
+      return value > office_start_time;
+    }),
 
   password: passwordValidation,
 
