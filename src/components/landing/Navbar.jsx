@@ -151,6 +151,12 @@ const Navbar = ({ onBook }) => {
           >
             Login
           </a>
+          <a
+            href="/auth/register"
+            className="rounded-lg border border-slate-200 bg-white px-5 py-2.5 text-[15px] font-semibold text-brand-navy transition hover:border-slate-300 hover:bg-slate-50"
+          >
+            Sign Up
+          </a>
           <button
             type="button"
             onClick={(e) => {
@@ -208,6 +214,12 @@ const Navbar = ({ onBook }) => {
                 className="rounded-lg border border-slate-200 bg-white px-5 py-3 text-center font-semibold text-brand-navy"
               >
                 Login
+              </a>
+              <a
+                href="/auth/register"
+                className="rounded-lg border border-slate-200 bg-white px-5 py-3 text-center font-semibold text-brand-navy hover:bg-slate-50"
+              >
+                Sign Up
               </a>
               <button
                 type="button"
