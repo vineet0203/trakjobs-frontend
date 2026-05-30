@@ -792,21 +792,30 @@ const BookingWorkflow = ({ catalog, initialSelection }) => {
                       sub => sub.label === selectedService
                     )?.value || selectedService.toLowerCase().replace(/ & /g, '_').replace(/ /g, '_');
 
-                    const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/v1/public/bookings`, {
-                      name: formData.name,
-                      email: formData.email,
-                      phone: formData.phone,
-                      location: formData.address,
-                      service_category: matchedCategory,
-                      service_sub_category: matchedSubCategory,
-                      date: startDate,
-                      time: startTime,
-                      notes: notes,
-                      vendor_ids: selectedVendors,
-                      service_name: serviceData?.name,
-                      unit_price: serviceData?.basePrice,
-                      quantity: quantity
+                    const payload = new FormData();
+                    payload.append('name', formData.name);
+                    payload.append('email', formData.email);
+                    payload.append('phone', formData.phone);
+                    payload.append('location', formData.address);
+                    payload.append('service_category', matchedCategory);
+                    payload.append('service_sub_category', matchedSubCategory);
+                    if (startDate) payload.append('date', startDate);
+                    if (startTime) payload.append('time', startTime);
+                    if (notes) payload.append('notes', notes);
+                    
+                    selectedVendors.forEach((id) => {
+                      payload.append('vendor_ids[]', id);
                     });
+                    
+                    if (serviceData?.name) payload.append('service_name', serviceData.name);
+                    if (serviceData?.basePrice) payload.append('unit_price', serviceData.basePrice);
+                    payload.append('quantity', quantity);
+                    
+                    files.forEach((file) => {
+                      payload.append('images[]', file);
+                    });
+
+                    const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/v1/public/bookings`, payload);
                     
                     setMatchedProviders(response.data.data.matched_providers);
                     setSubmitSuccess(true);

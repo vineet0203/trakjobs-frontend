@@ -135,6 +135,7 @@ const QuotePreviewModal = ({ open, quote, onClose, onEdit, onSuccess }) => {
       'can_edit',
       'can_send',
       'can_convert',
+      'images',
     ]);
 
     return Object.entries(displayedQuote)
@@ -245,6 +246,24 @@ const QuotePreviewModal = ({ open, quote, onClose, onEdit, onSuccess }) => {
             <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
               {displayedQuote.notes || 'N/A'}
             </Typography>
+
+            {displayedQuote.images && displayedQuote.images.length > 0 && (
+              <>
+                <Divider sx={{ my: 2 }} />
+                <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 700 }}>
+                  Attached Images
+                </Typography>
+                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                  {displayedQuote.images.map((imgUrl, index) => (
+                    <Box key={index} sx={{ border: '1px solid #E5E7EB', borderRadius: '8px', overflow: 'hidden', maxWidth: '200px' }}>
+                      <a href={imgUrl} target="_blank" rel="noopener noreferrer">
+                        <img src={imgUrl} alt={`Attachment ${index + 1}`} style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'cover' }} />
+                      </a>
+                    </Box>
+                  ))}
+                </Box>
+              </>
+            )}
 
             <Divider sx={{ my: 2 }} />
 

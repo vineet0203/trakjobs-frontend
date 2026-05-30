@@ -72,6 +72,7 @@ export const transformQuoteFromApi = (apiQuote) => {
     client: apiQuote.client,
     creator: apiQuote.creator,
     updater: apiQuote.updater,
+    images: apiQuote.images || [],
 
     // Permissions
     can_edit: apiQuote.can_edit,
