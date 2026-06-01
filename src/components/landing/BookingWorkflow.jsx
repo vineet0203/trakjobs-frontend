@@ -663,7 +663,9 @@ const BookingWorkflow = ({ catalog, initialSelection }) => {
               {loadingVendors ? (
                 <div className="text-center py-4 text-slate-500 text-sm">Searching for matching service providers...</div>
               ) : matchingVendors.length === 0 ? (
-                <div className="text-center py-4 text-red-500 text-sm font-semibold">No service providers found for this service. You will not be able to submit this request.</div>
+                <div className="text-center py-4 text-amber-700 bg-amber-50 rounded-xl border border-amber-200 text-sm font-medium px-4">
+                  We currently do not have matching service providers in your area for this service. You can still submit your request, and our support/admin team will assign one manually.
+                </div>
               ) : (
                 <div className="grid gap-3 sm:grid-cols-2">
                   {matchingVendors.map((vendor) => {
@@ -766,7 +768,7 @@ const BookingWorkflow = ({ catalog, initialSelection }) => {
               </button>
               <button 
                 onClick={async () => {
-                  if (selectedVendors.length === 0) {
+                  if (matchingVendors.length > 0 && selectedVendors.length === 0) {
                     alert('Please select at least one vendor.');
                     return;
                   }
@@ -828,7 +830,7 @@ const BookingWorkflow = ({ catalog, initialSelection }) => {
                     setIsSubmitting(false);
                   }
                 }}
-                disabled={isSubmitting || selectedVendors.length === 0}
+                disabled={isSubmitting || (matchingVendors.length > 0 && selectedVendors.length === 0)}
                 className="px-8 py-3 bg-brand-navy text-white rounded-xl font-bold flex items-center gap-2 hover:bg-slate-800 disabled:opacity-50"
               >
                 {isSubmitting ? 'Confirming...' : 'Confirm Booking'} <CheckCircle2 size={18} />
