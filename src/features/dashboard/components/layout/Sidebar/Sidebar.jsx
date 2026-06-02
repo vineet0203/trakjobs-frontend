@@ -21,7 +21,9 @@ import {
   ChevronDown,
   ChevronRight,
   Bell,
+  MessageSquare,
 } from 'lucide-react';
+import UnreadBadge from '../../../../messages/components/UnreadBadge';
 
 const Sidebar = () => {
   const navigate = useNavigate();
@@ -58,6 +60,7 @@ const Sidebar = () => {
     reports: <BarChart3 size={18} />,
     settings: <Settings size={18} />,
     notifications: <Bell size={18} />,
+    messages: <MessageSquare size={18} />,
   };
 
   const getIcon = (iconName) => icons[iconName] || icons.dashboard;
@@ -159,8 +162,9 @@ const Sidebar = () => {
                 }`}>
                   {getIcon(item.icon)}
                 </div>
-                <span className="text-[14px] whitespace-nowrap flex-1">
+                <span className="text-[14px] whitespace-nowrap flex-1 flex items-center justify-between">
                   {item.label}
+                  {item.icon === 'messages' && <UnreadBadge />}
                 </span>
                 {hasChildren && (
                   <div className="w-4 h-4 flex items-center justify-center text-slate-400">

@@ -320,127 +320,113 @@ const BookingWorkflow = ({ catalog, initialSelection }) => {
         </div>
 
         {/* Main Content Grid */}
-        <div className="grid gap-6 lg:grid-cols-[280px_1fr_300px]">
+        <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
           
-          {/* LEFT COLUMN: Categories */}
-          <div className="flex flex-col gap-6">
-            <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm">
-              <div className="px-5 py-4 border-b border-slate-100">
-                <h3 className="text-[15px] font-bold text-slate-800">Service Categories</h3>
-              </div>
-              <div className="flex flex-col p-2">
-                {/* Popular Services Special Item */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSelectedCategory(catalog[0].name);
-                    setSelectedService(null);
-                  }}
-                  className={`flex items-center justify-between rounded-xl px-4 py-3 text-left transition-colors ${
-                    isPopular ? "bg-amber-50 border border-amber-300" : "hover:bg-slate-50 border border-transparent"
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <Flame className={isPopular ? "text-amber-500" : "text-slate-400"} size={20} />
-                    <div>
-                      <div className={`text-[14px] font-bold ${isPopular ? "text-slate-900" : "text-slate-700"}`}>Popular Services</div>
-                      <div className="text-[12px] text-slate-500">Most booked services</div>
+          {/* LEFT COLUMN: Redesigned Service Catalog (Upfront Grid grouped by category) */}
+          <div className="flex flex-col gap-8 bg-white rounded-2xl border border-slate-200 p-6 md:p-8 shadow-sm">
+            {/* Quick Category Anchors */}
+            <div className="sticky top-0 bg-white z-20 py-3 border-b border-slate-100 flex gap-2 overflow-x-auto scrollbar-none shadow-sm -mx-6 md:-mx-8 px-6 md:px-8 mb-4">
+              {catalog.map((category) => {
+                const isActive = selectedCategory === category.name;
+                return (
+                  <button
+                    key={category.name}
+                    type="button"
+                    onClick={() => {
+                      setSelectedCategory(category.name);
+                      const element = document.getElementById(`category-${category.name.replace(/[^a-zA-Z0-9]/g, '-')}`);
+                      if (element) {
+                        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }
+                    }}
+                    className={`whitespace-nowrap px-4.5 py-2 rounded-full text-[13px] font-bold transition-all ${
+                      isActive
+                        ? "bg-[#ffb800] text-brand-navy shadow-sm"
+                        : "bg-slate-50 hover:bg-slate-100 text-slate-600"
+                    }`}
+                  >
+                    {category.name.replace(" Services", "")}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* List of categories with their service grid */}
+            <div className="flex flex-col gap-10">
+              {catalog.map((category) => {
+                const CatIcon = categoryIcons[category.name] || MoreHorizontal;
+                
+                return (
+                  <div 
+                    key={category.name} 
+                    id={`category-${category.name.replace(/[^a-zA-Z0-9]/g, '-')}`}
+                    className="scroll-mt-24"
+                  >
+                    <div className="flex items-center gap-3 mb-6 border-b border-slate-100 pb-3">
+                      <div className="h-10 w-10 rounded-xl bg-amber-50 flex items-center justify-center border border-amber-100 shadow-sm">
+                        <CatIcon className="text-amber-500" size={22} />
+                      </div>
+                      <div>
+                        <h3 className="text-[17px] font-bold text-slate-800 leading-tight">
+                          {category.name}
+                        </h3>
+                        <p className="text-[12px] text-slate-500">
+                          Professional solutions for {category.name.replace(" Services", "").toLowerCase()}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                      {category.services.map((service) => {
+                        const isSelected = selectedService === service.name;
+                        const SvcIcon = serviceIcons[service.name] || CatIcon;
+                        return (
+                          <div
+                            key={service.name}
+                            onClick={() => {
+                              setSelectedCategory(category.name);
+                              setSelectedService(service.name === selectedService ? null : service.name);
+                              setQuantity(1);
+                            }}
+                            className={`flex items-center gap-3 p-3.5 rounded-xl border cursor-pointer transition-all duration-200 group text-left ${
+                              isSelected
+                                ? "border-amber-400 bg-amber-50/20 shadow-sm ring-1 ring-amber-400"
+                                : "border-slate-200 hover:border-slate-300 hover:shadow-sm bg-slate-50/30 hover:bg-white"
+                            }`}
+                          >
+                            <div className={`h-9 w-9 rounded-lg flex items-center justify-center border shrink-0 transition-all ${
+                              isSelected ? "bg-amber-100 border-amber-300 shadow-sm text-amber-600" : "bg-white border-slate-200 text-blue-500"
+                            }`}>
+                              <SvcIcon size={16} />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h5 className={`font-semibold text-[13px] leading-tight truncate transition-colors ${
+                                isSelected ? "text-brand-navy" : "text-slate-800 group-hover:text-amber-500"
+                              }`}>
+                                {service.name}
+                              </h5>
+                              <p className="text-[11px] text-slate-500 mt-0.5">
+                                From <span className="font-bold text-slate-700">${service.basePrice}</span> • {service.duration}
+                              </p>
+                            </div>
+                            <div className={`flex h-4 w-4 items-center justify-center rounded-full border shrink-0 transition-colors ${
+                              isSelected ? "bg-[#ffb800] border-transparent text-slate-900" : "border-slate-300 bg-white"
+                            }`}>
+                              {isSelected && <CheckCircle2 size={10} className="stroke-[2.5]" />}
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
-                  {isPopular && <ChevronDown size={16} className="text-amber-500 -rotate-90" />}
-                </button>
-
-                <div className="my-2 border-t border-slate-100 mx-2"></div>
-
-                {catalog.map((category) => {
-                  if (category.name === catalog[0].name) return null; // Skip first as it's 'popular'
-                  const Icon = categoryIcons[category.name] || MoreHorizontal;
-                  const isActive = selectedCategory === category.name;
-                  
-                  return (
-                    <button
-                      key={category.name}
-                      type="button"
-                      onClick={() => {
-                        setSelectedCategory(category.name);
-                        setSelectedService(null);
-                      }}
-                      className={`flex items-center gap-3 rounded-xl px-4 py-3 text-left transition-colors ${
-                        isActive ? "bg-amber-50 border border-amber-300" : "hover:bg-slate-50 border border-transparent"
-                      }`}
-                    >
-                      <Icon className={isActive ? "text-amber-500" : "text-blue-500"} size={20} />
-                      <div>
-                        <div className={`text-[14px] font-bold ${isActive ? "text-slate-900" : "text-slate-700"}`}>
-                          {category.name.replace(" Services", "")}
-                        </div>
-                        <div className="text-[12px] text-slate-500 line-clamp-1">
-                          {category.services.map(s => s.name.split(' ')[0]).slice(0,3).join(', ')}...
-                        </div>
-                      </div>
-                      {isActive && <ChevronDown size={16} className="text-amber-500 -rotate-90 ml-auto" />}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-
-          {/* MIDDLE COLUMN: Service List */}
-          <div className="flex flex-col gap-6">
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm min-h-[500px]">
-              <div className="mb-6">
-                <h2 className="text-lg font-bold text-slate-800">
-                  {isPopular ? "Popular Services" : selectedCategory} in {initialSelection.location || "10001"}
-                </h2>
-                <p className="text-[13px] text-slate-500 mt-1">Based on your location</p>
-              </div>
-
-              <div className="grid gap-3">
-                {categoryData.services.map((service) => {
-                  const isSelected = selectedService === service.name;
-                  return (
-                    <div
-                      key={service.name}
-                      onClick={() => handleServiceSelect(service.name)}
-                      className={`flex items-center justify-between rounded-xl border p-4 cursor-pointer transition-all ${
-                        isSelected
-                          ? "border-amber-400 bg-amber-50/30 shadow-sm"
-                          : "border-slate-200 hover:border-slate-300 hover:shadow-sm"
-                      }`}
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="h-12 w-12 rounded-lg bg-slate-100 flex items-center justify-center overflow-hidden border border-slate-200 shrink-0">
-                          {serviceIcons[service.name] ? React.createElement(serviceIcons[service.name], {size: 24, className: "text-blue-500"}) : (categoryIcons[selectedCategory] ? React.createElement(categoryIcons[selectedCategory], {size: 24, className: "text-blue-500"}) : <Monitor size={24} className="text-blue-500" />)}
-                        </div>
-                        <div>
-                          <h4 className="text-[14px] font-bold text-slate-800">{service.name}</h4>
-                          <p className="text-[12px] text-slate-500 mt-0.5 line-clamp-1">Includes standard setup and installation.</p>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center gap-4 pl-4">
-                        <span className="text-[15px] font-bold text-slate-800 whitespace-nowrap">${service.basePrice}</span>
-                        <div className={`flex h-5 w-5 items-center justify-center rounded border transition-colors ${
-                          isSelected ? "bg-amber-400 border-amber-400 text-white" : "border-slate-300 bg-white"
-                        }`}>
-                          {isSelected && <CheckCircle2 size={14} />}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-              
-              <button className="mt-6 w-full py-3 text-[14px] font-semibold text-blue-600 hover:text-blue-700 flex items-center justify-center gap-2">
-                Show more services <ChevronDown size={16} />
-              </button>
+                );
+              })}
             </div>
           </div>
 
           {/* RIGHT COLUMN: Selection & Help */}
           <div className="flex flex-col gap-6">
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm h-[320px] flex flex-col">
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm h-[320px] flex flex-col sticky top-24">
               <h3 className="text-[15px] font-bold text-slate-800 mb-6">Your Selection</h3>
               
               {!serviceData ? (
@@ -469,7 +455,7 @@ const BookingWorkflow = ({ catalog, initialSelection }) => {
               )}
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sticky top-[420px]">
               <h3 className="text-[15px] font-bold text-slate-800 mb-2">Need help?</h3>
               <p className="text-[13px] text-slate-500 mb-5">Our support team is ready to assist you.</p>
               <a href="tel:+18001234567" className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors font-bold text-[14px] text-slate-800">

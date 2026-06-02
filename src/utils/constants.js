@@ -33,6 +33,7 @@ export const NAV_ITEMS = [
   },
   { path: "/quotes", label: "Quotes", icon: "quotes" },
   { path: "/jobs", label: "Jobs", icon: "jobs" },
+  { path: "/messages", label: "Messages", icon: "messages" },
 
   { path: "/schedule", label: "Schedule", icon: "schedule" },
   // { path: "/timesheets", label: "Timesheets", icon: "timesheets" },

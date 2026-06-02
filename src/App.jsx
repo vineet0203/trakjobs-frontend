@@ -51,6 +51,7 @@ import OnboardingAssign from './features/onboarding/pages/OnboardingAssign';
 
 // Time Tracking Approval Pages
 import TimeTrackingApproval from './features/time-tracking/pages/TimeTrackingApproval';
+import VendorMessages from './features/messages/pages/VendorMessages';
 import InvoiceList from './pages/invoice/InvoiceList';
 import InvoicePDFView from './pages/invoice/InvoicePDFView';
 import ReportsPage from './pages/reports/ReportsPage';
@@ -133,6 +134,9 @@ const AppContent = () => {
 
         {/* Time Tracking Approval Module */}
         <Route path="/time-tracking-approval" element={<TimeTrackingApproval />} />
+
+        {/* Messages Module */}
+        <Route path="/messages" element={<VendorMessages />} />
 
       </Route>
 

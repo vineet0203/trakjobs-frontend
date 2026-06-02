@@ -62,6 +62,7 @@ const PopularServices = ({ onBook, catalog }) => {
 
   const handleBook = (name) => {
     const details = serviceLookup.get(name);
+    setShowAllServices(false);
     if (onBook) {
       if (details) {
         onBook({
@@ -130,59 +131,86 @@ const PopularServices = ({ onBook, catalog }) => {
           </motion.button>
         </div>
 
-        {showAllServices && !selectedCategory && (
-          <div id="all-services" className="mt-12">
-            <h3 className="text-2xl font-bold text-brand-navy text-center mb-8">All Service Categories</h3>
-            <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 lg:gap-6">
+        {showAllServices && (
+          <div id="all-services" className="mt-12 bg-slate-50/50 rounded-3xl border border-slate-200/60 p-6 md:p-10 shadow-inner">
+            
+            {/* Quick Category Anchors */}
+            <div className="sticky top-0 bg-white/90 backdrop-blur-md z-10 py-4 border-b border-slate-100 flex gap-3 overflow-x-auto scrollbar-none shadow-sm -mx-6 md:-mx-10 px-6 md:px-10 mb-8 rounded-t-3xl">
               {catalog?.map((category) => {
                 const Icon = getCategoryIcon(category.name);
+                const isSelected = selectedCategory === category.name;
                 return (
-                  <motion.button
+                  <button
                     key={category.name}
-                    whileHover={{ y: -4 }}
-                    onClick={() => setSelectedCategory(category)}
-                    className="flex flex-col items-center justify-center rounded-2xl bg-white px-4 py-8 min-h-[140px] shadow-sm transition hover:shadow-md border border-slate-200 hover:border-[#ffb800]"
+                    type="button"
+                    onClick={() => {
+                      setSelectedCategory(category.name);
+                      const element = document.getElementById(`landing-category-${category.name.replace(/[^a-zA-Z0-9]/g, '-')}`);
+                      if (element) {
+                        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      }
+                    }}
+                    className={`flex items-center gap-2 whitespace-nowrap px-5 py-2.5 rounded-full text-[13px] font-bold transition-all ${
+                      isSelected
+                        ? "bg-[#ffb800] text-brand-navy shadow-sm"
+                        : "bg-white hover:bg-slate-50 text-slate-600 border border-slate-200"
+                    }`}
                   >
-                    <Icon size={38} strokeWidth={1.5} className="text-[#ffb800] mb-4" />
-                    <span className="text-[15px] font-bold text-brand-navy leading-tight whitespace-pre-line text-center">
-                      {category.name}
-                    </span>
-                  </motion.button>
+                    <Icon size={16} />
+                    {category.name.replace(" Services", "")}
+                  </button>
                 );
               })}
             </div>
-          </div>
-        )}
 
-        {showAllServices && selectedCategory && (
-          <div id="all-services" className="mt-12 rounded-3xl border border-slate-200 bg-white p-6 md:p-10 shadow-sm">
-            <div className="flex items-center gap-4 mb-8 border-b border-slate-100 pb-6">
-              <button 
-                onClick={() => setSelectedCategory(null)} 
-                className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-slate-100 transition-colors"
-              >
-                <ArrowLeft size={24} className="text-brand-navy" />
-              </button>
-              <div>
-                <h3 className="text-2xl font-bold text-brand-navy">{selectedCategory.name}</h3>
-                <p className="text-sm text-slate-500 mt-1">Select a service to book</p>
-              </div>
-            </div>
-            
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {selectedCategory.services.map((service) => (
-                <button
-                  key={service.name}
-                  onClick={() => handleBook(service.name)}
-                  className="flex flex-col text-left p-5 rounded-2xl border border-slate-200 hover:border-[#ffb800] hover:shadow-md transition bg-slate-50 hover:bg-white group"
-                >
-                  <span className="font-semibold text-brand-navy group-hover:text-[#ffb800] transition-colors">{service.name}</span>
-                  <div className="mt-4 flex items-center justify-between w-full text-sm">
-                    <span className="font-medium text-slate-700">From ${service.basePrice}</span>
-                    <span className="text-slate-500 bg-slate-100 px-2 py-1 rounded text-xs">{service.duration}</span>
+            {/* List of categories with their service grid */}
+            <div className="flex flex-col gap-12">
+              {catalog?.map((category) => {
+                const Icon = getCategoryIcon(category.name);
+                return (
+                  <div 
+                    key={category.name}
+                    id={`landing-category-${category.name.replace(/[^a-zA-Z0-9]/g, '-')}`}
+                    className="scroll-mt-28"
+                  >
+                    <div className="flex items-center gap-3 mb-6 border-b border-slate-100 pb-3">
+                      <div className="h-10 w-10 rounded-xl bg-amber-50 flex items-center justify-center border border-amber-100 shadow-sm">
+                        <Icon className="text-amber-500" size={22} />
+                      </div>
+                      <div>
+                        <h4 className="text-lg font-bold text-brand-navy leading-tight">
+                          {category.name}
+                        </h4>
+                        <p className="text-[12px] text-slate-500 mt-0.5">
+                          Professional solutions for {category.name.replace(" Services", "").toLowerCase()}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                      {category.services.map((service) => (
+                        <button
+                          key={service.name}
+                          onClick={() => handleBook(service.name)}
+                          className="flex items-center gap-3 p-3.5 rounded-xl border border-slate-200 hover:border-[#ffb800] hover:shadow-sm transition bg-white hover:bg-[#fffdf8] group text-left w-full"
+                        >
+                          <div className="h-9 w-9 rounded-lg bg-slate-50 flex items-center justify-center border border-slate-100 group-hover:bg-amber-50 group-hover:border-amber-200 shrink-0 transition-colors">
+                            {React.createElement(getCategoryIcon(category.name), { size: 16, className: "text-amber-500 group-hover:text-amber-600" })}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h5 className="font-semibold text-slate-800 text-[13px] leading-tight truncate group-hover:text-brand-navy transition-colors">
+                              {service.name}
+                            </h5>
+                            <p className="text-[11px] text-slate-500 mt-0.5">
+                              From <span className="font-bold text-slate-700">${service.basePrice}</span> • {service.duration}
+                            </p>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </button>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
