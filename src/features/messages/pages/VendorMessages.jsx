@@ -74,48 +74,58 @@ const VendorMessages = () => {
   useEffect(() => {
     if (!vendorId || !activeCustomerId || !token) return;
 
-    // Initialize Echo if not already done
-    if (!echoInstanceRef.current) {
-      window.Pusher = Pusher;
-      echoInstanceRef.current = new Echo({
-        broadcaster: 'pusher',
-        key: 'trakjobs_key',
-        wsHost: '45.63.106.38',
-        wsPort: 6001,
-        forceTLS: false,
-        disableStats: true,
-        enabledTransports: ['ws', 'wss'],
-        authEndpoint: `${API_BASE_URL}/chat/auth`,
-        auth: {
-          headers: {
-            Authorization: `Bearer ${token}`
+    let channelName = `chat.vendor.${vendorId}.customer.${activeCustomerId}`;
+    let channelInstance = null;
+
+    try {
+      // Initialize Echo if not already done
+      if (!echoInstanceRef.current) {
+        window.Pusher = Pusher;
+        echoInstanceRef.current = new Echo({
+          broadcaster: 'pusher',
+          key: 'trakjobs_key',
+          wsHost: '45.63.106.38',
+          wsPort: 6001,
+          forceTLS: false,
+          disableStats: true,
+          enabledTransports: ['ws', 'wss'],
+          authEndpoint: `${API_BASE_URL}/chat/auth`,
+          auth: {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        });
+      }
+
+      channelInstance = echoInstanceRef.current.private(channelName);
+
+      channelInstance.listen('.message.sent', (data) => {
+        // Append the message to state if it matches the current conversation
+        if (data && data.customer_id === activeCustomerId && data.vendor_id === vendorId) {
+          setMessages(prev => {
+            // Avoid duplicates
+            if (prev.some(m => m.id === data.id)) return prev;
+            return [...prev, data];
+          });
+
+          // Mark it as read immediately since the conversation is active
+          if (data.sender_type === 'customer') {
+            markAsRead(activeCustomerId).catch(console.error);
           }
         }
       });
+    } catch (error) {
+      console.error('Failed to set up Laravel Echo subscription:', error);
     }
 
-    const channelName = `chat.vendor.${vendorId}.customer.${activeCustomerId}`;
-    const channel = echoInstanceRef.current.private(channelName);
-
-    channel.listen('.message.sent', (data) => {
-      // Append the message to state if it matches the current conversation
-      if (data.customer_id === activeCustomerId && data.vendor_id === vendorId) {
-        setMessages(prev => {
-          // Avoid duplicates
-          if (prev.some(m => m.id === data.id)) return prev;
-          return [...prev, data];
-        });
-
-        // Mark it as read immediately since the conversation is active
-        if (data.sender_type === 'customer') {
-          markAsRead(activeCustomerId).catch(console.error);
-        }
-      }
-    });
-
     return () => {
-      if (echoInstanceRef.current) {
-        echoInstanceRef.current.leave(channelName);
+      if (echoInstanceRef.current && channelInstance) {
+        try {
+          echoInstanceRef.current.leave(channelName);
+        } catch (e) {
+          console.error('Error leaving Echo channel:', e);
+        }
       }
     };
   }, [activeCustomerId, vendorId, token]);
@@ -131,6 +141,7 @@ const VendorMessages = () => {
 
       // Update conversations sidebar last message
       setConversations(prev => {
+        if (!Array.isArray(prev)) return [];
         return prev.map(c => {
           if (c.id === activeCustomerId) {
             return {
@@ -150,7 +161,7 @@ const VendorMessages = () => {
     }
   };
 
-  const activeCustomer = conversations.find(c => c.id === activeCustomerId);
+  const activeCustomer = Array.isArray(conversations) ? conversations.find(c => c.id === activeCustomerId) : null;
 
   return (
     <div className="vendor-messages-page">
@@ -169,11 +180,12 @@ const VendorMessages = () => {
         <div className="conversations-list">
           {loadingConversations ? (
             <div className="conversations-loading">Loading conversations...</div>
-          ) : conversations.length === 0 ? (
+          ) : !Array.isArray(conversations) || conversations.length === 0 ? (
             <div className="conversations-empty">No conversations found</div>
           ) : (
             conversations.map((c) => {
               const isActive = c.id === activeCustomerId;
+              const hasName = c && typeof c.name === 'string' && c.name.length > 0;
               return (
                 <div
                   key={c.id}
@@ -181,11 +193,11 @@ const VendorMessages = () => {
                   onClick={() => handleSelectCustomer(c.id)}
                 >
                   <div className="conversation-avatar">
-                    {c.name.charAt(0).toUpperCase()}
+                    {hasName ? c.name.charAt(0).toUpperCase() : 'C'}
                   </div>
                   <div className="conversation-details">
                     <div className="conversation-header">
-                      <span className="customer-name">{c.name}</span>
+                      <span className="customer-name">{c.name || 'Unknown Customer'}</span>
                       {c.unread_count > 0 && (
                         <span className="unread-badge">{c.unread_count}</span>
                       )}
@@ -228,3 +240,4 @@ const VendorMessages = () => {
 };
 
 export default VendorMessages;
+
