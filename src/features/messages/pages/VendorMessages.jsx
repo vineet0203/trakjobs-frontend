@@ -83,9 +83,9 @@ const VendorMessages = () => {
         window.Pusher = Pusher;
         echoInstanceRef.current = new Echo({
           broadcaster: 'pusher',
-          key: 'trakjobs_key',
-          wsHost: '45.63.106.38',
-          wsPort: 6001,
+          key: 'idgq8iuytafdhi8zrh2u',
+          wsHost: 'api.trakjobs.com',
+          wsPort: 8080,
           forceTLS: false,
           disableStats: true,
           enabledTransports: ['ws', 'wss'],
