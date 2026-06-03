@@ -43,6 +43,7 @@ class BaseApiService {
 
   async update(id, data) {
     const url = this.buildUrl(`/${id}`);
+    console.log('🔥 API UPDATE PAYLOAD:', JSON.stringify(data, null, 2));
     const response = await this.client.put(url, data);
     return response.data;
   }
