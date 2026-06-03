@@ -87,14 +87,14 @@ export const transformQuoteForApi = (formData) => {
 };
 
 // Calculate totals from line items - MAKE SURE THIS IS EXPORTED
-export const calculateQuoteTotals = (items) => {
+export const calculateQuoteTotals = (items, isTaxApplicable = false) => {
   const subtotal = items.reduce((sum, item) => {
     return sum + (item.quantity || 0) * (item.unit_price || 0);
   }, 0);
 
   const total = items.reduce((sum, item) => {
     const itemSubtotal = (item.quantity || 0) * (item.unit_price || 0);
-    const taxAmount = itemSubtotal * ((item.tax_rate || 0) / 100);
+    const taxAmount = isTaxApplicable ? itemSubtotal * ((item.tax_rate || 0) / 100) : 0;
     return sum + itemSubtotal + taxAmount;
   }, 0);
 

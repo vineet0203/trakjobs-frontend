@@ -145,7 +145,7 @@ const QuoteEdit = () => {
         breadcrumb={[
           { label: 'Dashboard', path: '/dashboard' },
           { label: 'Quotes', path: '/quotes' },
-          { label: `Edit Quote #${currentQuote.quoteNumber || id}`, current: true }
+          { label: `Edit Quote #${currentQuote.quote_number || id}`, current: true }
         ]}
         title="Edit Quote"
         subtitle="Update the quote details below."
