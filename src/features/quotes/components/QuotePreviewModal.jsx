@@ -227,7 +227,7 @@ const QuotePreviewModal = ({ open, quote, onClose, onEdit, onSuccess }) => {
                       <TableCell>{item.description || '-'}</TableCell>
                       <TableCell align="right">{item.quantity ?? '-'}</TableCell>
                       <TableCell align="right">{formatCurrency(item.unit_price, displayedQuote.currency)}</TableCell>
-                      <TableCell align="right">{formatCurrency(item.quantity * item.unit_price, displayedQuote.currency)}</TableCell>
+                      <TableCell align="right">{formatCurrency(item.item_total, displayedQuote.currency)}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
