@@ -25,6 +25,7 @@ import {
   WEEKDAYS,
   ALL_DAYS
 } from '../../clients/constants/clientConstants';
+import { categoryService } from '../../../services/categoryService';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -39,6 +40,21 @@ const Register = () => {
 
   const [errorDialogOpen, setErrorDialogOpen] = useState(false);
   const [currentError, setCurrentError] = useState(null);
+  const [categoryOptions, setCategoryOptions] = useState(MAIN_CATEGORY_OPTIONS);
+
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const data = await categoryService.fetchCategories();
+        if (data && data.length > 0) {
+          setCategoryOptions(data);
+        }
+      } catch (err) {
+        console.warn("Failed to fetch dynamic categories, using hardcoded fallback", err);
+      }
+    };
+    loadCategories();
+  }, []);
 
   // Handle Redux errors - SHOWS DIALOG FOR ALL ERRORS
   useEffect(() => {
@@ -283,7 +299,7 @@ const Register = () => {
                       }
                     }}
                     options={[
-                      ...MAIN_CATEGORY_OPTIONS,
+                      ...categoryOptions,
                       { value: 'custom', label: 'Add new main service' }
                     ]}
                     error={touched.service_category && Boolean(errors.service_category)}

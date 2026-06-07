@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 const serviceCatalog = [
   {
     name: "Home Repair Services",
@@ -111,5 +113,36 @@ const serviceCatalog = [
     ],
   },
 ];
+
+export const fetchServiceCatalog = async () => {
+  try {
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000";
+    const response = await axios.get(`${apiBaseUrl}/api/v1/service-categories`);
+    
+    if (response.data && response.data.data) {
+      const categories = response.data.data;
+      return categories.map((cat) => {
+        // Try to match the dynamic category name with our existing hardcoded catalog
+        const existing = serviceCatalog.find(
+          (item) =>
+            item.name.toLowerCase() === cat.name.toLowerCase() ||
+            item.name.toLowerCase().replace(" services", "") === cat.name.toLowerCase().replace(" services", "") ||
+            item.name.toLowerCase().includes(cat.name.toLowerCase()) ||
+            cat.name.toLowerCase().includes(item.name.toLowerCase())
+        );
+
+        return {
+          name: cat.name,
+          slug: cat.slug,
+          services: existing ? existing.services : [],
+        };
+      });
+    }
+    return serviceCatalog;
+  } catch (error) {
+    console.error("Failed to fetch service categories from API, using fallback", error);
+    return serviceCatalog;
+  }
+};
 
 export default serviceCatalog;

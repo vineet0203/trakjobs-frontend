@@ -12,7 +12,7 @@ const navLinks = [
   { label: "Contact Us", href: "#contact" },
 ];
 
-const Navbar = ({ onBook }) => {
+const Navbar = ({ onBook, catalog = serviceCatalog }) => {
   const [open, setOpen] = useState(false);
 
   return (
@@ -69,7 +69,7 @@ const Navbar = ({ onBook }) => {
 
             <div className="invisible absolute left-1/2 -translate-x-[35%] top-full z-50 mt-4 w-[900px] max-h-[85vh] overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-xl opacity-0 transition-all duration-200 group-hover:visible group-hover:opacity-100 group-hover:mt-2">
               <div className="p-6 grid grid-cols-3 gap-x-8 gap-y-6">
-                {serviceCatalog.map((category) => (
+                {catalog.map((category) => (
                   <div key={category.name}>
                     <p className="text-sm font-bold text-brand-navy border-b border-slate-100 pb-2 mb-3">
                       {category.name}

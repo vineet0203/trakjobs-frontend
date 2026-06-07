@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import Navbar from "../components/landing/Navbar";
 import HeroSection from "../components/landing/HeroSection";
 import TrustBadgesSection from "../components/landing/TrustBadgesSection";
@@ -15,11 +15,20 @@ import AIAutomationSection from "../components/landing/AIAutomationSection";
 import CTASection from "../components/landing/CTASection";
 import Footer from "../components/landing/Footer";
 import BookingWorkflow from "../components/landing/BookingWorkflow";
-import serviceCatalog from "../components/landing/serviceCatalog";
+import serviceCatalog, { fetchServiceCatalog } from "../components/landing/serviceCatalog";
 
 const LandingPage = () => {
   const [bookingData, setBookingData] = useState(null);
+  const [catalog, setCatalog] = useState(serviceCatalog);
   const workflowRef = useRef(null);
+
+  useEffect(() => {
+    const loadCatalog = async () => {
+      const data = await fetchServiceCatalog();
+      setCatalog(data);
+    };
+    loadCatalog();
+  }, []);
 
   const handleStartBooking = ({ location, service }) => {
     setBookingData({ location, ...service });
@@ -30,15 +39,15 @@ const LandingPage = () => {
 
   return (
     <div className="bg-white text-slate-900 font-sans">
-      <Navbar onBook={handleStartBooking} />
+      <Navbar onBook={handleStartBooking} catalog={catalog} />
       <main className="overflow-hidden">
-        <HeroSection catalog={serviceCatalog} onBook={handleStartBooking} />
-        <PopularServices onBook={handleStartBooking} catalog={serviceCatalog} />
+        <HeroSection catalog={catalog} onBook={handleStartBooking} />
+        <PopularServices onBook={handleStartBooking} catalog={catalog} />
         <TrustStripSection />
         <TrustBadgesSection />
         {bookingData && (
           <div ref={workflowRef}>
-            <BookingWorkflow catalog={serviceCatalog} initialSelection={bookingData} />
+            <BookingWorkflow catalog={catalog} initialSelection={bookingData} />
           </div>
         )}
         <StatsSection />
