@@ -187,3 +187,11 @@ export const TAX_PERCENTAGE_OPTIONS = [
   { value: "28", label: "28%" },
 ];
 
+
+export const TAX_APPLICABLE_OPTIONS = [
+  { value: true, label: "Yes" },
+  { value: false, label: "No" },
+];
+
+export const MAIN_CATEGORY_OPTIONS = [];
+export const SERVICE_CATEGORIES = {};
