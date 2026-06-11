@@ -63,3 +63,15 @@ export const INITIAL_CLIENT_VALUES = {
     notes: "",
   },
 };
+
+export const BUSINESS_TYPE_OPTIONS = [
+  { value: "sole_proprietor", label: "Sole Proprietor" },
+  { value: "partnership", label: "Partnership" },
+  { value: "private_limited", label: "Private Limited" },
+  { value: "public_limited", label: "Public Limited" },
+  { value: "llp", label: "LLP" },
+  { value: "cooperative", label: "Cooperative" },
+  { value: "ngo", label: "NGO" },
+  { value: "government", label: "Government" },
+  { value: "other", label: "Other" },
+];
