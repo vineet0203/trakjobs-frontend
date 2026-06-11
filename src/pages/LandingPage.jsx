@@ -33,8 +33,13 @@ const LandingPage = () => {
   const handleStartBooking = ({ location, service }) => {
     setBookingData({ location, ...service });
     setTimeout(() => {
-      workflowRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 50);
+      const detailsElement = document.getElementById("booking-details-section");
+      if (detailsElement) {
+        detailsElement.scrollIntoView({ behavior: "smooth", block: "start" });
+      } else {
+        workflowRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }, 200);
   };
 
   return (
@@ -45,11 +50,9 @@ const LandingPage = () => {
         <PopularServices onBook={handleStartBooking} catalog={catalog} />
         <TrustStripSection />
         <TrustBadgesSection />
-        {bookingData && (
-          <div ref={workflowRef}>
-            <BookingWorkflow catalog={catalog} initialSelection={bookingData} />
-          </div>
-        )}
+        <div ref={workflowRef}>
+          <BookingWorkflow catalog={catalog} initialSelection={bookingData} />
+        </div>
         <StatsSection />
         <FeaturesSection />
         <HowItWorksSection />

@@ -176,15 +176,15 @@ const BookingWorkflow = ({ catalog, initialSelection }) => {
   const [activeStep, setActiveStep] = useState(2); 
 
   const initialCategory = useMemo(() => {
-    return catalog.find((category) => category.name === initialSelection.category)?.name ||
+    return catalog.find((category) => category.name === initialSelection?.category)?.name ||
       catalog[0]?.name;
-  }, [catalog, initialSelection.category]);
+  }, [catalog, initialSelection?.category]);
 
   const initialService = useMemo(() => {
     const category = catalog.find((item) => item.name === initialCategory) || catalog[0];
-    const match = category?.services.find((service) => service.name === initialSelection.name);
+    const match = category?.services.find((service) => service.name === initialSelection?.name);
     return match?.name || null; // Start with nothing selected if no direct match, to show the "No service selected" state
-  }, [catalog, initialCategory, initialSelection.name]);
+  }, [catalog, initialCategory, initialSelection?.name]);
 
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [selectedService, setSelectedService] = useState(initialService);
@@ -222,7 +222,7 @@ const BookingWorkflow = ({ catalog, initialSelection }) => {
     name: "",
     email: "",
     phone: "",
-    address: initialSelection.location || "",
+    address: initialSelection?.location || "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
@@ -363,32 +363,6 @@ const BookingWorkflow = ({ catalog, initialSelection }) => {
           
           {/* LEFT COLUMN: Redesigned Service Catalog (Upfront Grid grouped by category) */}
           <div className="flex flex-col gap-8 bg-white rounded-2xl border border-slate-200 p-6 md:p-8 shadow-sm">
-            {/* Quick Category Anchors */}
-            <div className="sticky top-0 bg-white z-20 py-3 border-b border-slate-100 flex gap-2 overflow-x-auto scrollbar-none shadow-sm -mx-6 md:-mx-8 px-6 md:px-8 mb-4">
-              {catalog.map((category) => {
-                const isActive = selectedCategory === category.name;
-                return (
-                  <button
-                    key={category.name}
-                    type="button"
-                    onClick={() => {
-                      setSelectedCategory(category.name);
-                      const element = document.getElementById(`category-${category.name.replace(/[^a-zA-Z0-9]/g, '-')}`);
-                      if (element) {
-                        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                      }
-                    }}
-                    className={`whitespace-nowrap px-4.5 py-2 rounded-full text-[13px] font-bold transition-all ${
-                      isActive
-                        ? "bg-[#ffb800] text-brand-navy shadow-sm"
-                        : "bg-slate-50 hover:bg-slate-100 text-slate-600"
-                    }`}
-                  >
-                    {category.name.replace(" Services", "")}
-                  </button>
-                );
-              })}
-            </div>
 
             {/* List of categories with their service grid */}
             <div className="flex flex-col gap-10">
@@ -426,6 +400,12 @@ const BookingWorkflow = ({ catalog, initialSelection }) => {
                               setSelectedCategory(category.name);
                               setSelectedService(service.name === selectedService ? null : service.name);
                               setQuantity(1);
+                              setTimeout(() => {
+                                const detailsElement = document.getElementById("booking-details-section");
+                                if (detailsElement) {
+                                  detailsElement.scrollIntoView({ behavior: "smooth", block: "start" });
+                                }
+                              }, 150);
                             }}
                             className={`flex items-center gap-3 p-3.5 rounded-xl border cursor-pointer transition-all duration-200 group text-left ${
                               isSelected
@@ -506,7 +486,10 @@ const BookingWorkflow = ({ catalog, initialSelection }) => {
         </div>
 
         {/* BOTTOM SECTION: Details, Upload, Pricing (Only fully active if service selected and step is not 4 or success) */}
-        <div className={`mt-6 grid gap-6 lg:grid-cols-[1.5fr_1.5fr_1fr] transition-opacity duration-300 ${!serviceData ? 'opacity-50 pointer-events-none' : 'opacity-100'} ${(activeStep === 4 || submitSuccess) ? 'hidden' : ''}`}>
+        <div 
+          id="booking-details-section"
+          className={`scroll-mt-24 mt-6 grid gap-6 lg:grid-cols-[1.5fr_1.5fr_1fr] transition-opacity duration-300 ${!serviceData ? 'opacity-50 pointer-events-none' : 'opacity-100'} ${(activeStep === 4 || submitSuccess) ? 'hidden' : ''}`}
+        >
           
           {/* Service Details Config */}
           <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">

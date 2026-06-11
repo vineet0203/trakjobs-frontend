@@ -1,5 +1,22 @@
 import React, { useState } from "react";
-import { Hammer, Menu, Phone, X, PenTool } from "lucide-react";
+import { 
+  Hammer, 
+  Menu, 
+  Phone, 
+  X, 
+  PenTool, 
+  Zap, 
+  Droplet, 
+  Paintbrush, 
+  Wrench, 
+  Sparkles, 
+  Home, 
+  Leaf, 
+  Cpu, 
+  Package, 
+  ChevronRight,
+  Clock
+} from "lucide-react";
 import { motion } from "framer-motion";
 import serviceCatalog from "./serviceCatalog";
 
@@ -12,8 +29,25 @@ const navLinks = [
   { label: "Contact Us", href: "#contact" },
 ];
 
+const getCategoryIcon = (name) => {
+  if (name.includes("Home Repair")) return Home;
+  if (name.includes("Electrical")) return Zap;
+  if (name.includes("Plumbing")) return Droplet;
+  if (name.includes("Painting")) return Paintbrush;
+  if (name.includes("Carpentry")) return Hammer;
+  if (name.includes("Cleaning")) return Sparkles;
+  if (name.includes("Appliance")) return Wrench;
+  if (name.includes("Outdoor")) return Leaf;
+  if (name.includes("Smart Home")) return Cpu;
+  if (name.includes("Moving")) return Package;
+  return Hammer;
+};
+
 const Navbar = ({ onBook, catalog = serviceCatalog }) => {
   const [open, setOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [hoveredCategory, setHoveredCategory] = useState(catalog[0]?.name || "");
+  const selectedCategoryData = catalog.find((c) => c.name === hoveredCategory) || catalog[0];
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-slate-200 shadow-sm">
@@ -37,99 +71,154 @@ const Navbar = ({ onBook, catalog = serviceCatalog }) => {
           </div>
         </a>
 
-{/* Desktop Nav Links */}
-<nav className="hidden lg:flex items-center gap-8 text-[15px] font-semibold text-brand-navy">
-  {navLinks
-    .filter((link) => link.label !== "Services")
-    .map((link, index) => (
-      <React.Fragment key={link.label}>
-        
-        {/* Services after Home */}
-        {index === 1 && (
-          <div className="relative group">
-            <a
-              href="#services"
-              className="relative transition hover:text-[#ffb800] flex items-center gap-1"
-            >
-              Services
-              <svg
-                className="w-3 h-3 text-slate-400 group-hover:text-[#ffb800]"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="3"
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
-            </a>
+        {/* Desktop Nav Links */}
+        <nav className="hidden lg:flex items-center gap-8 text-[15px] font-semibold text-brand-navy">
+          {navLinks
+            .filter((link) => link.label !== "Services")
+            .map((link, index) => (
+              <React.Fragment key={link.label}>
+                
+                {/* Services after Home */}
+                {index === 1 && (
+                  <div
+                    className="relative"
+                    onMouseEnter={() => setIsDropdownOpen(true)}
+                    onMouseLeave={() => setIsDropdownOpen(false)}
+                  >
+                    <a
+                      href="#services"
+                      className="relative transition hover:text-[#ffb800] flex items-center gap-1"
+                    >
+                      Services
+                      <svg
+                        className="w-3 h-3 text-slate-400 hover:text-[#ffb800]"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="3"
+                          d="M19 9l-7 7-7-7"
+                        />
+                      </svg>
+                    </a>
 
-            <div className="invisible absolute left-1/2 -translate-x-[35%] top-full z-50 mt-4 w-[900px] max-h-[85vh] overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-xl opacity-0 transition-all duration-200 group-hover:visible group-hover:opacity-100 group-hover:mt-2">
-              <div className="p-6 grid grid-cols-3 gap-x-8 gap-y-6">
-                {catalog.map((category) => (
-                  <div key={category.name}>
-                    <p className="text-sm font-bold text-brand-navy border-b border-slate-100 pb-2 mb-3">
-                      {category.name}
-                    </p>
+                    <div
+                      className={`absolute left-1/2 -translate-x-1/2 top-full z-50 pt-2 w-[850px] transition-all duration-200 ${
+                        isDropdownOpen ? "visible opacity-100" : "invisible opacity-0 pointer-events-none"
+                      }`}
+                    >
+                      <div className="flex rounded-2xl border border-slate-200 bg-white shadow-2xl overflow-hidden min-h-[420px]">
+                        {/* Left sidebar: Categories */}
+                        <div className="w-[280px] bg-slate-50/80 border-r border-slate-100 p-4 flex flex-col gap-1.5">
+                          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-2">
+                            Categories
+                          </p>
+                          {catalog.map((category) => {
+                            const Icon = getCategoryIcon(category.name);
+                            const isActive = hoveredCategory === category.name;
+                            return (
+                              <button
+                                key={category.name}
+                                type="button"
+                                onMouseEnter={() => setHoveredCategory(category.name)}
+                                className={`flex items-center justify-between px-3 py-2.5 rounded-xl text-left text-[14px] font-bold transition-all ${
+                                  isActive
+                                    ? "bg-white text-brand-navy shadow-sm ring-1 ring-slate-100/50"
+                                    : "text-slate-600 hover:bg-slate-100/60 hover:text-brand-navy"
+                                }`}
+                              >
+                                <div className="flex items-center gap-2.5">
+                                  <span className={`flex h-8 w-8 items-center justify-center rounded-lg border ${
+                                    isActive ? "bg-amber-50 border-amber-200 text-amber-500" : "bg-white border-slate-200 text-slate-400"
+                                  }`}>
+                                    <Icon size={16} />
+                                  </span>
+                                  <span>{category.name.replace(" Services", "")}</span>
+                                </div>
+                                <ChevronRight size={14} className={`transition-transform duration-200 text-slate-300 ${isActive ? "translate-x-0.5 text-amber-500" : ""}`} />
+                              </button>
+                            );
+                          })}
+                        </div>
 
-                    <ul className="space-y-1">
-                      {category.services.map((service) => (
-                        <li key={service.name}>
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              if (onBook) {
-                                onBook({
-                                  location: "",
-                                  service: {
-                                    name: service.name,
-                                    category: category.name,
-                                    basePrice: service.basePrice,
-                                    duration: service.duration,
-                                  },
-                                });
-                              }
-                            }}
-                            className="w-full text-left text-[13px] font-medium text-slate-600 hover:text-[#ffb800] hover:bg-orange-50/50 hover:pl-3 rounded-md px-2 py-1.5 transition-all duration-200"
-                          >
-                            {service.name}
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
+                        {/* Right panel: Active Category Services */}
+                        <div className="flex-1 p-6 flex flex-col justify-between">
+                          <div>
+                            <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                              <span className="text-[15px] font-extrabold text-brand-navy">
+                                {hoveredCategory}
+                              </span>
+                              <span className="text-xs text-slate-400 font-semibold">
+                                {selectedCategoryData?.services.length || 0} Services available
+                              </span>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3 max-h-[300px] overflow-y-auto pr-1">
+                              {selectedCategoryData?.services.map((service) => (
+                                <button
+                                  key={service.name}
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    setIsDropdownOpen(false);
+                                    if (onBook) {
+                                      onBook({
+                                        location: "",
+                                        service: {
+                                          name: service.name,
+                                          category: hoveredCategory,
+                                          basePrice: service.basePrice,
+                                          duration: service.duration,
+                                        },
+                                      });
+                                    }
+                                  }}
+                                  className="flex flex-col p-3 rounded-xl border border-slate-100 hover:border-amber-300 hover:bg-amber-50/10 text-left transition bg-slate-50/30 group"
+                                >
+                                  <span className="text-[13px] font-bold text-slate-800 group-hover:text-brand-navy">
+                                    {service.name}
+                                  </span>
+                                  <div className="flex items-center gap-3 mt-1.5 text-[11px] text-slate-400 font-medium">
+                                    <span className="text-slate-600 font-bold">From ${service.basePrice}</span>
+                                    <span>•</span>
+                                    <span className="flex items-center gap-1"><Clock size={10} /> {service.duration}</span>
+                                  </div>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div className="border-t border-slate-100 pt-4 flex justify-between items-center text-xs mt-4">
+                            <span className="text-slate-500 font-medium">
+                              Select a service to start booking.
+                            </span>
+                            <a
+                              href="#all-services"
+                              onClick={() => setIsDropdownOpen(false)}
+                              className="text-xs font-bold text-brand-navy hover:text-[#ffb800] inline-flex items-center gap-1 transition-colors"
+                            >
+                              View All Services <span aria-hidden="true">&rarr;</span>
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                ))}
-              </div>
+                )}
 
-              <div className="border-t border-slate-100 bg-slate-50/80 px-8 py-4 rounded-b-2xl flex justify-between items-center">
-                <span className="text-xs font-medium text-slate-500">
-                  Over 50+ services available to book instantly.
-                </span>
                 <a
-                  href="#all-services"
-                  className="text-sm font-bold text-brand-navy hover:text-[#ffb800] inline-flex items-center gap-1 transition-colors"
+                  href={link.href}
+                  className="relative transition hover:text-[#ffb800] group flex items-center gap-1"
                 >
-                  View All Services <span aria-hidden="true">&rarr;</span>
+                  {link.label}
+
+                  {link.label === "Home" && (
+                    <span className="absolute -bottom-[22px] left-0 h-[3px] w-full bg-[#ffb800]" />
+                  )}
                 </a>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <a
-          href={link.href}
-          className="relative transition hover:text-[#ffb800] group flex items-center gap-1"
-        >
-          {link.label}
-
-          {link.label === "Home" && (
-            <span className="absolute -bottom-[22px] left-0 h-[3px] w-full bg-[#ffb800]" />
-          )}
-        </a>
       </React.Fragment>
     ))}
 </nav>

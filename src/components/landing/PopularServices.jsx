@@ -19,7 +19,9 @@ import {
   Truck,
   Monitor,
   Zap,
-  Lock
+  Lock,
+  Search,
+  X
 } from "lucide-react";
 
 const getCategoryIcon = (categoryName) => {
@@ -50,6 +52,7 @@ const featuredServices = [
 const PopularServices = ({ onBook, catalog }) => {
   const [showAllServices, setShowAllServices] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
   
   const serviceLookup = new Map();
   if (catalog) {
@@ -59,6 +62,24 @@ const PopularServices = ({ onBook, catalog }) => {
       });
     });
   }
+
+  const allServices = React.useMemo(() => {
+    const list = [];
+    if (catalog) {
+      catalog.forEach((cat) => {
+        cat.services.forEach((s) => {
+          list.push({ ...s, category: cat.name });
+        });
+      });
+    }
+    return list;
+  }, [catalog]);
+
+  const filteredServices = React.useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    const query = searchQuery.toLowerCase().trim();
+    return allServices.filter((s) => s.name.toLowerCase().includes(query));
+  }, [allServices, searchQuery]);
 
   const handleBook = (name) => {
     const details = serviceLookup.get(name);
@@ -91,78 +112,106 @@ const PopularServices = ({ onBook, catalog }) => {
   return (
     <section id="services" className="bg-white py-16">
       <div className="mx-auto w-full max-w-none px-6 md:px-10 lg:px-14">
+        
+        {/* Real-time Search Box */}
+        <div className="flex justify-center mb-8">
+          <div className="relative w-full max-w-[600px]">
+            <input
+              type="text"
+              placeholder="Search for a service..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full px-5 py-3.5 pl-12 rounded-2xl border border-slate-200 focus:border-[#ffb800] focus:ring-2 focus:ring-orange-100 outline-none text-[15px] font-medium transition shadow-sm text-slate-800"
+            />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              >
+                <X size={18} />
+              </button>
+            )}
+          </div>
+        </div>
+
         <h2 className="text-center text-4xl font-extrabold text-brand-navy">
-          Our Most Popular Services
+          Book a Service Online
         </h2>
 
-        <div className="mt-14 grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-9 lg:gap-6">
-          {featuredServices.map((service) => {
-            return (
-              <motion.button
-                key={service.label}
-                whileHover={{ y: -4 }}
-                className="flex flex-col items-center justify-center rounded-2xl bg-white px-4 py-10 min-h-[120px] shadow-[0_4px_20px_rgba(0,0,0,0.06)] transition hover:shadow-[0_8px_25px_rgba(0,0,0,0.12)] border border-slate-100"
-                onClick={() => handleBook(service.serviceName)}
-              >
-                <service.icon size={42} strokeWidth={1} className="text-brand-navy mb-4" />
-                <span className="text-[15px] font-bold text-brand-navy leading-tight whitespace-pre-line">
-                  {service.label}
-                </span>
-              </motion.button>
-            );
-          })}
+        {searchQuery.trim() !== "" ? (
+          filteredServices.length === 0 ? (
+            <div className="text-center py-12 text-slate-500 font-semibold text-lg">
+              No services found
+            </div>
+          ) : (
+            <div className="mt-14 grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 lg:gap-6 justify-center">
+              {filteredServices.map((service) => {
+                const featured = featuredServices.find((f) => f.serviceName === service.name);
+                const Icon = featured ? featured.icon : getCategoryIcon(service.category);
+                return (
+                  <motion.button
+                    key={service.name}
+                    whileHover={{ y: -4 }}
+                    className="flex flex-col items-center justify-center rounded-2xl bg-white px-4 py-8 min-h-[120px] shadow-[0_4px_20px_rgba(0,0,0,0.06)] transition hover:shadow-[0_8px_25px_rgba(0,0,0,0.12)] border border-slate-100"
+                    onClick={() => {
+                      handleBook(service.name);
+                      setSearchQuery("");
+                    }}
+                  >
+                    <Icon size={36} strokeWidth={1.5} className="text-brand-navy mb-3" />
+                    <span className="text-[14px] font-bold text-brand-navy leading-tight text-center">
+                      {service.name}
+                    </span>
+                    <span className="text-[11px] text-slate-500 mt-1.5 font-semibold">
+                      From ${service.basePrice}
+                    </span>
+                  </motion.button>
+                );
+              })}
+            </div>
+          )
+        ) : (
+          <div className="mt-14 flex overflow-x-auto gap-5 md:gap-6 pb-4 scrollbar-none justify-start">
+            {featuredServices.map((service) => {
+              return (
+                <motion.button
+                  key={service.label}
+                  whileHover={{ y: -4 }}
+                  className="flex flex-col items-center justify-center rounded-2xl bg-white px-4 py-8 min-h-[120px] w-[140px] md:w-[155px] shrink-0 shadow-[0_4px_20px_rgba(0,0,0,0.06)] transition hover:shadow-[0_8px_25px_rgba(0,0,0,0.12)] border border-slate-100"
+                  onClick={() => handleBook(service.serviceName)}
+                >
+                  <service.icon size={42} strokeWidth={1} className="text-brand-navy mb-4" />
+                  <span className="text-[14px] font-bold text-brand-navy leading-tight whitespace-pre-line text-center">
+                    {service.label}
+                  </span>
+                </motion.button>
+              );
+            })}
 
-          <motion.button
-            whileHover={{ y: -4 }}
-            type="button"
-            onClick={() => {
-              setShowAllServices((prev) => !prev);
-              setSelectedCategory(null);
-            }}
-            className="flex flex-col items-center justify-center rounded-2xl bg-white px-4 py-10 min-h-[120px] shadow-[0_4px_20px_rgba(0,0,0,0.06)] transition hover:shadow-[0_8px_25px_rgba(0,0,0,0.12)] border border-slate-100"
-          >
-            <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[#ffb800] text-brand-navy mb-3">
-              <ArrowRight size={24} className="stroke-[2.5px]" />
-            </span>
-            <span className="text-[15px] font-bold text-brand-navy leading-tight">
-              {showAllServices ? "Hide" : "View All"}
-              <br />Services
-            </span>
-          </motion.button>
-        </div>
+            <motion.button
+              whileHover={{ y: -4 }}
+              type="button"
+              onClick={() => {
+                setShowAllServices((prev) => !prev);
+                setSelectedCategory(null);
+              }}
+              className="flex flex-col items-center justify-center rounded-2xl bg-white px-4 py-8 min-h-[120px] w-[140px] md:w-[155px] shrink-0 shadow-[0_4px_20px_rgba(0,0,0,0.06)] transition hover:shadow-[0_8px_25px_rgba(0,0,0,0.12)] border border-slate-100"
+            >
+              <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[#ffb800] text-brand-navy mb-3">
+                <ArrowRight size={24} className="stroke-[2.5px]" />
+              </span>
+              <span className="text-[14px] font-bold text-brand-navy leading-tight text-center">
+                {showAllServices ? "Hide" : "View All"}
+                <br />Services
+              </span>
+            </motion.button>
+          </div>
+        )}
 
         {showAllServices && (
           <div id="all-services" className="mt-12 bg-slate-50/50 rounded-3xl border border-slate-200/60 p-6 md:p-10 shadow-inner">
             
-            {/* Quick Category Anchors */}
-            <div className="sticky top-0 bg-white/90 backdrop-blur-md z-10 py-4 border-b border-slate-100 flex gap-3 overflow-x-auto scrollbar-none shadow-sm -mx-6 md:-mx-10 px-6 md:px-10 mb-8 rounded-t-3xl">
-              {catalog?.map((category) => {
-                const Icon = getCategoryIcon(category.name);
-                const isSelected = selectedCategory === category.name;
-                return (
-                  <button
-                    key={category.name}
-                    type="button"
-                    onClick={() => {
-                      setSelectedCategory(category.name);
-                      const element = document.getElementById(`landing-category-${category.name.replace(/[^a-zA-Z0-9]/g, '-')}`);
-                      if (element) {
-                        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                      }
-                    }}
-                    className={`flex items-center gap-2 whitespace-nowrap px-5 py-2.5 rounded-full text-[13px] font-bold transition-all ${
-                      isSelected
-                        ? "bg-[#ffb800] text-brand-navy shadow-sm"
-                        : "bg-white hover:bg-slate-50 text-slate-600 border border-slate-200"
-                    }`}
-                  >
-                    <Icon size={16} />
-                    {category.name.replace(" Services", "")}
-                  </button>
-                );
-              })}
-            </div>
-
             {/* List of categories with their service grid */}
             <div className="flex flex-col gap-12">
               {catalog?.map((category) => {
