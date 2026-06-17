@@ -1,6 +1,48 @@
 // Dynamic SERVICE_CATEGORIES - will be populated from API
-export const SERVICE_CATEGORIES = {};
-export const MAIN_CATEGORY_OPTIONS = [];
+export const SERVICE_CATEGORIES = {
+  "home-services": {
+    name: "Home Services",
+    subcategories: [
+      { value: "plumbing", label: "Plumbing" },
+      { value: "electrical", label: "Electrical" },
+      { value: "cleaning", label: "Cleaning" },
+      { value: "painting", label: "Painting" },
+      { value: "pest-control", label: "Pest Control" },
+      { value: "moving", label: "Moving" }
+    ]
+  },
+  "repair-services": {
+    name: "Repair Services",
+    subcategories: [
+      { value: "ac-repair", label: "AC Repair" },
+      { value: "appliance-repair", label: "Appliance Repair" },
+      { value: "furniture-repair", label: "Furniture Repair" }
+    ]
+  },
+  "automotive": {
+    name: "Automotive",
+    subcategories: [
+      { value: "car-washing", label: "Car Washing" },
+      { value: "car-repair", label: "Car Repair" },
+      { value: "tyre-change", label: "Tyre Change" }
+    ]
+  },
+  "other-services": {
+    name: "Other Services",
+    subcategories: [
+      { value: "gardening", label: "Gardening" },
+      { value: "security", label: "Security" },
+      { value: "photography", label: "Photography" }
+    ]
+  }
+};
+
+export const MAIN_CATEGORY_OPTIONS = [
+  { value: "home-services", label: "Home Services" },
+  { value: "repair-services", label: "Repair Services" },
+  { value: "automotive", label: "Automotive" },
+  { value: "other-services", label: "Other Services" }
+];
 
 export const WEEKDAYS = [
   "monday",

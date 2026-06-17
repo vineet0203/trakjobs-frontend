@@ -27,6 +27,7 @@ import {
 } from '../../clients/constants/clientConstants';
 import { categoryService } from '../../../services/categoryService';
 import axios from 'axios';
+import serviceCatalog from '../../../components/landing/serviceCatalog';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -42,6 +43,34 @@ const Register = () => {
   const [errorDialogOpen, setErrorDialogOpen] = useState(false);
   const [currentError, setCurrentError] = useState(null);
   const [services, setServices] = useState([]);
+  const [expandedCategories, setExpandedCategories] = useState({});
+
+  const toggleCategory = (catName) => {
+    setExpandedCategories(prev => ({
+      ...prev,
+      [catName]: !prev[catName]
+    }));
+  };
+
+  const getDisplayServices = () => {
+    if (services && services.length > 0) {
+      return services;
+    }
+    const fallbackServices = [];
+    let idx = 1;
+    serviceCatalog.forEach((cat) => {
+      cat.services.forEach((s) => {
+        fallbackServices.push({
+          id: `fallback-${idx++}`,
+          title: s.name,
+          category: cat.name,
+          price: `USD $${s.basePrice}.00+`,
+          subtitle: s.duration
+        });
+      });
+    });
+    return fallbackServices;
+  };
 
   useEffect(() => {
     const loadServices = async () => {
@@ -291,7 +320,8 @@ const Register = () => {
                 <Typography sx={sectionTitleSx}>Services</Typography>
                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr', gap: 2 }}>
                   {(() => {
-                    const servicesByCategory = services.reduce((acc, s) => {
+                    const servicesList = getDisplayServices();
+                    const servicesByCategory = servicesList.reduce((acc, s) => {
                       const cat = s.category || 'Other Services';
                       if (!acc[cat]) acc[cat] = [];
                       acc[cat].push(s);
@@ -299,80 +329,156 @@ const Register = () => {
                     }, {});
 
                     return (
-                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, width: '100%' }}>
-                        {Object.keys(servicesByCategory).map((categoryName) => (
-                          <Box key={categoryName} sx={{ width: '100%' }}>
-                            <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1F4A7A', mb: 1.5, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                              {categoryName}
-                            </Typography>
-                            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 1.5 }}>
-                              {servicesByCategory[categoryName].map((service) => {
-                                const isSelected = values.service_ids?.includes(service.id);
-                                return (
-                                  <Box
-                                    key={service.id}
-                                    onClick={() => {
-                                      const currentIds = values.service_ids || [];
-                                      let nextIds;
-                                      if (currentIds.includes(service.id)) {
-                                        nextIds = currentIds.filter(id => id !== service.id);
-                                      } else {
-                                        nextIds = [...currentIds, service.id];
-                                      }
-                                      setFieldValue('service_ids', nextIds);
-                                      
-                                      if (nextIds.length > 0) {
-                                        const firstSelected = services.find(s => s.id === nextIds[0]);
-                                        if (firstSelected) {
-                                          setFieldValue('service_category', firstSelected.category);
-                                          setFieldValue('service_sub_category', firstSelected.sub_category || firstSelected.title);
-                                        }
-                                      } else {
-                                        setFieldValue('service_category', '');
-                                        setFieldValue('service_sub_category', '');
-                                      }
-                                    }}
-                                    sx={{
-                                      p: 2,
-                                      borderRadius: 1.5,
-                                      border: '1px solid',
-                                      borderColor: isSelected ? '#1F4A7A' : '#E3E8EF',
-                                      bgcolor: isSelected ? '#F0F5FA' : '#fff',
-                                      cursor: 'pointer',
-                                      transition: 'all 0.2s',
-                                      '&:hover': {
-                                        borderColor: '#1F4A7A',
-                                        bgcolor: isSelected ? '#F0F5FA' : '#F7F9FC'
-                                      },
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, width: '100%' }}>
+                        {Object.keys(servicesByCategory).map((categoryName) => {
+                          const isExpanded = !!expandedCategories[categoryName];
+                          const selectedCount = servicesByCategory[categoryName].filter(s => values.service_ids?.includes(s.id)).length;
+                          return (
+                            <Box 
+                              key={categoryName} 
+                              sx={{ 
+                                width: '100%', 
+                                border: '1px solid #E3E8EF', 
+                                borderRadius: '12px',
+                                overflow: 'hidden',
+                                bgcolor: isExpanded ? '#FFF' : '#F8FAFC',
+                                transition: 'all 0.2s ease-in-out',
+                                boxShadow: isExpanded ? '0 4px 12px rgba(31, 74, 122, 0.05)' : 'none',
+                                '&:hover': {
+                                  borderColor: '#1F4A7A',
+                                }
+                              }}
+                            >
+                              <Box
+                                onClick={() => toggleCategory(categoryName)}
+                                sx={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'space-between',
+                                  cursor: 'pointer',
+                                  p: 2,
+                                  userSelect: 'none',
+                                  bgcolor: isExpanded ? '#F0F5FA' : 'transparent',
+                                  borderBottom: isExpanded ? '1px solid #E3E8EF' : 'none',
+                                  transition: 'background-color 0.2s ease',
+                                }}
+                              >
+                                <Typography 
+                                  variant="subtitle2" 
+                                  sx={{ 
+                                    fontWeight: 700, 
+                                    color: '#1F4A7A', 
+                                    textTransform: 'uppercase', 
+                                    letterSpacing: '0.05em',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 1
+                                  }}
+                                >
+                                  {categoryName}
+                                </Typography>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                                  {selectedCount > 0 && (
+                                    <Box 
+                                      sx={{ 
+                                        bgcolor: '#1F4A7A', 
+                                        color: '#fff', 
+                                        borderRadius: '20px', 
+                                        px: 1.5, 
+                                        py: 0.5, 
+                                        fontSize: '0.75rem', 
+                                        fontWeight: 700,
+                                        boxShadow: '0 2px 4px rgba(31, 74, 122, 0.2)'
+                                      }}
+                                    >
+                                      {selectedCount} Selected
+                                    </Box>
+                                  )}
+                                  <Box 
+                                    sx={{ 
                                       display: 'flex',
                                       alignItems: 'center',
-                                      gap: 1.5
+                                      transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                                      transition: 'transform 0.2s ease',
+                                      color: '#1F4A7A'
                                     }}
                                   >
-                                    <Checkbox
-                                      checked={isSelected}
-                                      size="small"
-                                      sx={{ color: '#1F4A7A', '&.Mui-checked': { color: '#1F4A7A' }, p: 0 }}
-                                    />
-                                    <Box sx={{ minWidth: 0 }}>
-                                      <Typography variant="body2" sx={{ fontWeight: 600, color: '#0F2744' }}>
-                                        {service.title}
-                                      </Typography>
-                                      {service.subtitle && (
-                                        <Typography variant="caption" display="block" sx={{ color: '#6B7280', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                          {service.subtitle}
-                                        </Typography>
-                                      )}
-                                      <Typography variant="caption" sx={{ color: '#2E6D9D', fontWeight: 600 }}>
-                                        {service.price}
-                                      </Typography>
-                                    </Box>
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
                                   </Box>
-                                );
-                              })}
+                                </Box>
+                              </Box>
+
+                              {isExpanded && (
+                                <Box sx={{ p: 2, display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 1.5 }}>
+                                  {servicesByCategory[categoryName].map((service) => {
+                                    const isSelected = values.service_ids?.includes(service.id);
+                                    return (
+                                      <Box
+                                        key={service.id}
+                                        onClick={() => {
+                                          const currentIds = values.service_ids || [];
+                                          let nextIds;
+                                          if (currentIds.includes(service.id)) {
+                                            nextIds = currentIds.filter(id => id !== service.id);
+                                          } else {
+                                            nextIds = [...currentIds, service.id];
+                                          }
+                                          setFieldValue('service_ids', nextIds);
+                                          
+                                          if (nextIds.length > 0) {
+                                            const firstSelected = services.find(s => s.id === nextIds[0]);
+                                            if (firstSelected) {
+                                              setFieldValue('service_category', firstSelected.category);
+                                              setFieldValue('service_sub_category', firstSelected.sub_category || firstSelected.title);
+                                            }
+                                          } else {
+                                            setFieldValue('service_category', '');
+                                            setFieldValue('service_sub_category', '');
+                                          }
+                                        }}
+                                        sx={{
+                                          p: 2,
+                                          borderRadius: 1.5,
+                                          border: '1px solid',
+                                          borderColor: isSelected ? '#1F4A7A' : '#E3E8EF',
+                                          bgcolor: isSelected ? '#F0F5FA' : '#fff',
+                                          cursor: 'pointer',
+                                          transition: 'all 0.2s',
+                                          '&:hover': {
+                                            borderColor: '#1F4A7A',
+                                            bgcolor: isSelected ? '#F0F5FA' : '#F7F9FC'
+                                          },
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          gap: 1.5
+                                        }}
+                                      >
+                                        <Checkbox
+                                          checked={isSelected}
+                                          size="small"
+                                          sx={{ color: '#1F4A7A', '&.Mui-checked': { color: '#1F4A7A' }, p: 0 }}
+                                        />
+                                        <Box sx={{ minWidth: 0 }}>
+                                          <Typography variant="body2" sx={{ fontWeight: 600, color: '#0F2744' }}>
+                                            {service.title}
+                                          </Typography>
+                                          {service.subtitle && (
+                                            <Typography variant="caption" display="block" sx={{ color: '#6B7280', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                              {service.subtitle}
+                                            </Typography>
+                                          )}
+                                          <Typography variant="caption" sx={{ color: '#2E6D9D', fontWeight: 600 }}>
+                                            {service.price}
+                                          </Typography>
+                                        </Box>
+                                      </Box>
+                                    );
+                                  })}
+                                </Box>
+                              )}
                             </Box>
-                          </Box>
-                        ))}
+                          );
+                        })}
                       </Box>
                     );
                   })()}

@@ -189,6 +189,14 @@ const BookingWorkflow = ({ catalog, initialSelection }) => {
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [selectedService, setSelectedService] = useState(initialService);
   const [quantity, setQuantity] = useState(1);
+  const [expandedCategories, setExpandedCategories] = useState({});
+  
+  const toggleCategory = (catName) => {
+    setExpandedCategories((prev) => ({
+      ...prev,
+      [catName]: !prev[catName],
+    }));
+  };
   const [notes, setNotes] = useState("");
   const [startDate, setStartDate] = useState("");
   const [startTime, setStartTime] = useState("");
@@ -365,78 +373,100 @@ const BookingWorkflow = ({ catalog, initialSelection }) => {
           <div className="flex flex-col gap-8 bg-white rounded-2xl border border-slate-200 p-6 md:p-8 shadow-sm">
 
             {/* List of categories with their service grid */}
-            <div className="flex flex-col gap-10">
+            <div className="flex flex-col gap-4">
               {catalog.map((category) => {
                 const CatIcon = categoryIcons[category.name] || MoreHorizontal;
+                const isExpanded = !!expandedCategories[category.name];
                 
                 return (
                   <div 
                     key={category.name} 
                     id={`category-${category.name.replace(/[^a-zA-Z0-9]/g, '-')}`}
-                    className="scroll-mt-24"
+                    className={`scroll-mt-24 border border-slate-200 rounded-2xl overflow-hidden transition-all duration-200 ${isExpanded ? 'bg-slate-50/50 shadow-sm' : 'bg-white hover:bg-slate-50/30'}`}
                   >
-                    <div className="flex items-center gap-3 mb-6 border-b border-slate-100 pb-3">
-                      <div className="h-10 w-10 rounded-xl bg-amber-50 flex items-center justify-center border border-amber-100 shadow-sm">
-                        <CatIcon className="text-amber-500" size={22} />
+                    {/* Collapsible Header */}
+                    <button
+                      type="button"
+                      onClick={() => toggleCategory(category.name)}
+                      className="w-full flex items-center justify-between p-5 text-left focus:outline-none"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="h-10 w-10 rounded-xl bg-amber-50 flex items-center justify-center border border-amber-100 shadow-sm shrink-0">
+                          <CatIcon className="text-amber-500" size={22} />
+                        </div>
+                        <div>
+                          <h3 className="text-[17px] font-bold text-slate-800 leading-tight">
+                            {category.name}
+                          </h3>
+                          <p className="text-[12px] text-slate-500 mt-1">
+                            Professional solutions for {category.name.replace(" Services", "").toLowerCase()}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <h3 className="text-[17px] font-bold text-slate-800 leading-tight">
-                          {category.name}
-                        </h3>
-                        <p className="text-[12px] text-slate-500">
-                          Professional solutions for {category.name.replace(" Services", "").toLowerCase()}
-                        </p>
-                      </div>
-                    </div>
 
-                    <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                      {category.services.map((service) => {
-                        const isSelected = selectedService === service.name;
-                        const SvcIcon = serviceIcons[service.name] || CatIcon;
-                        return (
-                          <div
-                            key={service.name}
-                            onClick={() => {
-                              setSelectedCategory(category.name);
-                              setSelectedService(service.name === selectedService ? null : service.name);
-                              setQuantity(1);
-                              setTimeout(() => {
-                                const detailsElement = document.getElementById("booking-details-section");
-                                if (detailsElement) {
-                                  detailsElement.scrollIntoView({ behavior: "smooth", block: "start" });
-                                }
-                              }, 150);
-                            }}
-                            className={`flex items-center gap-3 p-3.5 rounded-xl border cursor-pointer transition-all duration-200 group text-left ${
-                              isSelected
-                                ? "border-amber-400 bg-amber-50/20 shadow-sm ring-1 ring-amber-400"
-                                : "border-slate-200 hover:border-slate-300 hover:shadow-sm bg-slate-50/30 hover:bg-white"
-                            }`}
-                          >
-                            <div className={`h-9 w-9 rounded-lg flex items-center justify-center border shrink-0 transition-all ${
-                              isSelected ? "bg-amber-100 border-amber-300 shadow-sm text-amber-600" : "bg-white border-slate-200 text-blue-500"
-                            }`}>
-                              <SvcIcon size={16} />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <h5 className={`font-semibold text-[13px] leading-tight truncate transition-colors ${
-                                isSelected ? "text-brand-navy" : "text-slate-800 group-hover:text-amber-500"
-                              }`}>
-                                {service.name}
-                              </h5>
-                              <p className="text-[11px] text-slate-500 mt-0.5">
-                                From <span className="font-bold text-slate-700">${service.basePrice}</span> • {service.duration}
-                              </p>
-                            </div>
-                            <div className={`flex h-4 w-4 items-center justify-center rounded-full border shrink-0 transition-colors ${
-                              isSelected ? "bg-[#ffb800] border-transparent text-slate-900" : "border-slate-300 bg-white"
-                            }`}>
-                              {isSelected && <CheckCircle2 size={10} className="stroke-[2.5]" />}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-slate-400 font-semibold hidden sm:inline">
+                          {category.services.length} Services
+                        </span>
+                        <div className={`text-slate-800 transform transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}>
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </div>
+                      </div>
+                    </button>
+
+                    {/* Expandable Body */}
+                    {isExpanded && (
+                      <div className="p-6 pt-0 border-t border-slate-100 bg-white">
+                        <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 mt-6">
+                          {category.services.map((service) => {
+                            const isSelected = selectedService === service.name;
+                            const SvcIcon = serviceIcons[service.name] || CatIcon;
+                            return (
+                              <div
+                                key={service.name}
+                                onClick={() => {
+                                  setSelectedCategory(category.name);
+                                  setSelectedService(service.name === selectedService ? null : service.name);
+                                  setQuantity(1);
+                                  setTimeout(() => {
+                                    const detailsElement = document.getElementById("booking-details-section");
+                                    if (detailsElement) {
+                                      detailsElement.scrollIntoView({ behavior: "smooth", block: "start" });
+                                    }
+                                  }, 150);
+                                }}
+                                className={`flex items-center gap-3 p-3.5 rounded-xl border cursor-pointer transition-all duration-200 group text-left ${
+                                  isSelected
+                                    ? "border-amber-400 bg-amber-50/20 shadow-sm ring-1 ring-amber-400"
+                                    : "border-slate-200 hover:border-slate-300 hover:shadow-sm bg-slate-50/30 hover:bg-white"
+                                }`}
+                              >
+                                <div className={`h-9 w-9 rounded-lg flex items-center justify-center border shrink-0 transition-all ${
+                                  isSelected ? "bg-amber-100 border-amber-300 shadow-sm text-amber-600" : "bg-white border-slate-200 text-blue-500"
+                                }`}>
+                                  <SvcIcon size={16} />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <h5 className={`font-semibold text-[13px] leading-tight truncate transition-colors ${
+                                    isSelected ? "text-brand-navy" : "text-slate-800 group-hover:text-amber-500"
+                                  }`}>
+                                    {service.name}
+                                  </h5>
+                                  <p className="text-[11px] text-slate-500 mt-0.5">
+                                    From <span className="font-bold text-slate-700">${service.basePrice}</span> • {service.duration}
+                                  </p>
+                                </div>
+                                <div className={`flex h-4 w-4 items-center justify-center rounded-full border shrink-0 transition-colors ${
+                                  isSelected ? "bg-[#ffb800] border-transparent text-slate-900" : "border-slate-300 bg-white"
+                                }`}>
+                                  {isSelected && <CheckCircle2 size={10} className="stroke-[2.5]" />}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 );
               })}

@@ -1,7 +1,151 @@
 import React from 'react';
 import { APP_NAME } from '../../../../utils/constants';
+import maintenanceWorkerImg from '../../../../assets/horizontal-shot-handsome-young-maintenance-service-worker-wearing-white-helmet Background Removed.png';
+import electricianImg from '../../../../assets/ready-start-my-work-proud-attractive-electrician-with-protective-gear-holding-toolbox-electricity-cables Background Removed.png';
+import plumberImg from '../../../../assets/plumber-pointing-lateral Background Removed.png';
 
 const AuthLayout = ({ children, title, isRegister = false }) => {
+  const handleLogoClick = (e) => {
+    e.preventDefault();
+    if (window.location.port === '5174' || window.location.port === '5175') {
+      window.location.href = `http://${window.location.hostname}:5173`;
+    } else {
+      window.location.href = '/';
+    }
+  };
+
+  if (isRegister) {
+    return (
+      <div
+        className="min-h-screen lg:h-screen lg:overflow-hidden font-poppins relative flex flex-col lg:flex-row"
+        style={{
+          background: 'radial-gradient(1200px 500px at 80% -10%, #FFECC7 0%, rgba(255, 236, 199, 0) 60%), linear-gradient(135deg, #0B1F3B 0%, #1F4A7A 55%, #2E6D9D 100%)'
+        }}
+      >
+        <style>{`
+          @keyframes riseIn {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          @keyframes floatSlow {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+            100% { transform: translateY(0px); }
+          }
+        `}</style>
+
+        {/* Decorative ambient elements */}
+        <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-[#FFB24A] opacity-20 blur-2xl pointer-events-none"></div>
+        <div className="absolute -bottom-24 right-6 h-80 w-80 rounded-full bg-[#35C6C6] opacity-20 blur-2xl pointer-events-none"></div>
+        <div className="absolute top-24 right-12 h-40 w-40 rounded-full bg-white opacity-5 blur-xl pointer-events-none" style={{ animation: 'floatSlow 8s ease-in-out infinite' }}></div>
+
+        {/* Left Side Column: Fixed viewport height on desktop, no scrolling */}
+        <div className="w-full lg:w-[42%] lg:h-full flex flex-col justify-between p-8 lg:p-12 text-white border-b lg:border-b-0 lg:border-r border-white/10 bg-white/5 backdrop-blur-md relative z-20 lg:overflow-hidden">
+          <div className="flex flex-col gap-8 h-full justify-between">
+            {/* Logo */}
+            <div style={{ animation: 'riseIn 0.6s ease' }}>
+              <a 
+                href="/" 
+                onClick={handleLogoClick} 
+                className="flex items-center gap-3 w-fit"
+                style={{ textDecoration: 'none' }}
+              >
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-orange-50 text-[#0F2744]">
+                  <div className="relative">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12 2L2 12V22H22V12L12 2Z" stroke="#0f172a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M12 22V12" stroke="#0f172a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                </div>
+                <div className="leading-none pt-1 text-left">
+                  <span className="text-[22px] font-bold tracking-tight text-white">
+                    Trak<span className="text-[#ffb800]">Jobs</span>
+                  </span>
+                  <div className="mt-0.5 text-[10px] font-semibold text-slate-300 tracking-wide uppercase">
+                    Fix it. Right. On time.
+                  </div>
+                </div>
+              </a>
+            </div>
+
+            {/* Service Visuals Grid (Only Images, Bigger) */}
+            <div className="my-auto py-6 flex flex-col">
+              <div className="flex justify-center items-end -space-x-8 relative h-52 border-b border-white/10" style={{ animation: 'riseIn 0.8s ease' }}>
+                <img 
+                  src={maintenanceWorkerImg} 
+                  alt="Maintenance" 
+                  className="h-48 object-contain drop-shadow-[0_10px_15px_rgba(0,0,0,0.3)] relative z-10" 
+                />
+                <img 
+                  src={electricianImg} 
+                  alt="Electrician" 
+                  className="h-48 object-contain drop-shadow-[0_10px_15px_rgba(0,0,0,0.3)] relative z-20" 
+                />
+                <img 
+                  src={plumberImg} 
+                  alt="Plumber" 
+                  className="h-48 object-contain drop-shadow-[0_10px_15px_rgba(0,0,0,0.3)] relative z-10" 
+                />
+              </div>
+
+              {/* Why Partner with Us checklist */}
+              <div className="mt-8 flex flex-col gap-3" style={{ animation: 'riseIn 1s ease' }}>
+                <h4 className="text-sm font-bold uppercase tracking-wider text-[#ffb800]">Why Partner with Us?</h4>
+                <div className="flex flex-col gap-3 text-xs lg:text-sm text-white/90">
+                  <div className="flex items-start gap-3">
+                    <span className="h-5 w-5 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-300 text-xs font-bold shrink-0 mt-0.5">✓</span>
+                    <div>
+                      <strong className="text-white font-semibold">Grow Your Business:</strong> Access thousands of customer booking requests in your service areas daily.
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="h-5 w-5 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-300 text-xs font-bold shrink-0 mt-0.5">✓</span>
+                    <div>
+                      <strong className="text-white font-semibold">Direct Communication:</strong> Real-time built-in chat system to converse directly with customers.
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="h-5 w-5 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-300 text-xs font-bold shrink-0 mt-0.5">✓</span>
+                    <div>
+                      <strong className="text-white font-semibold">Guaranteed Secure Payments:</strong> Experience safe and quick invoicing directly linked to your bank.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom info/footer */}
+            <div className="text-xs text-white/40 border-t border-white/10 pt-4 mt-auto">
+              © {new Date().getFullYear()} TrakJobs Inc. All rights reserved.
+            </div>
+          </div>
+        </div>
+
+        {/* Right Side Column: Scrollable Form container */}
+        <div className="w-full lg:w-[58%] lg:h-full flex items-start justify-center p-4 sm:p-8 lg:p-12 z-10 lg:overflow-y-auto">
+          <div
+            className="w-full max-w-2xl bg-white/95 rounded-3xl border border-white/60 shadow-[0_30px_80px_rgba(8,22,44,0.25)] p-6 sm:p-10 my-4"
+            style={{ animation: 'riseIn 0.6s ease' }}
+          >
+            <div className="text-center mb-6">
+              <p className="text-xs uppercase tracking-[0.3em] text-[#3B556D]">Secure Portal</p>
+              <h2 className="font-semibold text-[#0F2744] text-2xl sm:text-3xl uppercase mt-1">
+                {title}
+              </h2>
+              <p className="text-sm text-[#5D7389] mt-2">
+                Complete your vendor profile to start receiving requests.
+              </p>
+            </div>
+
+            {children}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Original layout for non-register (login, forgot password, etc.)
   return (
     <div
       className="min-h-screen flex items-center justify-center p-4 font-poppins relative overflow-hidden"
@@ -25,61 +169,43 @@ const AuthLayout = ({ children, title, isRegister = false }) => {
       <div className="absolute -bottom-24 right-6 h-80 w-80 rounded-full bg-[#35C6C6] opacity-20 blur-2xl"></div>
       <div className="absolute top-24 right-12 h-40 w-40 rounded-full bg-white opacity-10 blur-xl" style={{ animation: 'floatSlow 8s ease-in-out infinite' }}></div>
 
-      <div
-        className={`relative z-10 w-full ${isRegister ? 'max-w-6xl grid grid-cols-1 lg:grid-cols-[1.05fr_1fr] gap-8 items-stretch' : 'max-w-md'}`}
-      >
-        {isRegister && (
-          <div className="hidden lg:flex flex-col justify-between text-white p-8 rounded-3xl border border-white/20 bg-white/10 backdrop-blur-md shadow-[0_30px_80px_rgba(0,0,0,0.35)]">
-            <div style={{ animation: 'riseIn 0.6s ease' }}>
-              <p className="text-sm uppercase tracking-[0.3em] text-white/70">Vendor Onboarding</p>
-              <h1 className="text-4xl font-semibold mt-3">{APP_NAME}</h1>
-              <p className="text-lg text-white/80 mt-4">
-                Build trust fast. Manage services, schedules, and availability in one professional workspace.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4" style={{ animation: 'riseIn 0.8s ease' }}>
-              <div className="rounded-2xl bg-white/10 border border-white/10 p-4">
-                <p className="text-sm text-white/70">Setup time</p>
-                <p className="text-2xl font-semibold">Under 5 min</p>
-              </div>
-              <div className="rounded-2xl bg-white/10 border border-white/10 p-4">
-                <p className="text-sm text-white/70">Support</p>
-                <p className="text-2xl font-semibold">24/7 Priority</p>
-              </div>
-            </div>
-
-            <ul className="space-y-3 text-white/85" style={{ animation: 'riseIn 1s ease' }}>
-              <li className="flex items-center gap-2">
-                <span className="inline-block h-2 w-2 rounded-full bg-[#FFB24A]"></span>
-                Fast verification workflow
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="inline-block h-2 w-2 rounded-full bg-[#35C6C6]"></span>
-                Service catalog with custom entries
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="inline-block h-2 w-2 rounded-full bg-[#FDE68A]"></span>
-                Availability presets + custom hours
-              </li>
-            </ul>
-          </div>
-        )}
-
+      <div className="relative z-10 w-full max-w-md">
         <div
           className="relative bg-white/95 rounded-3xl border border-white/60 shadow-[0_30px_80px_rgba(8,22,44,0.35)] p-6 sm:p-8"
           style={{ animation: 'riseIn 0.6s ease' }}
         >
+          {/* TrakJobs Logo Branding */}
+          <div className="flex justify-center mb-6">
+            <a 
+              href="/" 
+              onClick={handleLogoClick} 
+              className="flex items-center gap-3"
+              style={{ textDecoration: 'none' }}
+            >
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-orange-50 text-[#0F2744]">
+                <div className="relative">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L2 12V22H22V12L12 2Z" stroke="#0f172a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M12 22V12" stroke="#0f172a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+              </div>
+              <div className="leading-none pt-1 text-left">
+                <span className="text-[22px] font-bold tracking-tight text-[#0F2744]">
+                  Trak<span className="text-[#ffb800]">Jobs</span>
+                </span>
+                <div className="mt-0.5 text-[10px] font-semibold text-slate-500 tracking-wide uppercase">
+                  Fix it. Right. On time.
+                </div>
+              </div>
+            </a>
+          </div>
+
           <div className="text-center mb-6">
-            <p className="text-xs uppercase tracking-[0.3em] text-[#3B556D]">Secure Registration</p>
-            <h2 className={`font-semibold text-[#0F2744] ${isRegister ? 'text-3xl' : 'text-4xl'} uppercase`}>
+            <p className="text-xs uppercase tracking-[0.3em] text-[#3B556D]">Secure Portal</p>
+            <h2 className="font-semibold text-[#0F2744] text-3xl uppercase">
               {title}
             </h2>
-            {isRegister && (
-              <p className="text-sm text-[#5D7389] mt-2">
-                Complete your vendor profile to start receiving requests.
-              </p>
-            )}
           </div>
 
           {children}
@@ -88,5 +214,4 @@ const AuthLayout = ({ children, title, isRegister = false }) => {
     </div>
   );
 };
-
 export default AuthLayout;

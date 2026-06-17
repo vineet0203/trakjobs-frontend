@@ -88,7 +88,7 @@ const Sidebar = () => {
             Online
           </div>
           <div className="w-10 h-10 rounded-full bg-slate-200 flex-shrink-0 flex items-center justify-center font-bold text-slate-500 overflow-hidden">
-            <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=0D8ABC&color=fff`} alt="User" />
+            <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=0D8ABC&color=fff`} alt="User" className="w-full h-full object-cover rounded-full" />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-bold text-slate-800 truncate">{displayName}</p>
@@ -116,6 +116,7 @@ const Sidebar = () => {
                 <Notifications
                   align="left"
                   direction="up"
+                  positionMode="fixed"
                   customTrigger={(unreadCount, toggleOpen) => (
                     <button
                       onClick={toggleOpen}

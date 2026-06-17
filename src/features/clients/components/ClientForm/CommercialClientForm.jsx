@@ -92,7 +92,7 @@ const CommercialClientForm = ({ formik, mode = 'create' }) => {
       >
         <SectionHeader
           number="1"
-          title="Basic Business Information"
+          title="Customer Information"
         />
 
         <Grid container spacing={3}>
@@ -414,9 +414,9 @@ const CommercialClientForm = ({ formik, mode = 'create' }) => {
               <DebouncedSelect
                 name="is_tax_applicable"
                 label=""
-                value={formik.values.is_tax_applicable ? 'yes' : 'no'}
+                value={formik.values.is_tax_applicable}
                 onChange={(value) => {
-                  const isTaxApplicable = value === 'yes';
+                  const isTaxApplicable = value === true || value === 'true';
                   formik.setFieldValue('is_tax_applicable', isTaxApplicable);
                   if (!isTaxApplicable) {
                     formik.setFieldValue('tax_percentage', '0');

@@ -3,7 +3,7 @@ import { publicClient } from "./api/httpClient";
 export const categoryService = {
   fetchCategories: async () => {
     try {
-      const response = await publicClient.get("/api/v1/service-categories");
+      const response = await publicClient.get("/api/v1/public/service-categories");
       if (response.data && response.data.data) {
         // Return full categories so we can access their raw IDs and slugs
         return response.data.data;

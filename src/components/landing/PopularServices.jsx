@@ -53,6 +53,14 @@ const PopularServices = ({ onBook, catalog }) => {
   const [showAllServices, setShowAllServices] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [expandedCategories, setExpandedCategories] = useState({});
+
+  const toggleCategory = (catName) => {
+    setExpandedCategories((prev) => ({
+      ...prev,
+      [catName]: !prev[catName],
+    }));
+  };
   
   const serviceLookup = new Map();
   if (catalog) {
@@ -211,52 +219,73 @@ const PopularServices = ({ onBook, catalog }) => {
 
         {showAllServices && (
           <div id="all-services" className="mt-12 bg-slate-50/50 rounded-3xl border border-slate-200/60 p-6 md:p-10 shadow-inner">
-            
             {/* List of categories with their service grid */}
-            <div className="flex flex-col gap-12">
+            <div className="flex flex-col gap-4">
               {catalog?.map((category) => {
                 const Icon = getCategoryIcon(category.name);
+                const isExpanded = !!expandedCategories[category.name];
                 return (
                   <div 
                     key={category.name}
                     id={`landing-category-${category.name.replace(/[^a-zA-Z0-9]/g, '-')}`}
-                    className="scroll-mt-28"
+                    className={`scroll-mt-28 border border-slate-200 rounded-2xl overflow-hidden transition-all duration-200 ${isExpanded ? 'bg-slate-50/50 shadow-sm' : 'bg-white hover:bg-slate-50/30'}`}
                   >
-                    <div className="flex items-center gap-3 mb-6 border-b border-slate-100 pb-3">
-                      <div className="h-10 w-10 rounded-xl bg-amber-50 flex items-center justify-center border border-amber-100 shadow-sm">
-                        <Icon className="text-amber-500" size={22} />
+                    {/* Collapsible Header */}
+                    <button
+                      type="button"
+                      onClick={() => toggleCategory(category.name)}
+                      className="w-full flex items-center justify-between p-5 text-left focus:outline-none"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="h-12 w-12 rounded-xl bg-amber-50 flex items-center justify-center border border-amber-100 shadow-sm shrink-0">
+                          <Icon className="text-amber-500" size={24} />
+                        </div>
+                        <div>
+                          <h4 className="text-[17px] font-bold text-brand-navy leading-tight">
+                            {category.name}
+                          </h4>
+                          <p className="text-[12px] text-slate-500 mt-1">
+                            Professional solutions for {category.name.replace(" Services", "").toLowerCase()}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <h4 className="text-lg font-bold text-brand-navy leading-tight">
-                          {category.name}
-                        </h4>
-                        <p className="text-[12px] text-slate-500 mt-0.5">
-                          Professional solutions for {category.name.replace(" Services", "").toLowerCase()}
-                        </p>
+                      
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-slate-400 font-semibold hidden sm:inline">
+                          {category.services.length} Services
+                        </span>
+                        <div className={`text-brand-navy transform transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}>
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </div>
                       </div>
-                    </div>
+                    </button>
 
-                    <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                      {category.services.map((service) => (
-                        <button
-                          key={service.name}
-                          onClick={() => handleBook(service.name)}
-                          className="flex items-center gap-3 p-3.5 rounded-xl border border-slate-200 hover:border-[#ffb800] hover:shadow-sm transition bg-white hover:bg-[#fffdf8] group text-left w-full"
-                        >
-                          <div className="h-9 w-9 rounded-lg bg-slate-50 flex items-center justify-center border border-slate-100 group-hover:bg-amber-50 group-hover:border-amber-200 shrink-0 transition-colors">
-                            {React.createElement(getCategoryIcon(category.name), { size: 16, className: "text-amber-500 group-hover:text-amber-600" })}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h5 className="font-semibold text-slate-800 text-[13px] leading-tight truncate group-hover:text-brand-navy transition-colors">
-                              {service.name}
-                            </h5>
-                            <p className="text-[11px] text-slate-500 mt-0.5">
-                              From <span className="font-bold text-slate-700">${service.basePrice}</span> • {service.duration}
-                            </p>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
+                    {/* Expandable Body */}
+                    {isExpanded && (
+                      <div className="p-6 pt-0 border-t border-slate-100 bg-white">
+                        <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 mt-6">
+                          {category.services.map((service) => (
+                            <button
+                              key={service.name}
+                              onClick={() => handleBook(service.name)}
+                              className="flex items-center gap-3 p-3.5 rounded-xl border border-slate-200 hover:border-[#ffb800] hover:shadow-sm transition bg-white hover:bg-[#fffdf8] group text-left w-full"
+                            >
+                              <div className="h-9 w-9 rounded-lg bg-slate-50 flex items-center justify-center border border-slate-100 group-hover:bg-amber-50 group-hover:border-amber-200 shrink-0 transition-colors">
+                                {React.createElement(getCategoryIcon(category.name), { size: 16, className: "text-amber-500 group-hover:text-amber-600" })}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <h5 className="font-semibold text-slate-800 text-[13px] leading-tight truncate group-hover:text-brand-navy transition-colors">
+                                  {service.name}
+                                </h5>
+                                <p className="text-[11px] text-slate-500 mt-0.5">
+                                  From <span className="font-bold text-slate-700">${service.basePrice}</span> • {service.duration}
+                                </p>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 );
               })}

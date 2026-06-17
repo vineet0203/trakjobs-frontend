@@ -131,10 +131,22 @@ export const fetchServiceCatalog = async () => {
         
         // Extract base price numeric value from string (e.g. "PKR 1,500+" -> 1500)
         let basePrice = 0;
+        let formattedPrice = s.price || '';
         if (s.price) {
+          const cleanPrice = s.price.toUpperCase();
           const match = s.price.replace(/,/g, '').match(/\d+/);
           if (match) {
-            basePrice = parseInt(match[0], 10);
+            let val = parseInt(match[0], 10);
+            if (cleanPrice.includes('PKR')) {
+              val = Math.round(val / 100);
+              formattedPrice = `USD $${val.toFixed(2)}+`;
+              basePrice = val;
+            } else {
+              basePrice = val;
+              if (!formattedPrice.includes('USD $')) {
+                formattedPrice = `USD $${val.toFixed(2)}+`;
+              }
+            }
           }
         }
 
@@ -142,7 +154,7 @@ export const fetchServiceCatalog = async () => {
           id: s.id,
           name: s.title,
           basePrice: basePrice,
-          price: s.price,
+          price: formattedPrice,
           duration: "1-2 hrs",
           image: s.image,
           subtitle: s.subtitle,

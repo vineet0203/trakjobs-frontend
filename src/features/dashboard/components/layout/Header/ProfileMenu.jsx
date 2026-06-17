@@ -101,14 +101,14 @@ const ProfileMenu = ({ user }) => {
         className="flex items-center gap-3 cursor-pointer p-2 rounded-md hover:bg-gray-50 transition-colors"
         onClick={toggleMenu}
       >
-        <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold text-sm">
+        <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex-shrink-0 flex items-center justify-center font-semibold text-sm">
           {getUserInitials()}
         </div>
-        <div className="flex flex-col">
-          <span className="text-sm font-medium text-gray-900">
+        <div className="flex flex-col min-w-[100px]">
+          <span className="text-sm font-medium text-gray-900 whitespace-nowrap">
             {getDisplayName()}
           </span>
-          <span className="text-xs text-gray-500">{getUserRole()}</span>
+          <span className="text-xs text-gray-500 whitespace-nowrap">{getUserRole()}</span>
         </div>
         <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${isProfileMenuOpen ? 'rotate-180' : ''}`} />
       </div>
@@ -131,7 +131,7 @@ const ProfileMenu = ({ user }) => {
             {/* User Info Section */}
             <div className="px-4 py-6 border-b border-gray-100 flex flex-col items-center text-center">
               {/* Initials Circle - Larger */}
-              <div className="w-16 h-16 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold text-xl mb-3 shadow-md">
+              <div className="w-16 h-16 rounded-full bg-blue-600 text-white flex-shrink-0 flex items-center justify-center font-semibold text-xl mb-3 shadow-md">
                 {getUserInitials()}
               </div>
 
