@@ -3,8 +3,20 @@ import * as Yup from "yup";
 
 const commonContactSchema = {
   email: Yup.string().email("Invalid email").required("Email is required"),
-  mobile_number: Yup.string().required("Mobile number is required"),
-  alternate_mobile_number: Yup.string(),
+  mobile_number: Yup.string()
+    .required("Mobile number is required")
+    .matches(/^[0-9]+$/, "Mobile number must contain only digits")
+    .min(6, "Mobile number must be at least 6 digits")
+    .max(15, "Mobile number must not exceed 15 digits"),
+  alternate_mobile_number: Yup.string()
+    .nullable()
+    .transform((value) => (value === "" ? null : value))
+    .matches(/^[0-9]+$/, {
+      message: "Alternate mobile number must contain only digits",
+      excludeEmptyString: true
+    })
+    .min(6, "Alternate mobile number must be at least 6 digits")
+    .max(15, "Alternate mobile number must not exceed 15 digits"),
 };
 
 const commonAddressSchema = {

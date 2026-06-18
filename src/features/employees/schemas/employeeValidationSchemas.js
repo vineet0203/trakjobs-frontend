@@ -4,9 +4,13 @@ export const employeeValidationSchema = Yup.object({
   // Basic Information
   employee_id: Yup.string()
     .nullable()
+    .transform((value) => (value === "" ? null : value))
     .matches(
       /^[A-Z0-9-]+$/,
-      "Employee ID must contain only uppercase letters, numbers, and hyphens",
+      {
+        message: "Employee ID must contain only uppercase letters, numbers, and hyphens",
+        excludeEmptyString: true
+      }
     ),
 
   first_name: Yup.string()
@@ -33,7 +37,9 @@ export const employeeValidationSchema = Yup.object({
 
   mobile_number: Yup.string()
     .required("Mobile number is required")
-    .max(20, "Mobile number must be at most 20 characters"),
+    .matches(/^[0-9]+$/, "Mobile number must contain only digits")
+    .min(6, "Mobile number must be at least 6 digits")
+    .max(15, "Mobile number must not exceed 15 digits"),
 
   address: Yup.string()
     .nullable()
@@ -50,6 +56,7 @@ export const employeeValidationSchema = Yup.object({
 
   reporting_manager_id: Yup.number()
     .nullable()
+    .transform((value, originalValue) => (originalValue === "" ? null : value))
     .positive("Invalid reporting manager"),
 
   role: Yup.string()

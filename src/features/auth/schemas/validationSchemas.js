@@ -16,7 +16,7 @@ export const passwordValidation = Yup.string()
 export const mobileValidation = Yup.string()
   .required("Mobile number is required")
   .matches(/^[0-9]+$/, "Mobile number must contain only digits")
-  .min(10, "Mobile number must be at least 10 digits")
+  .min(6, "Mobile number must be at least 6 digits")
   .max(15, "Mobile number must not exceed 15 digits");
 
 // Strict URL validation - requires http:// or https://
