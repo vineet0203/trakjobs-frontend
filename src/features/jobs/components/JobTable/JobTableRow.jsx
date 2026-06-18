@@ -177,7 +177,8 @@ const JobTableRow = ({ job, isSelected, onSelect, onDeleteClick }) => {
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <ProfileAvatar
                             name={latestAssignment.employee_name}
-                            size={24}
+                            avatarSize={24}
+                            showName={false}
                         />
                         <EllipsisText
                             text={latestAssignment.employee_name}
@@ -188,7 +189,8 @@ const JobTableRow = ({ job, isSelected, onSelect, onDeleteClick }) => {
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <ProfileAvatar
                             name={assignedTo.full_name || 'Unknown User'}
-                            size={24}
+                            avatarSize={24}
+                            showName={false}
                         />
                     </Box>
                 ) : (
