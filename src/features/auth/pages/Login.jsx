@@ -77,7 +77,7 @@ const Login = () => {
       if (result) {
         if (role === 'Customer') {
           const customerAppUrl = import.meta.env.VITE_CUSTOMER_APP_URL || 'http://localhost:5175';
-          const token = result?.access_token;
+          const token = result?.data?.access_token;
           if (token) {
             const separator = customerAppUrl.includes('?') ? '&' : '?';
             window.location.href = `${customerAppUrl}${separator}authToken=${encodeURIComponent(token)}`;
@@ -86,7 +86,7 @@ const Login = () => {
           }
         } else if (role === 'Employee') {
           const employeeAppUrl = import.meta.env.VITE_EMPLOYEE_APP_URL || 'http://localhost:5174';
-          const token = result?.access_token;
+          const token = result?.data?.access_token;
           if (token) {
             const separator = employeeAppUrl.includes('?') ? '&' : '?';
             window.location.href = `${employeeAppUrl}${separator}authToken=${encodeURIComponent(token)}`;
