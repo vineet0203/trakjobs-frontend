@@ -17,7 +17,7 @@ import {
   Button,
   Skeleton,
 } from "@mui/material";
-import { MapPin, Clock, Route } from "lucide-react";
+import { MapPin, Clock } from "lucide-react";
 import scheduleService from "../services/scheduleService";
 import employeeService from "../../employees/services/employeeService";
 import httpClient from "../../../services/api/httpClient";
@@ -38,12 +38,12 @@ const VIEW_OPTIONS = [
 ];
 
 const STATUS_COLORS = {
-  scheduled:   { bg: "#E3F2FD", text: "#1565C0" },
-  draft:       { bg: "#F5F5F5", text: "#757575" },
-  completed:   { bg: "#E8F5E9", text: "#2E7D32" },
-  cancelled:   { bg: "#FFEBEE", text: "#C62828" },
-  pending:     { bg: "#FFF8E1", text: "#F57F17" },
-  assigned:    { bg: "#E8F5E9", text: "#2E7D32" },
+  scheduled: { bg: "#E3F2FD", text: "#1565C0" },
+  draft: { bg: "#F5F5F5", text: "#757575" },
+  completed: { bg: "#E8F5E9", text: "#2E7D32" },
+  cancelled: { bg: "#FFEBEE", text: "#C62828" },
+  pending: { bg: "#FFF8E1", text: "#F57F17" },
+  assigned: { bg: "#E8F5E9", text: "#2E7D32" },
   in_progress: { bg: "#E3F2FD", text: "#1565C0" },
 };
 
@@ -205,13 +205,12 @@ const DispatchCalendarView = ({ onOpenModal }) => {
   const [events, setEvents] = useState([]);
   const [upcomingJobs, setUpcomingJobs] = useState([]);
   const [loadingEmployees, setLoadingEmployees] = useState(true);
-  const [loadingCrews, setLoadingCrews] = useState(true);
+  const [loadingCrews, setLoadingCrews] = useState(true); // eslint-disable-line no-unused-vars
   const [loadingEvents, setLoadingEvents] = useState(true);
   const [loadingJobs, setLoadingJobs] = useState(true);
   const [selectedCrewId, setSelectedCrewId] = useState("all");
   const [selectedEmployeeId, setSelectedEmployeeId] = useState("all");
   const [calendarView, setCalendarView] = useState("timeGridWeek");
-  const [optimizing, setOptimizing] = useState(false);
 
   useEffect(() => {
     fetchEmployees();
@@ -360,11 +359,6 @@ const DispatchCalendarView = ({ onOpenModal }) => {
     }
   };
 
-  const handleOptimizeRoute = () => {
-    setOptimizing(true);
-    // Placeholder — no Maps integration yet
-    setTimeout(() => setOptimizing(false), 1500);
-  };
 
   const handleEmployeeSelect = (employeeId) => {
     setSelectedEmployeeId((prev) => (String(prev) === String(employeeId) ? "all" : employeeId));
@@ -625,92 +619,6 @@ const DispatchCalendarView = ({ onOpenModal }) => {
           )}
         </Paper>
       </Box>
-
-      {/* ── Route Optimization Card ──────────────────────────────────────────────── */}
-      <Paper
-        elevation={0}
-        sx={{
-          borderRadius: 2,
-          border: "1px solid #e5e7eb",
-          p: 2.5,
-          mt: 2,
-        }}
-      >
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "flex-start",
-            justifyContent: "space-between",
-            mb: 2,
-            flexWrap: "wrap",
-            gap: 1,
-          }}
-        >
-          <Box>
-            <Typography variant="subtitle2" fontWeight={600} mb={0.5}>
-              Route Optimization
-            </Typography>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
-              <Route size={14} color="#6b7280" />
-              <Typography variant="body2" color="text.secondary">
-                Today&apos;s Route:&nbsp;
-                <Box component="span" sx={{ fontWeight: 600, color: "text.primary" }}>
-                  {filteredUpcomingJobs.length} stop{filteredUpcomingJobs.length !== 1 ? "s" : ""}
-                </Box>
-                &nbsp;|&nbsp;
-                <Box component="span" sx={{ fontWeight: 600, color: "text.primary" }}>
-                  Distance —
-                </Box>
-                &nbsp;|&nbsp;
-                <Box component="span" sx={{ fontWeight: 600, color: "text.primary" }}>
-                  Duration —
-                </Box>
-              </Typography>
-            </Box>
-          </Box>
-
-          <Button
-            variant="outlined"
-            size="small"
-            disabled={optimizing}
-            onClick={handleOptimizeRoute}
-            sx={{
-              textTransform: "none",
-              borderRadius: 1.5,
-              fontWeight: 500,
-              minWidth: 130,
-            }}
-          >
-            {optimizing && <CircularProgress size={14} sx={{ mr: 1 }} />}
-            Optimize Route
-          </Button>
-        </Box>
-
-        {/* Map placeholder */}
-        <Box
-          sx={{
-            height: 200,
-            backgroundColor: "#f3f4f6",
-            borderRadius: 2,
-            border: "1px dashed #d1d5db",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 1.5,
-          }}
-        >
-          <MapPin size={36} color="#9ca3af" strokeWidth={1.5} />
-          <Box sx={{ textAlign: "center" }}>
-            <Typography variant="body2" color="text.secondary" fontWeight={500}>
-              Map view coming soon
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              Route map integration will show stop-by-stop directions
-            </Typography>
-          </Box>
-        </Box>
-      </Paper>
     </Box>
   );
 };
