@@ -82,11 +82,11 @@ const VendorMessages = () => {
       if (!echoInstanceRef.current) {
         window.Pusher = Pusher;
         echoInstanceRef.current = new Echo({
-          broadcaster: 'reverb',
-          key: 'idgq8iuytafdhi8zrh2u',
-          wsHost: 'api.trakjobs.com',
-          wsPort: 8080,
-          forceTLS: false,
+          broadcaster: 'pusher',
+          key: 'trakjobs_key',
+          wsHost: 'ws.trakjobs.com',
+          wsPort: 443,
+          forceTLS: true,
           disableStats: true,
           enabledTransports: ['ws', 'wss'],
           authEndpoint: `${API_BASE_URL}/chat/auth`,
