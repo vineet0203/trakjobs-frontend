@@ -317,11 +317,13 @@ const TimeTrackingApproval = () => {
                       <TableCell>{formatTime(entry.check_out)}</TableCell>
                       <TableCell>{formatDuration(entry.total_time)}</TableCell>
                       <TableCell>
-                        <Chip label={entry.status} color={statusColorMap[entry.status]} size="small" />
+                        <Chip label={!entry.check_out ? 'active' : entry.status} color={!entry.check_out ? 'primary' : statusColorMap[entry.status]} size="small" style={{ textTransform: 'capitalize' }} />
                       </TableCell>
                       <TableCell>{formatAudit(entry)}</TableCell>
                       <TableCell align="center">
-                        {entry.status === 'pending' ? (
+                        {!entry.check_out ? (
+                          <Chip label="Currently Clocked In" variant="outlined" color="primary" size="small" />
+                        ) : entry.status === 'pending' ? (
                           <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
                             <Button
                               size="small"
