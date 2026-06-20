@@ -88,6 +88,7 @@ const VendorMessages = () => {
           wsPort: 443,
           forceTLS: true,
           disableStats: true,
+          cluster: 'mt1',
           enabledTransports: ['ws', 'wss'],
           authEndpoint: `${API_BASE_URL}/chat/auth`,
           auth: {
