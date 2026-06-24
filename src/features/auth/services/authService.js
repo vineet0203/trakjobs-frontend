@@ -132,7 +132,7 @@ class AuthService extends BaseApiService {
 
   async forgotPassword(email) {
     try {
-      const response = await this.client.post("/auth/forgot-password", { email });
+      const response = await this.client.post("/api/v1/auth/password/forgot", { email });
       
       return {
         success: true,
@@ -153,7 +153,7 @@ class AuthService extends BaseApiService {
 
   async resetPassword(data) {
     try {
-      const response = await this.client.post("/auth/reset-password", data);
+      const response = await this.client.post("/api/v1/auth/password/reset", data);
       
       return {
         success: true,

@@ -134,6 +134,16 @@ const Login = () => {
   };
 
   const handleSelectRole = (role) => {
+    if (role === 'Employee') {
+      const employeeAppUrl = import.meta.env.VITE_EMPLOYEE_APP_URL || 'http://localhost:5174';
+      window.location.href = `${employeeAppUrl}/login`;
+      return;
+    }
+    if (role === 'Customer') {
+      const customerAppUrl = import.meta.env.VITE_CUSTOMER_APP_URL || 'http://localhost:5175';
+      window.location.href = `${customerAppUrl}/login`;
+      return;
+    }
     setSelectedRole(role);
     clearError();
   };

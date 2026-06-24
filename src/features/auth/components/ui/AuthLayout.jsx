@@ -16,12 +16,12 @@ const AuthLayout = ({ children, title, isRegister = false }) => {
 
   if (isRegister) {
     return (
-      <div
-        className="min-h-screen lg:h-screen lg:overflow-hidden font-poppins relative flex flex-col lg:flex-row"
-        style={{
-          background: 'radial-gradient(1200px 500px at 80% -10%, #FFECC7 0%, rgba(255, 236, 199, 0) 60%), linear-gradient(135deg, #0B1F3B 0%, #1F4A7A 55%, #2E6D9D 100%)'
-        }}
-      >
+      <div className="min-h-screen lg:h-screen lg:overflow-hidden font-poppins relative flex flex-col lg:flex-row aurora-bg-wrapper">
+        <div className="aurora-bg">
+          <div className="aurora-blob aurora-blob-1"></div>
+          <div className="aurora-blob aurora-blob-2"></div>
+          <div className="aurora-blob aurora-blob-3"></div>
+        </div>
         <style>{`
           @keyframes riseIn {
             from { opacity: 0; transform: translateY(16px); }
@@ -35,9 +35,6 @@ const AuthLayout = ({ children, title, isRegister = false }) => {
         `}</style>
 
         {/* Decorative ambient elements */}
-        <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-[#FFB24A] opacity-20 blur-2xl pointer-events-none"></div>
-        <div className="absolute -bottom-24 right-6 h-80 w-80 rounded-full bg-[#35C6C6] opacity-20 blur-2xl pointer-events-none"></div>
-        <div className="absolute top-24 right-12 h-40 w-40 rounded-full bg-white opacity-5 blur-xl pointer-events-none" style={{ animation: 'floatSlow 8s ease-in-out infinite' }}></div>
 
         {/* Left Side Column: Fixed viewport height on desktop, no scrolling */}
         <div className="w-full lg:w-[42%] lg:h-full flex flex-col justify-between p-8 lg:p-12 text-white border-b lg:border-b-0 lg:border-r border-white/10 bg-white/5 backdrop-blur-md relative z-20 lg:overflow-hidden">
@@ -147,27 +144,12 @@ const AuthLayout = ({ children, title, isRegister = false }) => {
 
   // Original layout for non-register (login, forgot password, etc.)
   return (
-    <div
-      className="min-h-screen flex items-center justify-center p-4 font-poppins relative overflow-hidden"
-      style={{
-        background: 'radial-gradient(1200px 500px at 80% -10%, #FFECC7 0%, rgba(255, 236, 199, 0) 60%), linear-gradient(135deg, #0B1F3B 0%, #1F4A7A 55%, #2E6D9D 100%)'
-      }}
-    >
-      <style>{`
-        @keyframes riseIn {
-          from { opacity: 0; transform: translateY(16px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes floatSlow {
-          0% { transform: translateY(0px); }
-          50% { transform: translateY(-8px); }
-          100% { transform: translateY(0px); }
-        }
-      `}</style>
-
-      <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-[#FFB24A] opacity-20 blur-2xl"></div>
-      <div className="absolute -bottom-24 right-6 h-80 w-80 rounded-full bg-[#35C6C6] opacity-20 blur-2xl"></div>
-      <div className="absolute top-24 right-12 h-40 w-40 rounded-full bg-white opacity-10 blur-xl" style={{ animation: 'floatSlow 8s ease-in-out infinite' }}></div>
+    <div className="min-h-screen flex items-center justify-center p-4 font-poppins relative overflow-hidden aurora-bg-wrapper">
+      <div className="aurora-bg">
+        <div className="aurora-blob aurora-blob-1"></div>
+        <div className="aurora-blob aurora-blob-2"></div>
+        <div className="aurora-blob aurora-blob-3"></div>
+      </div>
 
       <div className="relative z-10 w-full max-w-md">
         <div
