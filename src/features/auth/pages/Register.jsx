@@ -146,6 +146,12 @@ const Register = () => {
         email: values.email,
         mobile_number: values.mobile_number,
         business_type: values.business_type,
+        address_line1: values.address_line1,
+        address_line2: values.address_line2,
+        city: values.city,
+        state: values.state,
+        zip_code: values.zip_code,
+        country: values.country,
         service_category: values.service_category,
         service_sub_category: values.service_sub_category,
         service_category_custom: values.service_category_custom || null,
@@ -225,6 +231,12 @@ const Register = () => {
           email: '',
           mobile_number: '',
           business_type: '',
+          address_line1: '',
+          address_line2: '',
+          city: '',
+          state: '',
+          zip_code: '',
+          country: '',
           service_category: '',
           service_sub_category: '',
           service_category_custom: '',
@@ -333,6 +345,89 @@ const Register = () => {
                     helperText={touched.business_type && errors.business_type}
                     fullWidth
                     required
+                    disabled={loading}
+                  />
+                </Box>
+              </Box>
+
+              <Box sx={sectionCardSx}>
+                <Typography sx={sectionTitleSx}>Address Details</Typography>
+                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
+                  <DebouncedTextField
+                    name="address_line1"
+                    label="Address Line 1"
+                    placeholder="Enter street address"
+                    value={values.address_line1}
+                    onChange={(value) => setFieldValue('address_line1', value)}
+                    onBlur={() => setFieldTouched('address_line1', true)}
+                    error={touched.address_line1 && Boolean(errors.address_line1)}
+                    helperText={touched.address_line1 && errors.address_line1}
+                    size="medium"
+                    disabled={loading}
+                  />
+
+                  <DebouncedTextField
+                    name="address_line2"
+                    label="Address Line 2 (Optional)"
+                    placeholder="Suite, unit, building, floor, etc."
+                    value={values.address_line2}
+                    onChange={(value) => setFieldValue('address_line2', value)}
+                    onBlur={() => setFieldTouched('address_line2', true)}
+                    error={touched.address_line2 && Boolean(errors.address_line2)}
+                    helperText={touched.address_line2 && errors.address_line2}
+                    size="medium"
+                    disabled={loading}
+                  />
+
+                  <DebouncedTextField
+                    name="city"
+                    label="City"
+                    placeholder="Enter city"
+                    value={values.city}
+                    onChange={(value) => setFieldValue('city', value)}
+                    onBlur={() => setFieldTouched('city', true)}
+                    error={touched.city && Boolean(errors.city)}
+                    helperText={touched.city && errors.city}
+                    size="medium"
+                    disabled={loading}
+                  />
+
+                  <DebouncedTextField
+                    name="state"
+                    label="State"
+                    placeholder="Enter state"
+                    value={values.state}
+                    onChange={(value) => setFieldValue('state', value)}
+                    onBlur={() => setFieldTouched('state', true)}
+                    error={touched.state && Boolean(errors.state)}
+                    helperText={touched.state && errors.state}
+                    size="medium"
+                    disabled={loading}
+                  />
+
+                  <DebouncedTextField
+                    name="zip_code"
+                    label="Zip Code"
+                    placeholder="Enter zip code"
+                    value={values.zip_code}
+                    onChange={(value) => setFieldValue('zip_code', value)}
+                    onBlur={() => setFieldTouched('zip_code', true)}
+                    error={touched.zip_code && Boolean(errors.zip_code)}
+                    helperText={touched.zip_code && errors.zip_code}
+                    size="medium"
+                    disabled={loading}
+                  />
+
+                  <DebouncedTextField
+                    name="country"
+                    label="Country"
+                    placeholder="Enter country"
+                    value={values.country}
+                    onChange={(value) => setFieldValue('country', value)}
+                    onBlur={() => setFieldTouched('country', true)}
+                    error={touched.country && Boolean(errors.country)}
+                    helperText={touched.country && errors.country}
+                    size="medium"
                     disabled={loading}
                   />
                 </Box>

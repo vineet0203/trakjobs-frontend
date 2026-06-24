@@ -54,6 +54,13 @@ export const registerSchema = Yup.object({
     .required("Business type is required")
     .oneOf(["commercial", "residential"], "Select a valid business type"),
 
+  address_line1: Yup.string().nullable().max(191, "Address Line 1 must not exceed 191 characters"),
+  address_line2: Yup.string().nullable().max(191, "Address Line 2 must not exceed 191 characters"),
+  city: Yup.string().nullable().max(191, "City must not exceed 191 characters"),
+  state: Yup.string().nullable().max(191, "State must not exceed 191 characters"),
+  zip_code: Yup.string().nullable().max(20, "Zip code must not exceed 20 characters"),
+  country: Yup.string().nullable().max(191, "Country must not exceed 191 characters"),
+
   full_name: Yup.string()
     .required("Full name is required")
     .max(100, "Full name must not exceed 100 characters"),
