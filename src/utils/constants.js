@@ -9,7 +9,7 @@ const getApiBaseUrl = () => {
   }
   // For production builds, always use the production API
   if (import.meta.env.PROD) {
-    return "http://127.0.0.1:8000/api/v1";
+    return "https://api.trakjobs.com/api/v1";
   }
   // For development, use env variable or fallback
   return envUrl || "http://127.0.0.1:8000/api/v1";
