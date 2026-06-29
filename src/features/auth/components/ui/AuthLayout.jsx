@@ -1,8 +1,6 @@
 import React from 'react';
 import { APP_NAME } from '../../../../utils/constants';
-import maintenanceWorkerImg from '../../../../assets/horizontal-shot-handsome-young-maintenance-service-worker-wearing-white-helmet Background Removed.webp';
-import electricianImg from '../../../../assets/ready-start-my-work-proud-attractive-electrician-with-protective-gear-holding-toolbox-electricity-cables Background Removed.webp';
-import plumberImg from '../../../../assets/plumber-pointing-lateral Background Removed.webp';
+import registerBgImg from '../../../../assets/Register_page_background.webp';
 
 const AuthLayout = ({ children, title, isRegister = false }) => {
   const handleLogoClick = (e) => {
@@ -69,44 +67,46 @@ const AuthLayout = ({ children, title, isRegister = false }) => {
               </a>
             </div>
 
-            {/* Service Visuals Grid (Only Images, Bigger) */}
-            <div className="my-auto py-6 flex flex-col">
-              <div className="flex justify-center items-end -space-x-8 relative h-52 border-b border-white/10" style={{ animation: 'riseIn 0.8s ease' }}>
+            {/* Service Visuals Grid */}
+            <div className="my-auto py-4 flex flex-col">
+              <div className="w-full overflow-hidden rounded-2xl border border-white/20 shadow-xl" style={{ animation: 'riseIn 0.8s ease' }}>
                 <img 
-                  src={maintenanceWorkerImg} 
-                  alt="Maintenance" 
-                  className="h-48 object-contain drop-shadow-[0_10px_15px_rgba(0,0,0,0.3)] relative z-10" 
-                />
-                <img 
-                  src={electricianImg} 
-                  alt="Electrician" 
-                  className="h-48 object-contain drop-shadow-[0_10px_15px_rgba(0,0,0,0.3)] relative z-20" 
-                />
-                <img 
-                  src={plumberImg} 
-                  alt="Plumber" 
-                  className="h-48 object-contain drop-shadow-[0_10px_15px_rgba(0,0,0,0.3)] relative z-10" 
+                  src={registerBgImg} 
+                  alt="TrakJobs Services" 
+                  className="w-full h-auto object-cover block" 
                 />
               </div>
 
               {/* Why Partner with Us checklist */}
-              <div className="mt-8 flex flex-col gap-3" style={{ animation: 'riseIn 1s ease' }}>
-                <h4 className="text-sm font-bold uppercase tracking-wider text-[#ffb800]">Why Partner with Us?</h4>
-                <div className="flex flex-col gap-3 text-xs lg:text-sm text-white/90">
+              <div className="mt-8 flex flex-col gap-4" style={{ animation: 'riseIn 1s ease' }}>
+                <h4 className="text-sm font-bold uppercase tracking-wider text-[#ffb800]">WHY PARTNER WITH US?</h4>
+                <div className="flex flex-col gap-3.5 text-xs lg:text-sm text-white/90">
                   <div className="flex items-start gap-3">
-                    <span className="h-5 w-5 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-300 text-xs font-bold shrink-0 mt-0.5">✓</span>
+                    <div className="h-5 w-5 rounded-full bg-[#10b981] flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
+                      <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
                     <div>
                       <strong className="text-white font-semibold">Grow Your Business:</strong> Access thousands of customer booking requests in your service areas daily.
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <span className="h-5 w-5 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-300 text-xs font-bold shrink-0 mt-0.5">✓</span>
+                    <div className="h-5 w-5 rounded-full bg-[#10b981] flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
+                      <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
                     <div>
                       <strong className="text-white font-semibold">Direct Communication:</strong> Real-time built-in chat system to converse directly with customers.
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <span className="h-5 w-5 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-300 text-xs font-bold shrink-0 mt-0.5">✓</span>
+                    <div className="h-5 w-5 rounded-full bg-[#10b981] flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
+                      <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
                     <div>
                       <strong className="text-white font-semibold">Guaranteed Secure Payments:</strong> Experience safe and quick invoicing directly linked to your bank.
                     </div>
