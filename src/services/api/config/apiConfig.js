@@ -15,8 +15,8 @@ export const API_ENDPOINTS = {
     register: "/api/auth/register",
     logout: "/api/auth/logout",
     refresh: "/api/auth/refresh",
-    forgotPassword: "/api/auth/forgot-password",
-    resetPassword: "/api/auth/reset-password",
+    forgotPassword: "/api/v1/auth/password/forgot",
+    resetPassword: "/api/v1/auth/password/reset",
   },
   clients: {
     base: "/api/v1/vendors/clients", // Updated path

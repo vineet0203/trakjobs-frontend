@@ -77,7 +77,7 @@ const ReportsPageContent = () => {
     setExportAnchor(null);
     setIsExporting(true);
     const elementId = 'reports-content';
-    const filename = `TrackJobs_${activeTab}_Report`;
+    const filename = `TrakJobs_${activeTab}_Report`;
 
     try {
       switch (type) {

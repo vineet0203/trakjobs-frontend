@@ -29,7 +29,7 @@ const mockEmailLogs = [
     {
         id: 1,
         from: 'Amot Verma',
-        fromEmail: 'amot.verma@trackjobs.com',
+        fromEmail: 'amot.verma@trakjobs.com',
         to: 'John Smith',
         toEmail: 'john.smith@brightensolution.com',
         subject: 'Website Redesign - Initial Concepts',
@@ -40,7 +40,7 @@ const mockEmailLogs = [
     {
         id: 2,
         from: 'Sarah Johnson',
-        fromEmail: 'sarah.j@trackjobs.com',
+        fromEmail: 'sarah.j@trakjobs.com',
         to: 'Sarah Johnson',
         toEmail: 'sarah.j@brightensolution.com',
         subject: 'Project Timeline Update',
@@ -51,7 +51,7 @@ const mockEmailLogs = [
     {
         id: 3,
         from: 'Amot Verma',
-        fromEmail: 'amot.verma@trackjobs.com',
+        fromEmail: 'amot.verma@trakjobs.com',
         to: 'Mike Chen',
         toEmail: 'mike.chen@brightensolution.com',
         subject: 'Invoice #INV-2025-042',
@@ -62,7 +62,7 @@ const mockEmailLogs = [
     {
         id: 4,
         from: 'David Wilson',
-        fromEmail: 'david.w@trackjobs.com',
+        fromEmail: 'david.w@trakjobs.com',
         to: 'David Wilson',
         toEmail: 'david.w@brightensolution.com',
         subject: 'Meeting Confirmation',
@@ -73,7 +73,7 @@ const mockEmailLogs = [
     {
         id: 5,
         from: 'Amot Verma',
-        fromEmail: 'amot.verma@trackjobs.com',
+        fromEmail: 'amot.verma@trakjobs.com',
         to: 'Client',
         toEmail: 'client@brightensolution.com',
         subject: 'Additional Resources',

@@ -4,7 +4,7 @@ import * as XLSX from 'xlsx';
 
 const getFileSuffix = () => new Date().toISOString().split('T')[0];
 
-export const exportAsPDF = async (elementId, filename = 'TrackJobs_Report') => {
+export const exportAsPDF = async (elementId, filename = 'TrakJobs_Report') => {
   const element = document.getElementById(elementId);
   if (!element) throw new Error('Export element not found');
   const opt = {
@@ -17,7 +17,7 @@ export const exportAsPDF = async (elementId, filename = 'TrackJobs_Report') => {
   await html2pdf().set(opt).from(element).save();
 };
 
-export const exportAsExcel = (data, filename = 'TrackJobs_Report') => {
+export const exportAsExcel = (data, filename = 'TrakJobs_Report') => {
   if (!data) throw new Error('No data available for Excel export');
   const wb = XLSX.utils.book_new();
   const fmt = (val) => {
@@ -55,7 +55,7 @@ export const exportAsExcel = (data, filename = 'TrackJobs_Report') => {
   XLSX.writeFile(wb, `${filename}_${getFileSuffix()}.xlsx`);
 };
 
-export const exportAsImage = async (elementId, filename = 'TrackJobs_Report') => {
+export const exportAsImage = async (elementId, filename = 'TrakJobs_Report') => {
   const element = document.getElementById(elementId);
   if (!element) throw new Error('Export element not found');
   const canvas = await html2canvas(element, { scale: 2, useCORS: true, backgroundColor: '#f4f6fb', logging: false });
@@ -71,6 +71,6 @@ export const printReport = async (elementId) => {
   const canvas = await html2canvas(element, { scale: 1.5, useCORS: true });
   const imgData = canvas.toDataURL('image/png');
   const printWindow = window.open('', '_blank');
-  printWindow.document.write('<html><head><title>TrackJobs Report</title><style>body{margin:0;display:flex;justify-content:center;}img{max-width:100%;height:auto;}@media print{@page{margin:10mm;}}</style></head><body><img src="' + imgData + '"/><script>window.onload=()=>{window.print();window.onafterprint=()=>window.close();}<\/script></body></html>');
+  printWindow.document.write('<html><head><title>TrakJobs Report</title><style>body{margin:0;display:flex;justify-content:center;}img{max-width:100%;height:auto;}@media print{@page{margin:10mm;}}</style></head><body><img src="' + imgData + '"/><script>window.onload=()=>{window.print();window.onafterprint=()=>window.close();}<\/script></body></html>');
   printWindow.document.close();
 };

@@ -42,7 +42,7 @@ export const register = async (userData) => {
 
 export const forgotPassword = async ({ email }) => {
   try {
-    const response = await api.post("/auth/forgot-password", { email });
+    const response = await api.post("/api/v1/auth/password/forgot", { email });
     return response.data;
   } catch (error) {
     if (error.response?.data) {
@@ -61,7 +61,7 @@ export const resetPassword = async ({
   password_confirmation,
 }) => {
   try {
-    const response = await api.post("/auth/reset-password", {
+    const response = await api.post("/api/v1/auth/password/reset", {
       email,
       token,
       password,
