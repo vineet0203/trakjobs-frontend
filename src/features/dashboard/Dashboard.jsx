@@ -123,6 +123,26 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-[#f8fafc] p-8 font-sans w-full box-border">
       {error && <div className="mb-4 rounded-lg bg-red-50 p-4 text-red-600">{error}</div>}
+
+      {((user?.verification_status || localStorage.getItem('trakjobs_verification_status')) !== 'verified') && (
+        <div className="mb-6 rounded-xl bg-amber-50 border border-amber-200 p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4 shadow-sm animate-pulse">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center text-amber-600 flex-shrink-0">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </div>
+            <div>
+              <h3 className="font-bold text-amber-900 text-sm">Account Verification Required</h3>
+              <p className="text-amber-700 text-xs mt-0.5">Please verify your account to unlock all features, schedule jobs, and access time-tracking approvals.</p>
+            </div>
+          </div>
+          <button 
+            onClick={() => window.location.href = '/verification'}
+            className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-bold transition-colors whitespace-nowrap"
+          >
+            Verify Now
+          </button>
+        </div>
+      )}
       
       {/* Header */}
       <div className="mb-8">

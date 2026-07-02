@@ -13,6 +13,11 @@ import { Login, Register, ForgotPassword, ResetPassword } from './features/auth'
 import NotFound from './pages/NotFound';
 import Unauthorized from './pages/Unauthorized';
 
+// Verification Pages
+import VerificationRequired from './features/verification/pages/VerificationRequired';
+import VerificationWizard from './features/verification/pages/VerificationWizard';
+import VerificationSuccess from './features/verification/pages/VerificationSuccess';
+
 // Layout
 import { Layout } from './features/dashboard';
 
@@ -51,6 +56,21 @@ import InvoicePDFView from './pages/invoice/InvoicePDFView';
 import ReportsPage from './pages/reports/ReportsPage';
 
 
+// Synchronously parse query parameters on load to prevent route guard race conditions
+const params = new URLSearchParams(window.location.search);
+const urlToken = params.get('authToken');
+const urlRole = params.get('role');
+if (urlToken) {
+  localStorage.setItem('access_token', urlToken);
+  const mockUser = {
+    email: 'user@trakjobs.com',
+    role: urlRole || 'Customer',
+    verification_status: 'pending'
+  };
+  localStorage.setItem('user', JSON.stringify(mockUser));
+  window.history.replaceState({}, '', window.location.pathname);
+}
+
 const AppContent = () => {
   const { loadAuthState, user } = useAuth();
 
@@ -70,6 +90,11 @@ const AppContent = () => {
 
       {/* Public Onboarding Form (no auth - token-based) */}
       <Route path="/fill-form/:token" element={<FillForm />} />
+
+      {/* Verification Routes */}
+      <Route path="/verification-required" element={<ProtectedRoute><VerificationRequired /></ProtectedRoute>} />
+      <Route path="/verification" element={<ProtectedRoute><VerificationWizard /></ProtectedRoute>} />
+      <Route path="/verification-success" element={<ProtectedRoute><VerificationSuccess /></ProtectedRoute>} />
 
       {/* Protected Routes */}
       <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>

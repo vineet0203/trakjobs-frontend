@@ -75,6 +75,12 @@ const Login = () => {
       const result = await login(values, role === 'Vendor' ? '/dashboard' : null);
       
       if (result) {
+        const userObj = result?.data?.user;
+        if (userObj && userObj.verification_status !== 'verified') {
+          navigate('/verification-required');
+          return;
+        }
+
         if (role === 'Customer') {
           const customerAppUrl = import.meta.env.VITE_CUSTOMER_APP_URL || 'http://localhost:5175';
           const token = result?.data?.access_token;

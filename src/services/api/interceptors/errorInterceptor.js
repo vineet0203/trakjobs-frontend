@@ -93,6 +93,47 @@ const handleUnauthorized = async (error) => {
 
 // Rest of the handlers remain the same
 const handleForbidden = (error) => {
+  const data = error.response?.data;
+  if (data?.error_code === "VERIFICATION_REQUIRED" || (data?.code === 403 && data?.message?.includes("must be verified"))) {
+    console.warn("Verification required - clearing stale verified status caches.");
+    
+    // Clear all possible verification caches
+    localStorage.removeItem("trakjobs_verification_status");
+    
+    const userStr = localStorage.getItem("user");
+    if (userStr) {
+      try {
+        const userObj = JSON.parse(userStr);
+        userObj.verification_status = "pending";
+        localStorage.setItem("user", JSON.stringify(userObj));
+      } catch (e) {}
+    }
+    
+    const customerStr = localStorage.getItem("customer_profile");
+    if (customerStr) {
+      try {
+        const customerObj = JSON.parse(customerStr);
+        customerObj.verification_status = "pending";
+        localStorage.setItem("customer_profile", JSON.stringify(customerObj));
+      } catch (e) {}
+    }
+
+    const employeeStr = localStorage.getItem("employee_auth_employee");
+    if (employeeStr) {
+      try {
+        const employeeObj = JSON.parse(employeeStr);
+        employeeObj.verification_status = "pending";
+        localStorage.setItem("employee_auth_employee", JSON.stringify(employeeObj));
+      } catch (e) {}
+    }
+
+    // Force route redirection to the warning screen
+    if (!window.location.pathname.includes('/verification-required') && 
+        !window.location.pathname.includes('/verification')) {
+      window.location.href = "/verification-required";
+    }
+  }
+
   console.warn("Access forbidden:", error.response?.data?.message);
   return Promise.reject(error);
 };

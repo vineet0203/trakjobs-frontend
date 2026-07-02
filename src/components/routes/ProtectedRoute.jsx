@@ -43,6 +43,12 @@ const ProtectedRoute = ({ children, requiredRoles = [], requiredPermissions = []
     return <Navigate to="/auth/login" state={{ from: location }} replace />;
   }
 
+  const verificationStatus = user?.verification_status || localStorage.getItem('trakjobs_verification_status');
+  if (verificationStatus !== 'verified' && !['/verification-required', '/verification', '/verification-success'].includes(location.pathname)) {
+    console.log('User not verified, redirecting to verification warning screen');
+    return <Navigate to="/verification-required" replace />;
+  }
+
   // Check roles if required
   if (requiredRoles.length > 0) {
     const hasRequiredRole = requiredRoles.some(role => {

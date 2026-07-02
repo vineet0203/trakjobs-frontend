@@ -22,6 +22,8 @@ import {
   ChevronRight,
   Bell,
   MessageSquare,
+  AlertCircle,
+  CheckCircle2,
 } from 'lucide-react';
 import UnreadBadge from '../../../../messages/components/UnreadBadge';
 
@@ -91,7 +93,18 @@ const Sidebar = () => {
             <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=0D8ABC&color=fff`} alt="User" className="w-full h-full object-cover rounded-full" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-bold text-slate-800 truncate">{displayName}</p>
+            <p className="text-sm font-bold text-slate-800 truncate flex items-center gap-1.5">
+              {displayName}
+              {(user?.verification_status || localStorage.getItem('trakjobs_verification_status')) === 'verified' ? (
+                <CheckCircle2 className="w-3.5 h-3.5 text-green-500 flex-shrink-0" fill="rgba(34, 197, 94, 0.15)" />
+              ) : (
+                <AlertCircle 
+                  className="w-3.5 h-3.5 text-amber-500 cursor-pointer flex-shrink-0 animate-pulse" 
+                  onClick={() => navigate('/verification')}
+                  title="Account verification required. Click to verify."
+                />
+              )}
+            </p>
             <p className="text-xs text-slate-500 truncate">{displayRole}</p>
             {user.vendor && (user.vendor.service_category || user.vendor.service_sub_category) && (
               <p className="text-[10px] font-medium text-[#ffb800] bg-orange-50 border border-orange-100 rounded px-1.5 py-0.5 mt-1 inline-block truncate max-w-full">

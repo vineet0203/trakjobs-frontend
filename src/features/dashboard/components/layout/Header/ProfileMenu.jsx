@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Bell, LogOut, User, Settings, ChevronDown } from 'lucide-react';
+import { Bell, LogOut, User, Settings, ChevronDown, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '../../../../auth/hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 
 const ProfileMenu = ({ user }) => {
   const { logout } = useAuth();
+  const navigate = useNavigate();
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [shouldShowMenu, setShouldShowMenu] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
@@ -105,8 +107,20 @@ const ProfileMenu = ({ user }) => {
           {getUserInitials()}
         </div>
         <div className="flex flex-col min-w-[100px]">
-          <span className="text-sm font-medium text-gray-900 whitespace-nowrap">
+          <span className="text-sm font-medium text-gray-900 whitespace-nowrap flex items-center gap-1.5">
             {getDisplayName()}
+            {(user?.verification_status || localStorage.getItem('trakjobs_verification_status')) === 'verified' ? (
+              <CheckCircle2 className="w-3.5 h-3.5 text-green-500 flex-shrink-0" fill="rgba(34, 197, 94, 0.15)" />
+            ) : (
+              <AlertCircle 
+                className="w-3.5 h-3.5 text-amber-500 cursor-pointer flex-shrink-0 animate-pulse" 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate('/verification');
+                }}
+                title="Account verification required. Click to verify."
+              />
+            )}
           </span>
           <span className="text-xs text-gray-500 whitespace-nowrap">{getUserRole()}</span>
         </div>
