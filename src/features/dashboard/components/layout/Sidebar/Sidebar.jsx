@@ -95,7 +95,7 @@ const Sidebar = () => {
           <div className="flex-1 min-w-0">
             <p className="text-sm font-bold text-slate-800 truncate flex items-center gap-1.5">
               {displayName}
-              {(user?.verification_status || localStorage.getItem('trakjobs_verification_status')) === 'verified' ? (
+              {(localStorage.getItem('trakjobs_verification_status') || user?.verification_status) === 'verified' ? (
                 <CheckCircle2 className="w-3.5 h-3.5 text-green-500 flex-shrink-0" fill="rgba(34, 197, 94, 0.15)" />
               ) : (
                 <AlertCircle 

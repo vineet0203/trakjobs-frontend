@@ -109,7 +109,7 @@ const ProfileMenu = ({ user }) => {
         <div className="flex flex-col min-w-[100px]">
           <span className="text-sm font-medium text-gray-900 whitespace-nowrap flex items-center gap-1.5">
             {getDisplayName()}
-            {(user?.verification_status || localStorage.getItem('trakjobs_verification_status')) === 'verified' ? (
+            {(localStorage.getItem('trakjobs_verification_status') || user?.verification_status) === 'verified' ? (
               <CheckCircle2 className="w-3.5 h-3.5 text-green-500 flex-shrink-0" fill="rgba(34, 197, 94, 0.15)" />
             ) : (
               <AlertCircle 

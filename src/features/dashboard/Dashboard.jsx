@@ -124,7 +124,7 @@ const Dashboard = () => {
     <div className="min-h-screen bg-[#f8fafc] p-8 font-sans w-full box-border">
       {error && <div className="mb-4 rounded-lg bg-red-50 p-4 text-red-600">{error}</div>}
 
-      {((user?.verification_status || localStorage.getItem('trakjobs_verification_status')) !== 'verified') && (
+      {((localStorage.getItem('trakjobs_verification_status') || user?.verification_status) !== 'verified') && (
         <div className="mb-6 rounded-xl bg-amber-50 border border-amber-200 p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4 shadow-sm animate-pulse">
           <div className="flex items-start gap-3">
             <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center text-amber-600 flex-shrink-0">
