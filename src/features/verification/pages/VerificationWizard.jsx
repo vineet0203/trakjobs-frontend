@@ -439,7 +439,7 @@ export default function VerificationWizard() {
                     <label className="text-xs font-bold text-[#0d1b2a] tracking-wide uppercase">Registered Email Address</label>
                     <div className="relative">
                       <input 
-                        disabled
+                        
                         type="email" 
                         value={emailInput}
                         className="w-full h-12 pl-4 pr-10 rounded-xl border border-slate-200 bg-slate-50 text-slate-400 text-sm shadow-inner"
@@ -456,8 +456,9 @@ export default function VerificationWizard() {
                     <label className="text-xs font-bold text-[#0d1b2a] tracking-wide uppercase">Registered WhatsApp Mobile</label>
                     <div className="relative">
                       <input 
-                        disabled
+                        
                         type="tel" 
+                        onChange={(e) => setPhoneInput(e.target.value)}
                         value={phoneInput}
                         className="w-full h-12 pl-4 pr-10 rounded-xl border border-slate-200 bg-slate-50 text-slate-400 text-sm shadow-inner"
                       />

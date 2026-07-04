@@ -13,7 +13,7 @@ class AuthService extends BaseApiService {
       let loginEndpoint = "/api/v1/auth/login";
 
       if (role === "Customer") {
-        loginEndpoint = "/api/v1/customer/login";
+        loginEndpoint = "/api/v1/customers/login";
       } else if (role === "Employee") {
         loginEndpoint = "/api/v1/employee/login";
       } else if (role === "Vendor") {
