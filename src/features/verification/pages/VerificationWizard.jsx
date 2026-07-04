@@ -669,7 +669,7 @@ export default function VerificationWizard() {
                 </div>
 
                 {/* Hidden reCAPTCHA Container */}
-                <div id="recaptcha-container-otp" className="hidden" />
+                <div id="recaptcha-container-sms-verification" className="hidden" />
 
                 {/* Agreement Checkbox Card */}
                 <div className="flex items-start gap-4 p-5 bg-[#f8fafc] rounded-2xl border border-slate-200">

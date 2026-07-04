@@ -71,7 +71,7 @@ export function useFirebaseOtp() {
     if (recaptchaVerifierRef.current) return;
 
     try {
-      recaptchaVerifierRef.current = new RecaptchaVerifier(auth, 'recaptcha-container-otp', {
+      recaptchaVerifierRef.current = new RecaptchaVerifier(auth, 'recaptcha-container-sms-verification', {
         size: 'invisible',
         callback: () => {
           // reCAPTCHA solved
