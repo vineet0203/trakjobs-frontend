@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { User, CheckCircle, HelpCircle, FileText, UploadCloud, Shield, Check, Mail, Phone, ArrowRight, X } from 'lucide-react';
 import { verificationApi } from '../api/verificationApi';
 import { useAuth } from '../../auth/hooks/useAuth';
 
@@ -233,6 +234,23 @@ export default function VerificationWizard() {
     }
   };
 
+  const getCompletionPercentage = () => {
+    let pct = 0;
+    if (firstName && lastName && dob && gender) pct += 25;
+    if (idFileName) pct += 25;
+    if (emailVerified) pct += 25;
+    if (phoneVerified) pct += 25;
+    return pct;
+  };
+
+  const percentComplete = getCompletionPercentage();
+
+  const getDisplayName = () => {
+    if (user?.full_name) return user.full_name;
+    if (user?.first_name && user?.last_name) return `${user.first_name} ${user.last_name}`;
+    return 'New User';
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#f7f9fb]">
@@ -241,466 +259,469 @@ export default function VerificationWizard() {
     );
   }
 
+  // Sidebar Steps
+  const sidebarSteps = [
+    { num: 1, title: 'Personal Info', desc: 'Legal name & details', done: !!(firstName && lastName && dob && gender) },
+    { num: 2, title: 'Identity Verification', desc: 'Government-issued ID', done: !!idFileName },
+    { num: 3, title: 'Contact Verification', desc: 'Email & WhatsApp checks', done: !!(emailVerified && phoneVerified) },
+  ];
+
   return (
-    <div className="flex flex-1 w-full mx-auto overflow-hidden min-h-screen bg-[#f7f9fb] font-sans">
-      {/* Sidebar Navigation */}
-      <aside className="hidden md:flex flex-col h-screen w-[300px] bg-[#0d1b2a] sticky top-0 overflow-hidden shrink-0">
-        {/* Brand Section */}
-        <div className="p-8 pb-10 flex items-center gap-2">
-          <span className="w-8 h-8 rounded-md bg-[#ffb800] text-[#0d1b2a] flex items-center justify-center text-lg font-extrabold">T</span>
-          <span className="text-xl font-black text-white tracking-tight">Trak<span className="text-[#ffb800]">Jobs</span></span>
-        </div>
-
-        {/* Profile / Welcome */}
-        <div className="px-8 mb-10">
-          <div className="flex items-center gap-4 p-4 bg-white/5 rounded-xl border border-white/10">
-            <div className="w-10 h-10 rounded-full bg-[#ffb800] flex items-center justify-center shrink-0">
-              <span className="material-symbols-outlined text-[#0d1b2a] font-bold">person</span>
-            </div>
+    <div className="min-h-screen bg-[#f7f9fb] flex flex-col font-sans text-slate-800 antialiased">
+      {/* Brand Header */}
+      <header className="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span className="w-10 h-10 rounded-xl bg-[#0d1b2a] text-[#ffb800] flex items-center justify-center text-xl font-black shadow-md">T</span>
             <div>
-              <p className="text-white font-bold text-sm truncate max-w-[150px]">{firstName || 'New User'}</p>
-              <p className="text-white/60 text-xs">Verification Profile</p>
+              <span className="text-xl font-extrabold text-[#0d1b2a] tracking-tight">Trak<span className="text-[#ffb800]">Jobs</span></span>
+              <span className="hidden sm:inline-block ml-3 px-2.5 py-1 bg-slate-100 text-[#0d1b2a] text-[10px] font-bold rounded-md uppercase tracking-wider">Verification Center</span>
             </div>
+          </div>
+          
+          <div className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-700 rounded-full border border-emerald-150">
+            <Shield className="w-4 h-4 text-emerald-600" />
+            <span className="text-xs font-bold uppercase tracking-wider">End-to-end encrypted</span>
           </div>
         </div>
+      </header>
 
-        {/* Progress Steps */}
-        <nav className="flex-1 px-8 space-y-6">
-          <div className="flex items-start gap-4 relative">
-            <div className="w-8 h-8 rounded-full bg-[#ffb800] text-[#0d1b2a] font-bold flex items-center justify-center shrink-0 z-10 text-sm">
-              1
-            </div>
+      {/* Main Grid Wrapper */}
+      <div className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          
+          {/* Sticky Left Sidebar */}
+          <aside className="lg:col-span-1 bg-[#0d1b2a] text-white rounded-3xl p-6 h-fit lg:sticky lg:top-28 shadow-xl flex flex-col justify-between">
             <div>
-              <p className="font-bold text-white text-sm">Personal Info</p>
-              <p className="text-white/40 text-[11px]">Basic details &amp; ID</p>
-            </div>
-          </div>
-          <div className="flex items-start gap-4 relative">
-            <div className="w-8 h-8 rounded-full bg-white/5 border border-white/20 text-white/40 font-bold flex items-center justify-center shrink-0 z-10 text-sm">2</div>
-            <div>
-              <p className="font-bold text-white/40 text-sm">Contact Info</p>
-              <p className="text-white/20 text-[11px]">How to reach you</p>
-            </div>
-          </div>
-          <div className="flex items-start gap-4 relative">
-            <div className="w-8 h-8 rounded-full bg-white/5 border border-white/20 text-white/40 font-bold flex items-center justify-center shrink-0 z-10 text-sm">3</div>
-            <div>
-              <p className="font-bold text-white/40 text-sm">Service Address</p>
-              <p className="text-white/20 text-[11px]">Where we serve you</p>
-            </div>
-          </div>
-        </nav>
-
-        {/* Bottom Support */}
-        <div className="p-8 bg-black/20 mt-auto">
-          <div className="flex items-center gap-3 text-white/60 mb-2">
-            <span className="material-symbols-outlined text-[#ffb800] text-base">help</span>
-            <span className="text-xs font-bold uppercase tracking-wider">Support</span>
-          </div>
-          <p className="text-[11px] text-white/40 leading-relaxed mb-4">Need help completing this form? Contact our support team.</p>
-          <div className="space-y-1">
-            <a className="text-white hover:text-[#ffb800] text-xs transition-colors block" href="mailto:support@trakjobs.com">support@trakjobs.com</a>
-            <p className="text-white/80 text-xs">(972) 555-0199</p>
-          </div>
-        </div>
-      </aside>
-
-      {/* Main Content Area */}
-      <main className="flex-1 bg-[#f7f9fb] overflow-y-auto">
-        {/* Top Header */}
-        <header className="bg-white border-b border-gray-200 h-20 flex items-center px-12 sticky top-0 z-40">
-          <div className="flex justify-between items-center w-full max-w-5xl mx-auto">
-            <div className="flex items-center gap-4">
-              <span className="material-symbols-outlined text-[#22c55e] text-3xl">verified</span>
-              <div>
-                <h1 className="text-lg font-bold text-[#0d1b2a] uppercase tracking-tight">Verified Customer Form</h1>
-                <p className="text-xs text-gray-500">Step 1 of 1: Personal Information</p>
-              </div>
-            </div>
-            <div className="hidden lg:flex items-center gap-2 px-4 py-2 bg-[#f7f9fb] rounded-full">
-              <span className="material-symbols-outlined text-[18px] text-[#64748b]">lock</span>
-              <span className="text-[12px] font-bold text-[#64748b] uppercase tracking-wider">End-to-end encrypted</span>
-            </div>
-          </div>
-        </header>
-
-        <div className="p-8 md:p-12 max-w-5xl mx-auto">
-          {/* Form Completion Bar */}
-          <div className="mb-12 bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-            <div className="flex justify-between items-center mb-3">
-              <span className="text-xs font-bold text-slate-700">Form Completion</span>
-              <span className="text-xs font-bold text-[#ffb800]">{agreement && emailVerified && phoneVerified && idFileName ? '100%' : '16%'} Complete</span>
-            </div>
-            <div className="h-3 w-full bg-[#f0f2f5] rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-[#ffb800] transition-all duration-500 rounded-full" 
-                style={{ width: agreement && emailVerified && phoneVerified && idFileName ? '100%' : '16%' }}
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 gap-8">
-            {/* Form Title Section */}
-            <div className="flex items-start gap-5">
-              <div className="w-16 h-16 rounded-2xl bg-[#0d1b2a] text-[#ffb800] flex items-center justify-center shrink-0 shadow-lg">
-                <span className="material-symbols-outlined text-4xl">person_pin</span>
-              </div>
-              <div>
-                <h3 className="text-xl font-bold text-[#0d1b2a]">Personal Information</h3>
-                <p className="text-sm text-gray-500 mt-1">Please provide your legal information as it appears on your government-issued ID.</p>
-              </div>
-            </div>
-
-            {/* Form Card */}
-            <form onSubmit={handleSubmit} className="space-y-8 bg-white p-8 md:p-10 rounded-3xl shadow-sm border border-gray-200">
-              {/* Name Fields */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-[#0d1b2a] block">First Name <span className="text-red-500">*</span></label>
-                  <input 
-                    required 
-                    type="text" 
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    placeholder="e.g. John" 
-                    className="w-full h-12 px-4 rounded-xl border border-gray-300 focus:outline-none focus:border-[#0d1b2a] text-sm"
-                  />
+              {/* Profile Card */}
+              <div className="flex items-center gap-3 p-4 bg-white/5 rounded-2xl border border-white/10 mb-8">
+                <div className="w-10 h-10 rounded-full bg-[#ffb800] text-[#0d1b2a] flex items-center justify-center shrink-0 font-bold shadow-inner">
+                  <User className="w-5 h-5" />
                 </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-[#0d1b2a] block">Last Name <span className="text-red-500">*</span></label>
-                  <input 
-                    required 
-                    type="text" 
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    placeholder="e.g. Doe" 
-                    className="w-full h-12 px-4 rounded-xl border border-gray-300 focus:outline-none focus:border-[#0d1b2a] text-sm"
-                  />
+                <div className="min-w-0">
+                  <p className="text-white font-extrabold text-sm truncate">{getDisplayName()}</p>
+                  <p className="text-white/50 text-[10px] uppercase font-bold tracking-wider">Verification profile</p>
                 </div>
               </div>
 
-              {/* DOB & Gender */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-[#0d1b2a] block">Date of Birth <span className="text-red-500">*</span></label>
-                  <input 
-                    required 
-                    type="date" 
-                    value={dob}
-                    onChange={(e) => setDob(e.target.value)}
-                    className="w-full h-12 px-4 rounded-xl border border-gray-300 focus:outline-none focus:border-[#0d1b2a] text-sm"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-[#0d1b2a] block">Gender <span class="text-red-500">*</span></label>
-                  <select 
-                    required
-                    value={gender}
-                    onChange={(e) => setGender(e.target.value)}
-                    className="w-full h-12 px-4 rounded-xl border border-gray-300 focus:outline-none focus:border-[#0d1b2a] text-sm bg-white"
-                  >
-                    <option value="" disabled>Select gender</option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Email & Phone */}
-              <div className="space-y-8">
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-[#0d1b2a] block">Email Address <span className="text-red-500">*</span></label>
-                  <div className="relative">
-                    <input 
-                      disabled
-                      type="email" 
-                      value={emailInput}
-                      className="w-full h-12 pl-4 pr-10 rounded-xl border border-gray-300 bg-gray-50 text-gray-500 text-sm"
-                    />
-                    {emailVerified && (
-                      <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[#22c55e]">
-                        <span className="material-symbols-outlined text-[20px]">check_circle</span>
-                      </div>
+              {/* Steps Progress */}
+              <nav className="space-y-6">
+                {sidebarSteps.map((step, idx) => (
+                  <div key={idx} className="flex items-start gap-4 relative">
+                    {/* Line Connector */}
+                    {idx < sidebarSteps.length - 1 && (
+                      <div className={`absolute left-4 top-8 w-0.5 h-10 -ml-[1px] ${step.done ? 'bg-[#ffb800]' : 'bg-white/15'}`} />
                     )}
+
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 z-10 transition-all ${
+                      step.done 
+                        ? 'bg-[#ffb800] text-[#0d1b2a] font-black' 
+                        : 'bg-white/5 border border-white/20 text-white/50 font-bold'
+                    } text-sm`}>
+                      {step.done ? <Check className="w-4 h-4 animate-pulse" strokeWidth={3} /> : step.num}
+                    </div>
+
+                    <div>
+                      <p className={`font-bold text-sm ${step.done ? 'text-white/90' : 'text-white/40'}`}>
+                        {step.title}
+                      </p>
+                      <p className="text-[10px] text-white/30">
+                        {step.desc}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </nav>
+            </div>
+
+            {/* Support Box */}
+            <div className="mt-12 pt-6 border-t border-white/10 bg-black/10 -mx-6 -mb-6 p-6 rounded-b-3xl">
+              <div className="flex items-center gap-2 text-[#ffb800] mb-2">
+                <HelpCircle className="w-4 h-4" />
+                <span className="text-[10px] font-extrabold uppercase tracking-wider">Support assistance</span>
+              </div>
+              <p className="text-[10px] text-white/40 leading-relaxed mb-3">Need help completing verification? Get in touch.</p>
+              <a href="mailto:support@trakjobs.com" className="text-white text-xs font-bold block hover:underline hover:text-[#ffb800] transition-all">support@trakjobs.com</a>
+              <p className="text-white/70 text-xs mt-1 font-semibold">(972) 555-0199</p>
+            </div>
+          </aside>
+
+          {/* Right Content Form Column */}
+          <main className="lg:col-span-3 space-y-8">
+            
+            {/* Completion Percentage Progress Bar */}
+            <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+              <div className="flex justify-between items-center mb-3">
+                <span className="text-xs font-black text-[#0d1b2a] uppercase tracking-wider">Verification Completion</span>
+                <span className="text-xs font-black text-[#ffb800]">{percentComplete}% Complete</span>
+              </div>
+              <div className="h-3 w-full bg-[#f0f2f5] rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-[#ffb800] transition-all duration-700 ease-out rounded-full" 
+                  style={{ width: `${percentComplete}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Main Form Box */}
+            <form onSubmit={handleSubmit} className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+              
+              {/* Header Title Banner */}
+              <div className="bg-slate-50 px-8 py-6 border-b border-slate-200 flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-[#0d1b2a] text-[#ffb800] flex items-center justify-center shadow-md">
+                  <User className="w-6 h-6" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-black text-[#0d1b2a]">Personal Information</h2>
+                  <p className="text-xs text-slate-500">Provide legal information exactly as printed on your government-issued ID.</p>
+                </div>
+              </div>
+
+              {/* Form Content padding */}
+              <div className="p-8 space-y-8">
+                
+                {/* 2-Column Grid for Personal Fields */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-[#0d1b2a] tracking-wide uppercase">First Name <span className="text-red-500">*</span></label>
+                    <input 
+                      required 
+                      type="text" 
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      placeholder="e.g. John" 
+                      className="w-full h-12 px-4 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#ffb800] focus:border-transparent text-sm transition-all shadow-sm"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-[#0d1b2a] tracking-wide uppercase">Last Name <span className="text-red-500">*</span></label>
+                    <input 
+                      required 
+                      type="text" 
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      placeholder="e.g. Doe" 
+                      className="w-full h-12 px-4 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#ffb800] focus:border-transparent text-sm transition-all shadow-sm"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-[#0d1b2a] tracking-wide uppercase">Date of Birth <span className="text-red-500">*</span></label>
+                    <input 
+                      required 
+                      type="date" 
+                      value={dob}
+                      onChange={(e) => setDob(e.target.value)}
+                      className="w-full h-12 px-4 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#ffb800] focus:border-transparent text-sm transition-all shadow-sm"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-[#0d1b2a] tracking-wide uppercase">Gender <span className="text-red-500">*</span></label>
+                    <select 
+                      required
+                      value={gender}
+                      onChange={(e) => setGender(e.target.value)}
+                      className="w-full h-12 px-4 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#ffb800] focus:border-transparent text-sm transition-all shadow-sm bg-white"
+                    >
+                      <option value="" disabled>Select gender</option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                      <option value="other">Other</option>
+                    </select>
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-[#0d1b2a] block">Phone Number <span className="text-red-500">*</span></label>
-                  <div className="relative">
-                    <input 
-                      disabled
-                      type="tel" 
-                      value={phoneInput}
-                      className="w-full h-12 pl-4 pr-10 rounded-xl border border-gray-300 bg-gray-50 text-gray-500 text-sm"
-                    />
-                    {phoneVerified && (
-                      <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[#22c55e]">
-                        <span className="material-symbols-outlined text-[20px]">check_circle</span>
-                      </div>
-                    )}
+                {/* Email & Phone fields with Verified state indicator */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-slate-200">
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-[#0d1b2a] tracking-wide uppercase">Registered Email Address</label>
+                    <div className="relative">
+                      <input 
+                        disabled
+                        type="email" 
+                        value={emailInput}
+                        className="w-full h-12 pl-4 pr-10 rounded-xl border border-slate-200 bg-slate-50 text-slate-400 text-sm shadow-inner"
+                      />
+                      {emailVerified && (
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-emerald-500 flex items-center">
+                          <CheckCircle className="w-5 h-5 text-emerald-500 fill-emerald-50" />
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  {phoneVerified && (
-                    <p className="text-[11px] text-[#22c55e] flex items-center gap-1 mt-1 font-semibold">
-                      <span className="material-symbols-outlined text-sm">verified</span>
-                      Verified Phone Number
-                    </p>
+
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-[#0d1b2a] tracking-wide uppercase">Registered WhatsApp Mobile</label>
+                    <div className="relative">
+                      <input 
+                        disabled
+                        type="tel" 
+                        value={phoneInput}
+                        className="w-full h-12 pl-4 pr-10 rounded-xl border border-slate-200 bg-slate-50 text-slate-400 text-sm shadow-inner"
+                      />
+                      {phoneVerified && (
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-emerald-500 flex items-center">
+                          <CheckCircle className="w-5 h-5 text-emerald-500 fill-emerald-50" />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Identification Verification File Upload Section */}
+                <div className="pt-6 border-t border-slate-200">
+                  <h4 className="text-sm font-black text-[#0d1b2a] uppercase tracking-wider mb-1">Government ID Verification</h4>
+                  <p className="text-xs text-slate-500 mb-6">Select your primary identification type and upload a clear scan of the document front side.</p>
+                  
+                  {/* Select ID Type Button Choice Row */}
+                  <div className="grid grid-cols-3 gap-4 mb-6">
+                    {['driver_license', 'passport', 'national_id'].map((type) => (
+                      <button
+                        key={type}
+                        type="button"
+                        onClick={() => setIdType(type)}
+                        className={`h-12 rounded-xl border text-xs font-black transition-all ${
+                          idType === type 
+                            ? 'border-[#0d1b2a] bg-[#0d1b2a]/5 text-[#0d1b2a] shadow-sm' 
+                            : 'border-slate-300 text-slate-500 hover:bg-slate-50'
+                        }`}
+                      >
+                        {type === 'driver_license' && "Driver's License"}
+                        {type === 'passport' && 'Passport'}
+                        {type === 'national_id' && 'National ID Card'}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Spacious Upload Frame */}
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className="lg:col-span-2 border-2 border-dashed border-slate-300 rounded-3xl p-10 flex flex-col items-center justify-center text-center bg-[#f8fafc] hover:bg-white hover:border-[#ffb800] transition-all cursor-pointer relative group min-h-[220px]">
+                      <input 
+                        type="file" 
+                        accept="image/*,application/pdf" 
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        onChange={handleFileUpload} 
+                      />
+                      
+                      {!idFileName && !uploading && (
+                        <div className="flex flex-col items-center">
+                          <div className="w-16 h-16 rounded-full bg-white shadow-md flex items-center justify-center mb-4 text-slate-400 group-hover:text-[#ffb800] transition-transform group-hover:scale-105 duration-200">
+                            <UploadCloud className="w-8 h-8" />
+                          </div>
+                          <p className="text-sm font-bold text-[#0d1b2a]">Choose File or Drag & Drop</p>
+                          <p className="text-[11px] text-slate-400 mt-1.5 font-medium">PNG, JPG or PDF formats (Maximum file limit 5MB)</p>
+                        </div>
+                      )}
+
+                      {uploading && (
+                        <div className="w-full max-w-xs">
+                          <p className="text-xs font-bold text-[#0d1b2a] mb-2 flex items-center justify-between">
+                            <span>Uploading document...</span>
+                            <span>{uploadProgress}%</span>
+                          </p>
+                          <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
+                            <div className="h-full bg-[#ffb800] transition-all duration-300" style={{ width: `${uploadProgress}%` }} />
+                          </div>
+                        </div>
+                      )}
+
+                      {idFileName && !uploading && (
+                        <div className="flex flex-col items-center">
+                          <div className="w-16 h-16 rounded-full bg-white shadow-md flex items-center justify-center mb-4 text-emerald-500">
+                            <CheckCircle className="w-8 h-8" strokeWidth={2.5} />
+                          </div>
+                          <p className="text-sm font-extrabold text-[#0d1b2a]">{idFileName}</p>
+                          <p className="text-xs text-emerald-600 font-semibold mt-1">Upload verified successfully. Click or drag to replace.</p>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="bg-[#f2f4f6] border border-slate-200 rounded-3xl p-6 flex flex-col justify-between">
+                      <div className="space-y-4">
+                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Accepted IDs</span>
+                        <ul className="space-y-3">
+                          <li className="flex items-center gap-2.5 text-xs font-extrabold text-slate-700">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500" /> State Driver's License
+                          </li>
+                          <li className="flex items-center gap-2.5 text-xs font-extrabold text-slate-700">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500" /> Government Passport
+                          </li>
+                          <li className="flex items-center gap-2.5 text-xs font-extrabold text-slate-700">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500" /> National Identity Card
+                          </li>
+                        </ul>
+                      </div>
+                      <div className="pt-4 border-t border-slate-300 flex items-start gap-2.5 mt-6">
+                        <Shield className="w-5 h-5 text-slate-400 shrink-0" />
+                        <p className="text-[10px] text-slate-500 leading-relaxed font-medium">Your identity files are fully protected and stored using private AES-256 standard encryption.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Email Verification Section */}
+                <div className="pt-6 border-t border-slate-200">
+                  <div className="flex items-center gap-2.5 mb-1.5">
+                    <h4 className="text-sm font-black text-[#0d1b2a] uppercase tracking-wider">Email Verification</h4>
+                    <span className="px-2.5 py-0.5 bg-blue-100 text-blue-800 text-[10px] font-bold rounded-md uppercase tracking-wider">Required</span>
+                  </div>
+                  
+                  {emailVerified ? (
+                    <div className="flex items-center gap-2 text-emerald-600 font-extrabold text-sm bg-emerald-50 p-3.5 rounded-xl border border-emerald-100 w-fit animate-fadeIn">
+                      <CheckCircle className="w-4 h-4" /> 
+                      <span>Email Verified Successfully</span>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <p className="text-xs text-slate-500">We will send a 6-digit confirmation code to your email <span className="font-bold text-[#0d1b2a]">{emailInput}</span></p>
+                      <div className="flex flex-wrap items-center gap-3">
+                        {!emailSent ? (
+                          <button
+                            type="button"
+                            onClick={handleSendEmailOtp}
+                            className="h-11 px-6 bg-[#0d1b2a] hover:bg-[#1a2c3f] text-white text-xs font-black rounded-xl transition-all shadow-sm flex items-center gap-2 cursor-pointer"
+                          >
+                            <Mail className="w-4 h-4" />
+                            Send Email OTP
+                          </button>
+                        ) : (
+                          <div className="flex flex-wrap items-center gap-3">
+                            <input 
+                              type="text" 
+                              maxLength={6}
+                              placeholder="6-Digit Code"
+                              value={emailOtp}
+                              onChange={(e) => setEmailOtp(e.target.value.replace(/\D/g, ''))}
+                              className="w-40 h-11 px-4 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#ffb800] focus:border-transparent text-center text-sm font-extrabold tracking-widest"
+                            />
+                            <button
+                              type="button"
+                              onClick={handleVerifyEmailOtp}
+                              className="h-11 px-6 bg-[#22c55e] hover:bg-[#1bb853] text-white text-xs font-black rounded-xl transition-all shadow-sm cursor-pointer"
+                            >
+                              Verify Code
+                            </button>
+                            <button
+                              type="button"
+                              disabled={emailTimer > 0}
+                              onClick={handleSendEmailOtp}
+                              className="h-11 px-5 border border-slate-300 text-slate-600 text-xs font-black rounded-xl hover:bg-slate-50 transition-all disabled:opacity-55 cursor-pointer"
+                            >
+                              {emailTimer > 0 ? `Resend (${emailTimer}s)` : 'Resend Code'}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                      {emailError && <p className="text-xs text-red-500 font-semibold">{emailError}</p>}
+                    </div>
                   )}
                 </div>
-              </div>
 
-              {/* Identification Verification */}
-              <div className="pt-6 border-t border-gray-200">
-                <h4 className="text-base font-bold text-[#0d1b2a] mb-1">Identification Verification</h4>
-                <p className="text-xs text-gray-500 mb-6">Your security is our priority. Please select ID type and upload a clear photo of your ID.</p>
-                
-                {/* ID Type Choice */}
-                <div className="grid grid-cols-3 gap-4 mb-4">
-                  {['driver_license', 'passport', 'national_id'].map((type) => (
-                    <button
-                      key={type}
-                      type="button"
-                      onClick={() => setIdType(type)}
-                      className={`h-11 rounded-xl border text-xs font-bold transition-all ${
-                        idType === type 
-                          ? 'border-[#0d1b2a] bg-[#0d1b2a]/5 text-[#0d1b2a]' 
-                          : 'border-gray-300 hover:border-gray-400 text-gray-600'
-                      }`}
-                    >
-                      {type === 'driver_license' && "Driver's License"}
-                      {type === 'passport' && 'Passport'}
-                      {type === 'national_id' && 'National ID'}
-                    </button>
-                  ))}
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                  {/* File Upload Box */}
-                  <div className="lg:col-span-2 border-2 border-dashed border-gray-300 rounded-2xl p-8 flex flex-col items-center justify-center text-center bg-[#f8fafc] hover:bg-white hover:border-[#ffb800] transition-all cursor-pointer relative group">
-                    <input 
-                      type="file" 
-                      accept="image/*,application/pdf" 
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                      onChange={handleFileUpload} 
-                    />
-                    
-                    {!idFileName && !uploading && (
-                      <>
-                        <div className="w-16 h-16 rounded-full bg-white shadow-sm flex items-center justify-center mb-4 text-slate-400 group-hover:text-[#ffb800] transition-colors">
-                          <span className="material-symbols-outlined text-3xl">upload_file</span>
-                        </div>
-                        <p className="text-sm font-bold text-[#0d1b2a]">Upload ID (Front Side)</p>
-                        <p className="text-xs text-gray-400 mt-1">Drag & drop your file here or click to browse</p>
-                        <p className="text-[10px] text-slate-400 mt-4 uppercase tracking-widest">JPG, PNG or PDF • Max 5MB</p>
-                      </>
-                    )}
-
-                    {uploading && (
-                      <div className="w-full">
-                        <p className="text-xs font-bold text-[#0d1b2a] mb-2">Uploading ID Document... {uploadProgress}%</p>
-                        <div className="h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
-                          <div className="h-full bg-[#ffb800]" style={{ width: `${uploadProgress}%` }} />
-                        </div>
-                      </div>
-                    )}
-
-                    {idFileName && !uploading && (
-                      <>
-                        <div className="w-16 h-16 rounded-full bg-white shadow-sm flex items-center justify-center mb-4 text-[#22c55e]">
-                          <span className="material-symbols-outlined text-3xl">check_circle</span>
-                        </div>
-                        <p className="text-sm font-bold text-[#0d1b2a]">{idFileName}</p>
-                        <p className="text-xs text-[#22c55e] font-semibold mt-1">Upload completed! Click or drag to replace.</p>
-                      </>
-                    )}
+                {/* WhatsApp Verification Section */}
+                <div className="pt-6 border-t border-slate-200">
+                  <div className="flex items-center gap-2.5 mb-1.5">
+                    <h4 className="text-sm font-black text-[#0d1b2a] uppercase tracking-wider">WhatsApp Verification</h4>
+                    <span className="px-2.5 py-0.5 bg-[#25d366]/10 text-[#25d366] text-[10px] font-bold rounded-md uppercase tracking-wider">Secure</span>
                   </div>
-
-                  {/* Requirements card */}
-                  <div className="bg-[#f2f4f6] border border-gray-200 rounded-2xl p-6 flex flex-col justify-between">
-                    <div>
-                      <h5 className="text-[10px] font-bold text-slate-500 mb-4 uppercase tracking-widest">Requirement List</h5>
-                      <ul className="space-y-3">
-                        <li className="flex items-center gap-2 text-xs font-bold text-slate-700">
-                          <span className="material-symbols-outlined text-[18px] text-[#22c55e]">check_circle</span>
-                          Driver's License
-                        </li>
-                        <li className="flex items-center gap-2 text-xs font-bold text-slate-700">
-                          <span className="material-symbols-outlined text-[18px] text-[#22c55e]">check_circle</span>
-                          Passport
-                        </li>
-                        <li className="flex items-center gap-2 text-xs font-bold text-slate-700">
-                          <span className="material-symbols-outlined text-[18px] text-[#22c55e]">check_circle</span>
-                          State ID Card
-                        </li>
-                      </ul>
+                  
+                  {phoneVerified ? (
+                    <div className="flex items-center gap-2 text-emerald-600 font-extrabold text-sm bg-emerald-50 p-3.5 rounded-xl border border-emerald-100 w-fit animate-fadeIn">
+                      <CheckCircle className="w-4 h-4" /> 
+                      <span>WhatsApp Number Verified Successfully</span>
                     </div>
-                    <div className="pt-4 border-t border-gray-200 flex items-start gap-2 mt-6">
-                      <span className="material-symbols-outlined text-slate-400 text-sm">verified_user</span>
-                      <p className="text-[10px] text-slate-500 leading-relaxed">Your identification data is stored securely using AES-256 bank-level encryption.</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Email Verification Section */}
-              <div className="pt-6 border-t border-gray-200">
-                <div className="flex items-center gap-2 mb-1">
-                  <h4 className="text-base font-bold text-[#0d1b2a]">Email Verification</h4>
-                  <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-[10px] font-bold rounded uppercase tracking-wider">Required</span>
-                </div>
-                
-                {emailVerified ? (
-                  <p className="text-xs text-[#22c55e] font-bold flex items-center gap-1 mt-2">
-                    <span className="material-symbols-outlined text-sm">verified</span> Verified successfully
-                  </p>
-                ) : (
-                  <>
-                    <p className="text-xs text-gray-500 mb-4">We will send a 6-digit verification code to <span className="font-bold text-[#0d1b2a]">{emailInput}</span></p>
-                    <div className="flex flex-wrap items-center gap-4">
-                      {!emailSent ? (
-                        <button
-                          type="button"
-                          onClick={handleSendEmailOtp}
-                          className="px-6 h-11 bg-[#0d1b2a] hover:bg-[#1a2c3f] text-white text-xs font-bold rounded-xl transition-all"
-                        >
-                          Send Email OTP
-                        </button>
-                      ) : (
-                        <div className="flex items-center gap-3">
-                          <input 
-                            type="text" 
-                            maxLength={6}
-                            placeholder="Enter 6-Digit Code"
-                            value={emailOtp}
-                            onChange={(e) => setEmailOtp(e.target.value.replace(/\D/g, ''))}
-                            className="w-40 h-11 px-4 rounded-xl border border-gray-300 focus:outline-none focus:border-[#0d1b2a] text-center text-sm font-bold tracking-widest"
-                          />
+                  ) : (
+                    <div className="space-y-4">
+                      <p className="text-xs text-slate-500">We will send a 6-digit confirmation code to your WhatsApp <span className="font-bold text-[#0d1b2a]">{phoneInput}</span></p>
+                      <div className="flex flex-wrap items-center gap-3">
+                        {!phoneSent ? (
                           <button
                             type="button"
-                            onClick={handleVerifyEmailOtp}
-                            className="px-6 h-11 bg-[#22c55e] hover:bg-[#1bb853] text-white text-xs font-bold rounded-xl transition-all"
-                          >
-                            Verify Code
-                          </button>
-                          <button
-                            type="button"
-                            disabled={emailTimer > 0}
-                            onClick={handleSendEmailOtp}
-                            className="px-4 h-11 border border-gray-300 text-gray-600 text-xs font-bold rounded-xl hover:bg-slate-50 transition-all"
-                          >
-                            {emailTimer > 0 ? `Resend (${emailTimer}s)` : 'Resend Code'}
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                    {emailError && <p className="text-xs text-red-500 mt-2">{emailError}</p>}
-                  </>
-                )}
-              </div>
-
-              {/* WhatsApp Verification Section */}
-              <div className="pt-6 border-t border-gray-200">
-                <div className="flex items-center gap-2 mb-1">
-                  <h4 className="text-base font-bold text-[#0d1b2a]">WhatsApp Verification</h4>
-                  <span className="px-2 py-0.5 bg-[#25d366]/10 text-[#25d366] text-[10px] font-bold rounded uppercase tracking-wider">Secure</span>
-                </div>
-                
-                {phoneVerified ? (
-                  <p className="text-xs text-[#22c55e] font-bold flex items-center gap-1 mt-2">
-                    <span className="material-symbols-outlined text-sm">verified</span> Verified successfully
-                  </p>
-                ) : (
-                  <>
-                    <p className="text-xs text-gray-500 mb-4">We will send a 6-digit code to your WhatsApp number <span className="font-bold text-[#0d1b2a]">{phoneInput}</span></p>
-                    <div className="flex flex-wrap items-center gap-4">
-                      {!phoneSent ? (
-                        <button
-                          type="button"
-                          onClick={handleSendPhoneOtp}
-                          className="px-6 h-11 bg-[#0d1b2a] hover:bg-[#1a2c3f] text-white text-xs font-bold rounded-xl transition-all"
-                        >
-                          Send WhatsApp OTP
-                        </button>
-                      ) : (
-                        <div className="flex items-center gap-3">
-                          <input 
-                            type="text" 
-                            maxLength={6}
-                            placeholder="Enter 6-Digit Code"
-                            value={phoneOtp}
-                            onChange={(e) => setPhoneOtp(e.target.value.replace(/\D/g, ''))}
-                            className="w-40 h-11 px-4 rounded-xl border border-gray-300 focus:outline-none focus:border-[#0d1b2a] text-center text-sm font-bold tracking-widest"
-                          />
-                          <button
-                            type="button"
-                            onClick={handleVerifyPhoneOtp}
-                            className="px-6 h-11 bg-[#22c55e] hover:bg-[#1bb853] text-white text-xs font-bold rounded-xl transition-all"
-                          >
-                            Verify Code
-                          </button>
-                          <button
-                            type="button"
-                            disabled={phoneTimer > 0}
                             onClick={handleSendPhoneOtp}
-                            className="px-4 h-11 border border-gray-300 text-gray-600 text-xs font-bold rounded-xl hover:bg-slate-50 transition-all"
+                            className="h-11 px-6 bg-[#0d1b2a] hover:bg-[#1a2c3f] text-white text-xs font-black rounded-xl transition-all shadow-sm flex items-center gap-2 cursor-pointer"
                           >
-                            {phoneTimer > 0 ? `Resend (${phoneTimer}s)` : 'Resend Code'}
+                            <Phone className="w-4 h-4" />
+                            Send WhatsApp OTP
                           </button>
-                        </div>
-                      )}
+                        ) : (
+                          <div className="flex flex-wrap items-center gap-3">
+                            <input 
+                              type="text" 
+                              maxLength={6}
+                              placeholder="6-Digit Code"
+                              value={phoneOtp}
+                              onChange={(e) => setPhoneOtp(e.target.value.replace(/\D/g, ''))}
+                              className="w-40 h-11 px-4 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#ffb800] focus:border-transparent text-center text-sm font-extrabold tracking-widest"
+                            />
+                            <button
+                              type="button"
+                              onClick={handleVerifyPhoneOtp}
+                              className="h-11 px-6 bg-[#22c55e] hover:bg-[#1bb853] text-white text-xs font-black rounded-xl transition-all shadow-sm cursor-pointer"
+                            >
+                              Verify Code
+                            </button>
+                            <button
+                              type="button"
+                              disabled={phoneTimer > 0}
+                              onClick={handleSendPhoneOtp}
+                              className="h-11 px-5 border border-slate-300 text-slate-600 text-xs font-black rounded-xl hover:bg-slate-50 transition-all disabled:opacity-55 cursor-pointer"
+                            >
+                              {phoneTimer > 0 ? `Resend (${phoneTimer}s)` : 'Resend Code'}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                      {phoneError && <p className="text-xs text-red-500 font-semibold">{phoneError}</p>}
                     </div>
-                    {phoneError && <p className="text-xs text-red-500 mt-2">{phoneError}</p>}
-                  </>
-                )}
-              </div>
+                  )}
+                </div>
 
-              {/* Agreement Checkbox */}
-              <div className="flex items-start gap-4 p-5 bg-[#f8fafc] rounded-2xl border border-gray-200">
-                <input 
-                  type="checkbox" 
-                  id="terms" 
-                  checked={agreement}
-                  onChange={(e) => setAgreement(e.target.checked)}
-                  className="w-5 h-5 rounded border-gray-300 text-[#0d1b2a] focus:ring-[#ffb800] mt-0.5"
-                />
-                <label htmlFor="terms" className="text-xs text-gray-500 leading-relaxed cursor-pointer select-none">
-                  I confirm that all provided information is accurate and matches my legal documentation. I agree to the <a className="text-[#0d1b2a] font-bold hover:underline" href="#">Terms of Service</a> and <a className="text-[#0d1b2a] font-bold hover:underline" href="#">Privacy Policy</a>.
-                </label>
-              </div>
+                {/* Agreement Checkbox Card */}
+                <div className="flex items-start gap-4 p-5 bg-[#f8fafc] rounded-2xl border border-slate-200">
+                  <input 
+                    type="checkbox" 
+                    id="terms" 
+                    checked={agreement}
+                    onChange={(e) => setAgreement(e.target.checked)}
+                    className="w-5 h-5 rounded border-slate-300 text-[#0d1b2a] focus:ring-[#ffb800] mt-0.5 cursor-pointer"
+                  />
+                  <label htmlFor="terms" className="text-xs text-slate-500 leading-relaxed cursor-pointer select-none">
+                    I confirm that all provided information is accurate and matches my legal documentation. I agree to the <a className="text-[#0d1b2a] font-bold hover:underline" href="#">Terms of Service</a> and <a className="text-[#0d1b2a] font-bold hover:underline" href="#">Privacy Policy</a>.
+                  </label>
+                </div>
 
-              {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row items-center gap-4 pt-10 border-t border-gray-200">
-                <button 
-                  type="button"
-                  onClick={handleCancel}
-                  className="w-full sm:w-auto px-10 h-14 rounded-xl border border-gray-300 text-slate-600 font-bold hover:bg-slate-50 transition-all text-sm"
-                >
-                  Cancel
-                </button>
-                <button 
-                  type="submit"
-                  disabled={submitting}
-                  className="w-full sm:flex-1 h-14 bg-[#ffb800] hover:bg-[#e0a300] text-[#0d1b2a] rounded-xl font-extrabold flex items-center justify-center gap-2 transition-all shadow-md text-sm"
-                >
-                  {submitting ? 'Submitting...' : 'Save & Continue'}
-                  <span className="material-symbols-outlined font-bold text-sm">arrow_forward</span>
-                </button>
+                {/* Action Row buttons */}
+                <div className="flex flex-col sm:flex-row items-center gap-4 pt-8 border-t border-slate-200">
+                  <button 
+                    type="button"
+                    onClick={handleCancel}
+                    className="w-full sm:w-auto px-10 h-14 rounded-2xl border border-slate-300 text-slate-600 font-extrabold hover:bg-slate-50 transition-all text-sm shadow-sm"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="submit"
+                    disabled={submitting}
+                    className="w-full sm:flex-1 h-14 bg-[#ffb800] hover:bg-[#e0a300] text-[#0d1b2a] rounded-2xl font-black flex items-center justify-center gap-2 transition-all shadow-md text-sm cursor-pointer disabled:opacity-50"
+                  >
+                    {submitting ? 'Submitting Details...' : 'Save & Continue'}
+                    <ArrowRight className="w-4 h-4" strokeWidth={2.5} />
+                  </button>
+                </div>
               </div>
             </form>
-          </div>
+          </main>
 
-          {/* Content Footer */}
-          <div className="mt-12 flex flex-col md:flex-row justify-between items-center px-4 gap-6">
-            <p className="text-xs text-slate-400 font-medium">© 2026 TrakJobs Professional Services. All rights reserved.</p>
-            <div className="flex gap-8">
-              <a className="text-xs text-slate-400 hover:text-[#0d1b2a] transition-colors font-bold uppercase tracking-widest" href="#">Help Center</a>
-              <a className="text-xs text-slate-400 hover:text-[#0d1b2a] transition-colors font-bold uppercase tracking-widest" href="#">Privacy</a>
-              <a className="text-xs text-slate-400 hover:text-[#0d1b2a] transition-colors font-bold uppercase tracking-widest" href="#">Contact</a>
-            </div>
-          </div>
         </div>
-      </main>
+
+        {/* Outer footer */}
+        <footer className="mt-16 flex flex-col md:flex-row justify-between items-center px-4 gap-6 border-t border-slate-200 pt-8">
+          <p className="text-xs text-slate-400 font-medium">© 2026 TrakJobs Professional Services. All rights reserved.</p>
+          <div className="flex gap-8">
+            <a className="text-xs text-slate-400 hover:text-[#0d1b2a] transition-colors font-bold uppercase tracking-widest" href="#">Help Center</a>
+            <a className="text-xs text-slate-400 hover:text-[#0d1b2a] transition-colors font-bold uppercase tracking-widest" href="#">Privacy Policy</a>
+            <a className="text-xs text-slate-400 hover:text-[#0d1b2a] transition-colors font-bold uppercase tracking-widest" href="#">Contact Us</a>
+          </div>
+        </footer>
+      </div>
     </div>
   );
 }
