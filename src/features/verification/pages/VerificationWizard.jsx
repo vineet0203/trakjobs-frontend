@@ -274,13 +274,13 @@ export default function VerificationWizard() {
       {/* Brand Header */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <a href="https://trakjobs.com" className="flex items-center gap-3 cursor-pointer hover:opacity-90 transition-opacity">
             <span className="w-10 h-10 rounded-xl bg-[#0d1b2a] text-[#ffb800] flex items-center justify-center text-xl font-black shadow-md">T</span>
             <div>
               <span className="text-xl font-extrabold text-[#0d1b2a] tracking-tight">Trak<span className="text-[#ffb800]">Jobs</span></span>
               <span className="hidden sm:inline-block ml-3 px-2.5 py-1 bg-slate-100 text-[#0d1b2a] text-[10px] font-bold rounded-md uppercase tracking-wider">Verification Center</span>
             </div>
-          </div>
+          </a>
           
           <div className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-700 rounded-full border border-emerald-150">
             <Shield className="w-4 h-4 text-emerald-600" />
