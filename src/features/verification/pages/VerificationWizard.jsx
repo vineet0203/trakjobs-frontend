@@ -6,6 +6,9 @@ import { useAuth } from '../../auth/hooks/useAuth';
 
 export default function VerificationWizard() {
   const navigate = useNavigate();
+  const handleCancel = () => {
+    navigate('/dashboard');
+  };
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
