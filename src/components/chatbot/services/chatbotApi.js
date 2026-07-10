@@ -37,31 +37,31 @@ async function post(path, body) {
 }
 
 /**
- * GET /api/public/service-categories
+ * GET /api/v1/public/service-categories
  * Returns active high-level service categories.
  */
 export async function fetchServiceCategories() {
-  const data = await get('/api/public/service-categories');
+  const data = await get('/api/v1/public/service-categories');
   return data?.data ?? [];
 }
 
 /**
- * GET /api/service-sub-categories
+ * GET /api/v1/service-sub-categories
  * Returns sub-categories, optionally filtered by service_category_id.
  */
 export async function fetchSubCategories(serviceCategoryId) {
-  const data = await get('/api/service-sub-categories', {
+  const data = await get('/api/v1/service-sub-categories', {
     service_category_id: serviceCategoryId ?? undefined,
   });
   return data?.data ?? [];
 }
 
 /**
- * GET /api/public/vendors
+ * GET /api/v1/public/vendors
  * Returns vendors matching a service_category and service_sub_category slug.
  */
 export async function fetchMatchingVendors(serviceCategory, serviceSubCategory) {
-  const data = await get('/api/public/vendors', {
+  const data = await get('/api/v1/public/vendors', {
     service_category: serviceCategory,
     service_sub_category: serviceSubCategory,
   });
@@ -69,10 +69,10 @@ export async function fetchMatchingVendors(serviceCategory, serviceSubCategory) 
 }
 
 /**
- * POST /api/public/bookings
+ * POST /api/v1/public/bookings
  * Submits a lead/quote request into TrakJobs.
  * Backend handles: customer creation, quote creation, vendor assignment, notifications.
  */
 export async function submitPublicBooking(payload) {
-  return post('/api/public/bookings', payload);
+  return post('/api/v1/public/bookings', payload);
 }
