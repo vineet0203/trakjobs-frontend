@@ -56,7 +56,9 @@ export default function VerificationWizard() {
     async function loadProgress() {
       try {
         const res = await verificationApi.getProgress();
+        console.log("Verification API Response:", res);
         if (res.success && res.data) {
+          if (res.data.status === 'verified') { navigate('/verification-success'); return; }
           const vData = res.data.verification_data || {};
           setFirstName(vData.first_name || user?.first_name || '');
           setLastName(vData.last_name || user?.last_name || '');
