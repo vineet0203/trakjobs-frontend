@@ -1,0 +1,915 @@
+/**
+ * Chatbot.css
+ *
+ * Isolated styles for the TrakJobs chatbot floating widget.
+ * All selectors are scoped under .trakjobs-chat-* to avoid any global conflicts.
+ * Uses CSS custom properties for easy theming.
+ */
+
+/* ─── Design Tokens ────────────────────────────────────────────────────────── */
+:root {
+  --cb-primary:        #0f2744;
+  --cb-primary-light:  #1a3a5c;
+  --cb-accent:         #f59e0b;
+  --cb-accent-soft:    #fef3c7;
+  --cb-bg:             #ffffff;
+  --cb-bg-surface:     #f8fafc;
+  --cb-bg-glass:       rgba(255, 255, 255, 0.92);
+  --cb-text:           #0f172a;
+  --cb-text-muted:     #64748b;
+  --cb-text-light:     #94a3b8;
+  --cb-border:         rgba(226, 232, 240, 0.8);
+  --cb-border-strong:  #e2e8f0;
+  --cb-shadow-sm:      0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --cb-shadow-md:      0 4px 6px -1px rgba(0,0,0,0.08), 0 2px 4px -1px rgba(0,0,0,0.04);
+  --cb-shadow-lg:      0 20px 25px -5px rgba(15, 39, 68, 0.12), 0 10px 10px -5px rgba(15, 39, 68, 0.06);
+  --cb-shadow-xl:      0 25px 50px -12px rgba(15, 39, 68, 0.18);
+  --cb-radius-sm:      8px;
+  --cb-radius-md:      12px;
+  --cb-radius-lg:      16px;
+  --cb-radius-xl:      20px;
+  --cb-radius-2xl:     24px;
+  --cb-bot-bubble:     #f1f5f9;
+  --cb-user-bubble:    #0f2744;
+  --cb-font:           'Inter', 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --cb-transition:     0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ─── Launcher Button ──────────────────────────────────────────────────────── */
+.trakjobs-chat-launcher {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  filter: drop-shadow(var(--cb-shadow-lg));
+  transition: transform var(--cb-transition);
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.trakjobs-chat-launcher:hover {
+  transform: translateY(-3px) scale(1.02);
+}
+
+.trakjobs-chat-launcher:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.trakjobs-chat-launcher-pill {
+  background: var(--cb-primary);
+  color: #fff;
+  border-radius: 40px;
+  padding: 13px 20px 13px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: var(--cb-shadow-lg);
+  border: none;
+  outline: none;
+  cursor: pointer;
+  font-family: var(--cb-font);
+}
+
+.trakjobs-chat-launcher-icon {
+  width: 36px;
+  height: 36px;
+  background: var(--cb-accent);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.trakjobs-chat-launcher-icon svg {
+  width: 18px;
+  height: 18px;
+  color: var(--cb-primary);
+}
+
+.trakjobs-chat-launcher-label {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.trakjobs-chat-launcher-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.trakjobs-chat-launcher-sub {
+  font-size: 11px;
+  color: rgba(255,255,255,0.65);
+  line-height: 1.2;
+  font-weight: 500;
+}
+
+.trakjobs-chat-notif-dot {
+  width: 10px;
+  height: 10px;
+  background: var(--cb-accent);
+  border-radius: 50%;
+  border: 2px solid var(--cb-primary);
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  animation: cb-pulse 2s infinite;
+}
+
+@keyframes cb-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.7; transform: scale(1.2); }
+}
+
+/* ─── Chat Window ──────────────────────────────────────────────────────────── */
+.trakjobs-chat-window {
+  position: fixed;
+  bottom: 96px;
+  right: 28px;
+  z-index: 9998;
+  width: 400px;
+  max-width: calc(100vw - 32px);
+  height: 620px;
+  max-height: calc(100dvh - 120px);
+  display: flex;
+  flex-direction: column;
+  background: var(--cb-bg);
+  border-radius: var(--cb-radius-2xl);
+  box-shadow: var(--cb-shadow-xl);
+  border: 1px solid var(--cb-border-strong);
+  overflow: hidden;
+  font-family: var(--cb-font);
+  color: var(--cb-text);
+}
+
+/* Open / Close animation */
+@keyframes cb-slide-in {
+  from { opacity: 0; transform: translateY(24px) scale(0.95); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes cb-slide-out {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to   { opacity: 0; transform: translateY(24px) scale(0.95); }
+}
+
+.trakjobs-chat-window.cb-opening {
+  animation: cb-slide-in 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.trakjobs-chat-window.cb-closing {
+  animation: cb-slide-out 0.22s ease forwards;
+}
+
+/* ─── Header ───────────────────────────────────────────────────────────────── */
+.trakjobs-chat-header {
+  background: var(--cb-primary);
+  padding: 16px 18px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.trakjobs-chat-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.trakjobs-chat-header-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--cb-accent) 0%, #f97316 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
+}
+
+.trakjobs-chat-header-avatar svg {
+  width: 18px;
+  height: 18px;
+  color: #fff;
+}
+
+.trakjobs-chat-header-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.trakjobs-chat-header-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.trakjobs-chat-header-status {
+  font-size: 11px;
+  color: rgba(255,255,255,0.6);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 2px;
+}
+
+.trakjobs-chat-header-status-dot {
+  width: 6px;
+  height: 6px;
+  background: #4ade80;
+  border-radius: 50%;
+}
+
+.trakjobs-chat-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.trakjobs-chat-icon-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: rgba(255,255,255,0.12);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: rgba(255,255,255,0.8);
+  transition: background var(--cb-transition), color var(--cb-transition);
+}
+
+.trakjobs-chat-icon-btn:hover {
+  background: rgba(255,255,255,0.22);
+  color: #fff;
+}
+
+.trakjobs-chat-icon-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ─── Messages Area ─────────────────────────────────────────────────────────── */
+.trakjobs-chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--cb-bg-surface);
+  scroll-behavior: smooth;
+}
+
+.trakjobs-chat-messages::-webkit-scrollbar {
+  width: 4px;
+}
+.trakjobs-chat-messages::-webkit-scrollbar-track {
+  background: transparent;
+}
+.trakjobs-chat-messages::-webkit-scrollbar-thumb {
+  background: var(--cb-border-strong);
+  border-radius: 100px;
+}
+
+/* ─── Message Rows ──────────────────────────────────────────────────────────── */
+.cb-msg-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 7px;
+  max-width: 100%;
+  animation: cb-msg-in 0.22s ease forwards;
+}
+
+@keyframes cb-msg-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.cb-msg-row.cb-bot-row { align-self: flex-start; }
+.cb-msg-row.cb-user-row { align-self: flex-end; flex-direction: row-reverse; }
+
+.cb-msg-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--cb-primary) 0%, var(--cb-primary-light) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--cb-accent);
+  letter-spacing: 0;
+}
+
+.cb-msg-content {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  max-width: 80%;
+}
+
+.cb-user-row .cb-msg-content {
+  align-items: flex-end;
+}
+
+/* ─── Bubbles ───────────────────────────────────────────────────────────────── */
+.cb-bubble {
+  padding: 10px 13px;
+  border-radius: 14px;
+  font-size: 13.5px;
+  line-height: 1.55;
+  max-width: 280px;
+  word-break: break-word;
+}
+
+.cb-bubble.cb-bot-bubble {
+  background: var(--cb-bot-bubble);
+  color: var(--cb-text);
+  border-bottom-left-radius: 4px;
+  box-shadow: var(--cb-shadow-sm);
+}
+
+.cb-bubble.cb-user-bubble {
+  background: var(--cb-user-bubble);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+  box-shadow: var(--cb-shadow-sm);
+}
+
+.cb-msg-time {
+  font-size: 10px;
+  color: var(--cb-text-light);
+  padding: 0 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── Quick Action Buttons ──────────────────────────────────────────────────── */
+.cb-quick-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  max-width: 290px;
+  margin-top: 2px;
+}
+
+.cb-quick-btn {
+  border: 1.5px solid var(--cb-border-strong);
+  background: var(--cb-bg);
+  color: var(--cb-primary);
+  border-radius: 100px;
+  padding: 7px 14px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--cb-transition);
+  font-family: var(--cb-font);
+  white-space: nowrap;
+  line-height: 1;
+  box-shadow: var(--cb-shadow-sm);
+}
+
+.cb-quick-btn:hover {
+  background: var(--cb-primary);
+  color: #fff;
+  border-color: var(--cb-primary);
+  transform: translateY(-1px);
+  box-shadow: var(--cb-shadow-md);
+}
+
+.cb-quick-btn:active {
+  transform: translateY(0);
+}
+
+.cb-quick-btn.cb-btn-primary {
+  background: var(--cb-accent);
+  border-color: var(--cb-accent);
+  color: var(--cb-primary);
+}
+
+.cb-quick-btn.cb-btn-primary:hover {
+  background: #d97706;
+  border-color: #d97706;
+  color: #fff;
+}
+
+.cb-quick-btn.cb-btn-ghost {
+  background: transparent;
+  border-color: var(--cb-border-strong);
+  color: var(--cb-text-muted);
+}
+
+.cb-quick-btn.cb-btn-ghost:hover {
+  background: var(--cb-bot-bubble);
+  color: var(--cb-text);
+}
+
+/* ─── Typing Indicator ──────────────────────────────────────────────────────── */
+.cb-typing-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 7px;
+  align-self: flex-start;
+}
+
+.cb-typing-bubble {
+  background: var(--cb-bot-bubble);
+  border-radius: 14px;
+  border-bottom-left-radius: 4px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: var(--cb-shadow-sm);
+}
+
+.cb-typing-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--cb-text-light);
+  animation: cb-typing-bounce 1.4s ease infinite;
+}
+
+.cb-typing-dot:nth-child(1) { animation-delay: 0s; }
+.cb-typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.cb-typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes cb-typing-bounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30%            { transform: translateY(-5px); opacity: 1; }
+}
+
+/* ─── Card Styles (Browse Services / FAQs) ──────────────────────────────────── */
+.cb-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 290px;
+}
+
+.cb-card {
+  background: var(--cb-bg);
+  border: 1.5px solid var(--cb-border-strong);
+  border-radius: var(--cb-radius-md);
+  padding: 11px 13px;
+  cursor: pointer;
+  transition: all var(--cb-transition);
+  box-shadow: var(--cb-shadow-sm);
+}
+
+.cb-card:hover {
+  border-color: var(--cb-primary);
+  background: #f0f4f8;
+  transform: translateY(-1px);
+  box-shadow: var(--cb-shadow-md);
+}
+
+.cb-card-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--cb-text);
+  line-height: 1.3;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.cb-card-title .cb-card-icon {
+  font-size: 16px;
+}
+
+.cb-card-sub {
+  font-size: 11.5px;
+  color: var(--cb-text-muted);
+  margin-top: 3px;
+  line-height: 1.4;
+}
+
+/* ─── Booking Summary ───────────────────────────────────────────────────────── */
+.cb-summary {
+  background: var(--cb-bg);
+  border: 1.5px solid var(--cb-border-strong);
+  border-radius: var(--cb-radius-md);
+  padding: 13px;
+  max-width: 290px;
+  box-shadow: var(--cb-shadow-sm);
+}
+
+.cb-summary-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--cb-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cb-summary-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 6px;
+  align-items: flex-start;
+  font-size: 12.5px;
+}
+
+.cb-summary-label {
+  color: var(--cb-text-muted);
+  font-weight: 600;
+  min-width: 72px;
+  flex-shrink: 0;
+}
+
+.cb-summary-value {
+  color: var(--cb-text);
+  font-weight: 500;
+  word-break: break-word;
+}
+
+/* ─── Success State ─────────────────────────────────────────────────────────── */
+.cb-success {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border: 1.5px solid #bbf7d0;
+  border-radius: var(--cb-radius-md);
+  padding: 14px;
+  max-width: 290px;
+  box-shadow: var(--cb-shadow-sm);
+}
+
+.cb-success-icon {
+  font-size: 24px;
+  margin-bottom: 6px;
+}
+
+.cb-success-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #166534;
+  margin-bottom: 5px;
+}
+
+.cb-success-body {
+  font-size: 12.5px;
+  color: #15803d;
+  line-height: 1.5;
+}
+
+/* ─── Error Bubble ──────────────────────────────────────────────────────────── */
+.cb-error-bubble {
+  background: #fff1f2;
+  border: 1.5px solid #fecdd3;
+  border-radius: var(--cb-radius-md);
+  padding: 10px 13px;
+  font-size: 12.5px;
+  color: #9f1239;
+  max-width: 280px;
+  line-height: 1.5;
+}
+
+/* ─── Input Bar ─────────────────────────────────────────────────────────────── */
+.trakjobs-chat-footer {
+  flex-shrink: 0;
+  border-top: 1px solid var(--cb-border);
+  background: var(--cb-bg);
+  padding: 10px 12px 12px;
+}
+
+.trakjobs-chat-input-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  background: var(--cb-bg-surface);
+  border: 1.5px solid var(--cb-border-strong);
+  border-radius: 14px;
+  padding: 6px 8px 6px 14px;
+  transition: border-color var(--cb-transition);
+}
+
+.trakjobs-chat-input-row:focus-within {
+  border-color: var(--cb-primary);
+}
+
+.trakjobs-chat-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 13.5px;
+  font-family: var(--cb-font);
+  color: var(--cb-text);
+  resize: none;
+  min-height: 22px;
+  max-height: 90px;
+  line-height: 1.5;
+  padding: 3px 0;
+}
+
+.trakjobs-chat-input::placeholder {
+  color: var(--cb-text-light);
+}
+
+.trakjobs-chat-send-btn {
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 10px;
+  background: var(--cb-primary);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--cb-transition);
+  flex-shrink: 0;
+}
+
+.trakjobs-chat-send-btn:hover:not(:disabled) {
+  background: var(--cb-primary-light);
+  transform: scale(1.06);
+}
+
+.trakjobs-chat-send-btn:disabled {
+  background: var(--cb-border-strong);
+  cursor: not-allowed;
+}
+
+.trakjobs-chat-send-btn svg {
+  width: 15px;
+  height: 15px;
+}
+
+.trakjobs-chat-footer-hint {
+  font-size: 10.5px;
+  color: var(--cb-text-light);
+  text-align: center;
+  margin-top: 6px;
+}
+
+/* ─── Support Section ───────────────────────────────────────────────────────── */
+.cb-support-list {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  max-width: 290px;
+}
+
+.cb-support-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--cb-bg);
+  border: 1.5px solid var(--cb-border-strong);
+  border-radius: var(--cb-radius-md);
+  padding: 11px 13px;
+  cursor: pointer;
+  transition: all var(--cb-transition);
+  text-decoration: none;
+  box-shadow: var(--cb-shadow-sm);
+}
+
+.cb-support-item:hover {
+  border-color: var(--cb-primary);
+  background: #f0f4f8;
+  transform: translateY(-1px);
+}
+
+.cb-support-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  flex-shrink: 0;
+}
+
+.cb-support-text {
+  flex: 1;
+}
+
+.cb-support-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--cb-text);
+}
+
+.cb-support-sub {
+  font-size: 11.5px;
+  color: var(--cb-text-muted);
+  margin-top: 1px;
+}
+
+/* ─── Welcome Screen ────────────────────────────────────────────────────────── */
+.cb-welcome {
+  padding: 18px 0 0;
+}
+
+.cb-welcome-header {
+  background: linear-gradient(160deg, var(--cb-primary) 0%, var(--cb-primary-light) 100%);
+  margin: -16px -14px 0;
+  padding: 28px 22px 40px;
+  position: relative;
+  overflow: hidden;
+}
+
+.cb-welcome-header::before {
+  content: '';
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 160px;
+  height: 160px;
+  background: rgba(245, 158, 11, 0.12);
+  border-radius: 50%;
+}
+
+.cb-welcome-header::after {
+  content: '';
+  position: absolute;
+  bottom: -20px;
+  left: -20px;
+  width: 100px;
+  height: 100px;
+  background: rgba(245, 158, 11, 0.08);
+  border-radius: 50%;
+}
+
+.cb-welcome-emoji {
+  font-size: 30px;
+  margin-bottom: 10px;
+}
+
+.cb-welcome-title {
+  font-size: 21px;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  margin-bottom: 6px;
+}
+
+.cb-welcome-sub {
+  font-size: 13.5px;
+  color: rgba(255,255,255,0.72);
+  line-height: 1.5;
+}
+
+.cb-welcome-actions {
+  padding: 20px 2px 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cb-welcome-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 16px;
+  background: var(--cb-bg);
+  border: 1.5px solid var(--cb-border-strong);
+  border-radius: var(--cb-radius-md);
+  cursor: pointer;
+  transition: all var(--cb-transition);
+  text-align: left;
+  font-family: var(--cb-font);
+  box-shadow: var(--cb-shadow-sm);
+}
+
+.cb-welcome-action-btn:hover {
+  border-color: var(--cb-primary);
+  background: #f0f4f8;
+  transform: translateX(3px);
+  box-shadow: var(--cb-shadow-md);
+}
+
+.cb-welcome-action-icon {
+  font-size: 20px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  background: var(--cb-bg-surface);
+  flex-shrink: 0;
+}
+
+.cb-welcome-action-label {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--cb-text);
+}
+
+.cb-welcome-action-sub {
+  font-size: 11.5px;
+  color: var(--cb-text-muted);
+  margin-top: 1px;
+}
+
+.cb-welcome-action-arrow {
+  margin-left: auto;
+  color: var(--cb-text-light);
+  font-size: 14px;
+}
+
+/* ─── Back Button ───────────────────────────────────────────────────────────── */
+.cb-back-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.7);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px 0;
+  transition: color var(--cb-transition);
+  font-family: var(--cb-font);
+}
+
+.cb-back-btn:hover {
+  color: #fff;
+}
+
+/* ─── Date Picker in Chat ───────────────────────────────────────────────────── */
+.cb-date-input {
+  width: 100%;
+  max-width: 260px;
+  padding: 9px 12px;
+  border: 1.5px solid var(--cb-border-strong);
+  border-radius: var(--cb-radius-sm);
+  font-size: 13px;
+  font-family: var(--cb-font);
+  color: var(--cb-text);
+  background: var(--cb-bg);
+  outline: none;
+  transition: border-color var(--cb-transition);
+}
+
+.cb-date-input:focus {
+  border-color: var(--cb-primary);
+}
+
+/* ─── Mobile Responsive ─────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .trakjobs-chat-window {
+    bottom: 0;
+    right: 0;
+    width: 100%;
+    max-width: 100%;
+    height: 100dvh;
+    max-height: 100dvh;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    border-bottom: none;
+  }
+
+  .trakjobs-chat-launcher {
+    bottom: 20px;
+    right: 20px;
+  }
+}
+
+/* ─── Loading Spinner ───────────────────────────────────────────────────────── */
+.cb-spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: cb-spin 0.65s linear infinite;
+}
+
+@keyframes cb-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ─── Divider ───────────────────────────────────────────────────────────────── */
+.cb-divider {
+  border: none;
+  border-top: 1px solid var(--cb-border);
+  margin: 8px 0;
+}

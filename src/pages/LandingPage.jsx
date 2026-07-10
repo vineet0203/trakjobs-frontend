@@ -15,6 +15,7 @@ import AIAutomationSection from "../components/landing/AIAutomationSection";
 import CTASection from "../components/landing/CTASection";
 import Footer from "../components/landing/Footer";
 import BookingWorkflow from "../components/landing/BookingWorkflow";
+import Chatbot from "../components/chatbot/Chatbot";
 import serviceCatalog, { fetchServiceCatalog } from "../components/landing/serviceCatalog";
 
 const LandingPage = () => {
@@ -64,6 +65,8 @@ const LandingPage = () => {
         <CTASection />
       </main>
       <Footer />
+      {/* TrakJobs AI Chatbot — isolated module, no existing code modified */}
+      <Chatbot />
     </div>
   );
 };
