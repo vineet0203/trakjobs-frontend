@@ -76,7 +76,7 @@ const Login = () => {
       
       if (result) {
         const userObj = result?.data?.user;
-        if (userObj && userObj.verification_status !== 'verified') {
+        if (role === 'Vendor' && userObj && userObj.verification_status !== 'verified') {
           navigate('/verification-required');
           return;
         }
